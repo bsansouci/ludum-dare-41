@@ -106,6 +106,7 @@ let setup = (assets, env) => {
   }
 };
 
+
 let draw = (state, env) => {
   Draw.background(Utils.color(~r=199, ~g=217, ~b=229, ~a=255), env);
   let dt = Env.deltaTime(env);
@@ -201,8 +202,9 @@ let draw = (state, env) => {
             Draw.fill(Utils.color(~r=200, ~g=180, ~b=200, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Fence =>
-            Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+            Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
+            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
+            drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env);
           | Blocked =>
             Draw.fill(Utils.color(~r=255, ~g=10, ~b=10, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
