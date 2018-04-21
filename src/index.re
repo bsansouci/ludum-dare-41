@@ -99,7 +99,9 @@ let setup = (assets, env) => {
     assets,
     gameobjects: GameObject.init(grid),
     facingDir: {x: 0., y: 1.},
-    currentItem: None
+    currentItem: None,
+    dayIndex: 1,
+    journal: [||]
   }
 };
 
