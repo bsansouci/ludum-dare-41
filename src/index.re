@@ -38,12 +38,14 @@ type gameobjectT = {
 };
 
 let mapString = {|
-222222222222222
-200000001111002
-200000001111002
-200000001111002
-200000000000002
-200222222000002
+333333333333333
+333300000000003
+333300011111003
+333300011111003
+333300011111003
+333300000000003
+333300000000003
+333322222002222
 200000000000002
 200000000000002
 200000000000002
@@ -149,7 +151,7 @@ let setup = (assets, env) => {
   {
     grid: createGrid(mapString),
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {x: 65., y: 65.},
+    playerPos: {x: 64. *. 5. +. 1., y: 65.},
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
     gameobjects: [
@@ -190,7 +192,7 @@ let draw = (state, env) => {
     } else {
       state
     };
-  let gameobject =
+  let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
         let d =
@@ -211,10 +213,14 @@ let draw = (state, env) => {
       None,
       state.gameobjects
     );
-  let (state, gameobject) =
-    switch gameobject {
-    | None => (state, gameobject)
-    | Some((_, {action: PickUp(Corn)} as go)) =>
+  let focusedObject = switch (focusedObject){
+    | None => None
+    | Some((_, fgo)) => Some(fgo)
+  };
+  let (state, focusedObject) =
+    switch focusedObject {
+    | None => (state, focusedObject)
+    | Some({action: PickUp(Corn)} as go) =>
       if (Env.keyPressed(X, env)) {
         (
           {
@@ -225,12 +231,12 @@ let draw = (state, env) => {
           None
         )
       } else {
-        (state, gameobject)
+        (state, focusedObject)
       }
     };
-  switch gameobject {
+  switch focusedObject {
   | None => ()
-  | Some((_, {action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
+  | Some({action: PickUp(Corn)}) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
   };
   Draw.pushMatrix(env);
   Draw.translate(
@@ -246,17 +252,6 @@ let draw = (state, env) => {
           | Plant =>
             Draw.fill(Utils.color(~r=180, ~g=180, ~b=100, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
-            let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
-            Draw.subImage(
-              state.spritesheet,
-              ~pos=(x * tileSize, y * tileSize),
-              ~width=tileSize,
-              ~height=tileSize,
-              ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
-              ~texWidth=int_of_float(corn.size.x),
-              ~texHeight=int_of_float(corn.size.y),
-              env
-            )
           | Grass =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -289,6 +284,32 @@ let draw = (state, env) => {
       env
     )
   };
+    List.iter(
+      (g: gameobjectT) => {
+        switch (g){
+          | {pos: {x, y}, action: PickUp(Corn)} =>
+            switch (focusedObject) {
+              | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
+              | None => ()
+            };
+            let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
+            Draw.subImage(
+              state.spritesheet,
+              ~pos=(int_of_float(x -. (tileSizef /. 2.)), int_of_float(y -. (tileSizef /. 2.))),
+              ~width=tileSize,
+              ~height=tileSize,
+              ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
+              ~texWidth=int_of_float(corn.size.x),
+              ~texHeight=int_of_float(corn.size.y),
+              env
+            );
+            Draw.tint(Constants.white, env)
+          | _ => ()
+        }
+      },
+      state.gameobjects
+    );
+
   if (debug) {
     List.iter(
       (g: gameobjectT) => {
