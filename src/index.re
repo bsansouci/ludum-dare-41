@@ -8,6 +8,7 @@ type tileT =
   | Plant
   | Grass
   | Fence
+  | Floor
   | Blocked;
 
 type vec2 = {
@@ -38,19 +39,21 @@ type gameobjectT = {
 };
 
 let mapString = {|
-333333333333333
-333300000000003
-333300011111003
-333300011111003
-333300011111003
-333300000000003
-333300000000003
-333322222002222
-200000000000002
-200000000000002
-200000000000002
-200000000000002
-222222222222222
+33333333333333333333
+33333333333333333333
+33333333333333333333
+34444444300000000003
+34444444300011111003
+34444444300011111003
+34444444300011111003
+34444444300000000003
+34444444300000000003
+33344433322222002222
+20000000000000000002
+20000000000000000002
+20000000000000000002
+20000000000000000002
+22222222222222222222
 |};
 
 let createGrid = (s) => {
@@ -68,6 +71,7 @@ let createGrid = (s) => {
             | '0' => Grass
             | '1' => Plant
             | '2' => Fence
+            | '4' => Floor
             | _ => Blocked
             }
           ),
@@ -151,7 +155,7 @@ let setup = (assets, env) => {
   {
     grid: createGrid(mapString),
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {x: 64. *. 5. +. 1., y: 65.},
+    playerPos: {x: 64. *. 10. +. 1., y: 64. *. 5. +. 1.},
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
     gameobjects: [
@@ -254,6 +258,9 @@ let draw = (state, env) => {
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
           | Grass =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
+            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+          | Floor =>
+            Draw.fill(Utils.color(~r=200, ~g=180, ~b=200, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Fence =>
             Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
