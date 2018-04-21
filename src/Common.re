@@ -36,6 +36,8 @@ type actionT =
   | WaterCorn
   | PlantSeed
   | Harvest
+  | PutBackWater
+  | PutBackSeed
   | Sell(carryableT)
   | NoAction;
 
@@ -78,6 +80,7 @@ type journalEntryT = string;
 
 type dayTransitionT =
   | NoTransition
+  | Journal
   | FadeOut
   | FadeIn;
 

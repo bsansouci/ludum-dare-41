@@ -171,7 +171,7 @@ let draw = (state, env) => {
     };
   let (state, focusedObject) =
     GameObject.checkPickUp(state, focusedObject, env);
-  let state = Journal.updateDay(state);
+  let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.translate(
     -. state.playerPos.x +. screenSize /. 2.,
@@ -252,7 +252,7 @@ let draw = (state, env) => {
   };
   Draw.popMatrix(env);
   GameObject.renderAction(state, focusedObject, env);
-  let state = Journal.render(state, env);
+  let state = Journal.renderTransition(state, dt, env);
   state
 };
 
