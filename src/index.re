@@ -1,4 +1,5 @@
 open Reprocessing;
+
 open Common;
 
 let mapString = {|
@@ -32,7 +33,7 @@ let createGrid = (s) => {
           m[x][y] = (
             switch c {
             | '0' => Grass
-            | '1' => Plant
+            | '1' => Dirt
             | '2' => Fence
             | '4' => Floor
             | _ => Blocked
@@ -89,18 +90,14 @@ let checkCollision = (prevOffset, offset, state) => {
 
 let setup = (assets, env) => {
   Env.size(~width=600, ~height=600, env);
+  let grid = createGrid(mapString);
   {
-    grid: createGrid(mapString),
+    grid,
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {x: 64. *. 10. +. 1., y: 64. *. 5. +. 1.},
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
-    gameobjects: [
-      {
-        pos: {x: tileSizef *. 8. +. tileSizef /. 2., y: tileSizef *. 3. +. tileSizef /. 2.},
-        action: PickUp(Corn)
-      }
-    ],
+    gameobjects: GameObject.init(grid),
     facingDir: {x: 0., y: 1.},
     currentItem: None
   }
@@ -162,7 +159,6 @@ let draw = (state, env) => {
     };
   let (state, focusedObject) =
     switch focusedObject {
-    | None => (state, focusedObject)
     | Some({action: PickUp(Corn)} as go) =>
       if (Env.keyPressed(X, env)) {
         (
@@ -176,10 +172,11 @@ let draw = (state, env) => {
       } else {
         (state, focusedObject)
       }
+    | _ => (state, focusedObject)
     };
   switch focusedObject {
-  | None => ()
   | Some({action: PickUp(Corn)}) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
+  | _ => ()
   };
   Draw.pushMatrix(env);
   Draw.translate(
@@ -192,7 +189,7 @@ let draw = (state, env) => {
       Array.iteri(
         (y, tile) =>
           switch tile {
-          | Plant =>
+          | Dirt =>
             Draw.fill(Utils.color(~r=180, ~g=180, ~b=100, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Grass =>
@@ -213,6 +210,8 @@ let draw = (state, env) => {
       ),
     state.grid
   );
+  /* @Todo sort player and gameobjects */
+  GameObject.render(state, focusedObject, env);
   {
     let playerAss =
       if (state.currentItem == None) {
@@ -231,7 +230,6 @@ let draw = (state, env) => {
       env
     )
   };
-  GameObject.render(state, focusedObject, env);
   if (debug) {
     List.iter(
       (g: gameobjectT) => {

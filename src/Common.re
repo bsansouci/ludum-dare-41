@@ -3,7 +3,7 @@ let debug = true;
 type plantT = int;
 
 type tileT =
-  | Plant
+  | Dirt
   | Grass
   | Fence
   | Floor
@@ -26,15 +26,18 @@ type actionsT =
   | PickUp(carryableT)
   | Cleanup
   | MilkCow
-  | WaterPlant
+  | WaterCorn
   | PlantSeed
   | Harvest
-  | Sell(carryableT);
+  | Sell(carryableT)
+  | DoNothing;
 
 type gameobjectT = {
   pos: vec2,
   action: actionsT
 };
+
+let posMake = (x, y) => {x: float_of_int(x), y: float_of_int(y)};
 
 module StringMap = Map.Make(String);
 
@@ -42,6 +45,8 @@ type assetT = {
   size: vec2,
   pos: vec2
 };
+
+type journalEntryT = string;
 
 type stateT = {
   grid: array(array(tileT)),
@@ -51,7 +56,9 @@ type stateT = {
   assets: StringMap.t(assetT),
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
-  facingDir: vec2
+  facingDir: vec2,
+  dayIndex: int,
+  journal: array(journalEntryT)
 };
 
 let screenSize = 600.;
