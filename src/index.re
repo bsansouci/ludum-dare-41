@@ -105,8 +105,7 @@ let setup = (assets, env) => {
     assets,
     gameobjects: GameObject.init(grid),
     currentItem: None,
-    dayIndex: 1,
-    journal: [||]
+    journal: Journal.init()
   }
 };
 
@@ -187,10 +186,7 @@ let draw = (state, env) => {
       }
     | _ => (state, focusedObject)
     };
-  switch focusedObject {
-  | Some({action: PickUp(Corn)}) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
-  | _ => ()
-  };
+  let state = Journal.updateDay(state);
   Draw.pushMatrix(env);
   Draw.translate(
     -. state.playerPos.x +. screenSize /. 2.,
@@ -258,6 +254,7 @@ let draw = (state, env) => {
       env
     )
   };
+  let state = Journal.render(state, env);
   Draw.popMatrix(env);
   state
 };
@@ -277,11 +274,11 @@ let loadAssetsAsync = (filename) =>
             let y = Json.get("y", frame) |?> Json.number |! "error";
             let w = Json.get("w", frame) |?> Json.number |! "error";
             let h = Json.get("h", frame) |?> Json.number |! "error";
-            StringMap.add(
-              Json.get("filename", thing) |?> Json.string |! "error",
-              {pos: {x, y}, size: {x: w, y: h}},
-              assets
-            )
+            let name = Json.get("filename", thing) |?> Json.string |! "error";
+            /*if (debug) {
+              print_endline("Loading asset: " ++ name)
+            };*/
+            StringMap.add(name, {pos: {x, y}, size: {x: w, y: h}}, assets)
           },
           StringMap.empty,
           things

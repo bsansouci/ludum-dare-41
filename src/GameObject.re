@@ -12,7 +12,14 @@ let init = (grid) => {
               if (tile == Dirt) {
                 (
                   y + 1,
-                  [{pos: posMake(x * tileSize + tileSize / 2, y *  tileSize + tileSize / 2), action: WaterCorn}, ...gameobjects]
+                  [
+                    {
+                      pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                      action: WaterCorn,
+                      state: Corn({stage: 1, isWatered: false})
+                    },
+                    ...gameobjects
+                  ]
                 )
               } else {
                 (y + 1, gameobjects)
@@ -25,27 +32,31 @@ let init = (grid) => {
       (0, []),
       grid
     );
+  let gameobjects = [{
+      pos: {x: 10. *. tileSizef, y: 6. *. tileSizef},
+      action: PickUp(Water),
+      state: NoState
+    }, ...gameobjects];
   gameobjects
 };
 
-let render = (state, focusedObject, env) =>
+let updateDaily = (state) => state;
+
+let render = (state, focusedObject, env) => {
   List.iter(
     (g: gameobjectT) =>
       switch g {
       | {pos: {x, y}, action: PickUp(Corn)} =>
+        /* Don't highlight when there's no action */
         switch focusedObject {
         | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
         | _ => ()
         };
-        let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
-        Draw.subImage(
-          state.spritesheet,
-          ~pos=(int_of_float(x -. tileSizef /. 2.), int_of_float(y -. tileSizef /. 2.)),
-          ~width=tileSize,
-          ~height=tileSize,
-          ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
-          ~texWidth=int_of_float(corn.size.x),
-          ~texHeight=int_of_float(corn.size.y),
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "stage_five_le_ble_d_inde.png",
+          state,
           env
         );
         Draw.tint(Constants.white, env)
@@ -54,15 +65,11 @@ let render = (state, focusedObject, env) =>
         | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
         | _ => ()
         };
-        let corn = StringMap.find("stage_zero_corn_fetus.png", state.assets);
-        Draw.subImage(
-          state.spritesheet,
-          ~pos=(int_of_float(x -. tileSizef /. 2.), int_of_float(y -. tileSizef /. 2.)),
-          ~width=tileSize,
-          ~height=tileSize,
-          ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
-          ~texWidth=int_of_float(corn.size.x),
-          ~texHeight=int_of_float(corn.size.y),
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "stage_zero_corn_fetus.png",
+          state,
           env
         );
         Draw.tint(Constants.white, env)
@@ -70,3 +77,10 @@ let render = (state, focusedObject, env) =>
       },
     state.gameobjects
   );
+  switch (state.currentItem, focusedObject) {
+  | (None, Some({action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
+  | (None, Some({action: PickUp(Water)})) => Draw.text(~body="Pick water", ~pos=(20, 20), env)
+  | (Some(Water), Some({action: WaterCorn})) => Draw.text(~body="Water corn", ~pos=(20, 20), env)
+  | _ => ()
+  }
+};

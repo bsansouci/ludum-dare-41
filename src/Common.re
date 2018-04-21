@@ -29,7 +29,7 @@ type carryableT =
   | Corn
   | Wood;
 
-type actionsT =
+type actionT =
   | PickUp(carryableT)
   | Cleanup
   | MilkCow
@@ -37,11 +37,32 @@ type actionsT =
   | PlantSeed
   | Harvest
   | Sell(carryableT)
-  | DoNothing;
+  | NoAction;
+
+type cornStateT = {
+  stage: int,
+  isWatered: bool
+};
+
+type cowStateT =
+  | HasMilk
+  | NoMilk;
+
+type waterTankStateT =
+  | HalfFull
+  | Full
+  | Empty;
+
+type gameobjectStateT =
+  | Corn(cornStateT)
+  | Cow(cowStateT)
+  | WaterTank(waterTankStateT)
+  | NoState;
 
 type gameobjectT = {
   pos: vec2,
-  action: actionsT
+  action: actionT,
+  state: gameobjectStateT
 };
 
 let posMake = (x, y) => {x: float_of_int(x), y: float_of_int(y)};
@@ -55,6 +76,18 @@ type assetT = {
 
 type journalEntryT = string;
 
+type dayTransitionT =
+  | NoTransition
+  | FadeOut
+  | FadeIn;
+
+type journalT = {
+  dayIndex: int,
+  journalEntries: array(journalEntryT),
+  dayTransition: dayTransitionT,
+  animationTime: float
+};
+
 type stateT = {
   grid: array(array(tileT)),
   plants: array(array(plantT)),
@@ -64,8 +97,7 @@ type stateT = {
   assets: StringMap.t(assetT),
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
-  dayIndex: int,
-  journal: array(journalEntryT)
+  journal: journalT
 };
 
 let screenSize = 600.;
@@ -77,21 +109,24 @@ let tileSize = 64;
 let tileSizef = float_of_int(tileSize);
 
 let drawAsset = (x, y, name, state, env) => {
-    let asset = StringMap.find(name, state.assets);
-    Reprocessing.Draw.subImage(
-      state.spritesheet,
-      ~pos=(x, y),
-      ~width=tileSize,
-      ~height=tileSize,
-      ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
-      ~texWidth=int_of_float(asset.size.x),
-      ~texHeight=int_of_float(asset.size.y),
-      env
-    )
-  };
+  let asset = StringMap.find(name, state.assets);
+  Reprocessing.Draw.subImage(
+    state.spritesheet,
+    ~pos=(x, y),
+    ~width=tileSize,
+    ~height=tileSize,
+    ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+    ~texWidth=int_of_float(asset.size.x),
+    ~texHeight=int_of_float(asset.size.y),
+    env
+  )
+};
 
-let drawAssetf = (x, y, name, state, env) => {
-    let asset = StringMap.find(name, state.assets);
+let drawAssetf = (x, y, name, state, env) =>
+  switch (StringMap.find(name, state.assets)) {
+  | exception Not_found =>
+    print_endline("Asset " ++ name ++ " not found. Get your shit together man.")
+  | asset =>
     Reprocessing.Draw.subImage(
       state.spritesheet,
       ~pos=(int_of_float(x), int_of_float(y)),
