@@ -1,5 +1,7 @@
 open Reprocessing;
 
+let debug = true;
+
 type plantT = int;
 
 type tileT =
@@ -7,6 +9,33 @@ type tileT =
   | Grass
   | Fence
   | Blocked;
+
+type vec2 = {
+  x: float,
+  y: float
+};
+
+type carryableT =
+  | Seed
+  | Water
+  | Milk
+  | Eggs
+  | Corn
+  | Wood;
+
+type actionsT =
+  | PickUp(carryableT)
+  | Cleanup
+  | MilkCow
+  | WaterPlant
+  | PlantSeed
+  | Harvest
+  | Sell(carryableT);
+
+type gameobjectT = {
+  pos: vec2,
+  action: actionsT
+};
 
 let mapString = {|
 222222222222222
@@ -47,11 +76,6 @@ let createGrid = (s) => {
   m
 };
 
-type vec2 = {
-  x: float,
-  y: float
-};
-
 module StringMap = Map.Make(String);
 
 type assetT = {
@@ -64,7 +88,10 @@ type stateT = {
   plants: array(array(plantT)),
   playerPos: vec2,
   spritesheet: imageT,
-  assets: StringMap.t(assetT)
+  assets: StringMap.t(assetT),
+  currentItem: option(carryableT),
+  gameobjects: list(gameobjectT),
+  facingDir: vec2
 };
 
 let screenSize = 600.;
@@ -124,7 +151,15 @@ let setup = (assets, env) => {
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {x: 65., y: 65.},
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
-    assets
+    assets,
+    gameobjects: [
+      {
+        pos: {x: tileSizef *. 8. +. tileSizef /. 2., y: tileSizef *. 3. +. tileSizef /. 2.},
+        action: PickUp(Corn)
+      }
+    ],
+    facingDir: {x: 0., y: 1.},
+    currentItem: None
   }
 };
 
@@ -155,6 +190,48 @@ let draw = (state, env) => {
     } else {
       state
     };
+  let gameobject =
+    List.fold_left(
+      (foundobject, gameobject: gameobjectT) => {
+        let d =
+          Utils.distf(
+            ~p1=(gameobject.pos.x, gameobject.pos.y),
+            ~p2=(
+              state.playerPos.x +. state.facingDir.x *. tileSizef +. tileSizef /. 2.,
+              state.playerPos.y +. state.facingDir.y *. tileSizef +. tileSizef /. 2.
+            )
+          );
+        switch foundobject {
+        | None when d < tileSizef /. 2. => Some((d, gameobject))
+        | Some((d2, _)) when d2 < d => foundobject
+        | Some((d2, _)) => Some((d, gameobject))
+        | None => None
+        }
+      },
+      None,
+      state.gameobjects
+    );
+  let (state, gameobject) =
+    switch gameobject {
+    | None => (state, gameobject)
+    | Some((_, {action: PickUp(Corn)} as go)) =>
+      if (Env.keyPressed(X, env)) {
+        (
+          {
+            ...state,
+            currentItem: Some(Corn),
+            gameobjects: List.filter((g) => g !== go, state.gameobjects)
+          },
+          None
+        )
+      } else {
+        (state, gameobject)
+      }
+    };
+  switch gameobject {
+  | None => ()
+  | Some((_, {action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
+  };
   Draw.pushMatrix(env);
   Draw.translate(
     -. state.playerPos.x +. screenSize /. 2.,
@@ -195,7 +272,12 @@ let draw = (state, env) => {
     state.grid
   );
   {
-    let playerAss = StringMap.find("farmer_hands_down_the_best.png", state.assets);
+    let playerAss =
+      if (state.currentItem == None) {
+        StringMap.find("farmer_hands_down_the_best.png", state.assets)
+      } else {
+        StringMap.find("everybody_put_your_hands_up.png", state.assets)
+      };
     Draw.subImage(
       state.spritesheet,
       ~pos=(int_of_float(state.playerPos.x), int_of_float(state.playerPos.y)),
@@ -204,6 +286,25 @@ let draw = (state, env) => {
       ~texPos=(int_of_float(playerAss.pos.x), int_of_float(playerAss.pos.y)),
       ~texWidth=int_of_float(playerAss.size.x),
       ~texHeight=int_of_float(playerAss.size.y),
+      env
+    )
+  };
+  if (debug) {
+    List.iter(
+      (g: gameobjectT) => {
+        Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
+        Draw.rectf(~pos=(g.pos.x, g.pos.y), ~width=5., ~height=5., env)
+      },
+      state.gameobjects
+    );
+    Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
+    Draw.rectf(
+      ~pos=(
+        state.playerPos.x +. state.facingDir.x *. tileSizef +. tileSizef /. 2.,
+        state.playerPos.y +. state.facingDir.y *. tileSizef +. tileSizef /. 2.
+      ),
+      ~width=5.,
+      ~height=5.,
       env
     )
   };
