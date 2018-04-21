@@ -1,42 +1,5 @@
 open Reprocessing;
-
-let debug = true;
-
-type plantT = int;
-
-type tileT =
-  | Plant
-  | Grass
-  | Fence
-  | Floor
-  | Blocked;
-
-type vec2 = {
-  x: float,
-  y: float
-};
-
-type carryableT =
-  | Seed
-  | Water
-  | Milk
-  | Eggs
-  | Corn
-  | Wood;
-
-type actionsT =
-  | PickUp(carryableT)
-  | Cleanup
-  | MilkCow
-  | WaterPlant
-  | PlantSeed
-  | Harvest
-  | Sell(carryableT);
-
-type gameobjectT = {
-  pos: vec2,
-  action: actionsT
-};
+open Common;
 
 let mapString = {|
 33333333333333333333
@@ -81,32 +44,6 @@ let createGrid = (s) => {
   );
   m
 };
-
-module StringMap = Map.Make(String);
-
-type assetT = {
-  size: vec2,
-  pos: vec2
-};
-
-type stateT = {
-  grid: array(array(tileT)),
-  plants: array(array(plantT)),
-  playerPos: vec2,
-  spritesheet: imageT,
-  assets: StringMap.t(assetT),
-  currentItem: option(carryableT),
-  gameobjects: list(gameobjectT),
-  facingDir: vec2
-};
-
-let screenSize = 600.;
-
-let playerSpeed = 300.;
-
-let tileSize = 64;
-
-let tileSizef = float_of_int(tileSize);
 
 let checkCollision = (prevOffset, offset, state) => {
   let l = [
@@ -292,30 +229,7 @@ let draw = (state, env) => {
       env
     )
   };
-  List.iter(
-    (g: gameobjectT) =>
-      switch g {
-      | {pos: {x, y}, action: PickUp(Corn)} =>
-        switch focusedObject {
-        | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
-        | None => ()
-        };
-        let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
-        Draw.subImage(
-          state.spritesheet,
-          ~pos=(int_of_float(x -. tileSizef /. 2.), int_of_float(y -. tileSizef /. 2.)),
-          ~width=tileSize,
-          ~height=tileSize,
-          ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
-          ~texWidth=int_of_float(corn.size.x),
-          ~texHeight=int_of_float(corn.size.y),
-          env
-        );
-        Draw.tint(Constants.white, env)
-      | _ => ()
-      },
-    state.gameobjects
-  );
+  GameObject.render(state, focusedObject, env);
   if (debug) {
     List.iter(
       (g: gameobjectT) => {
