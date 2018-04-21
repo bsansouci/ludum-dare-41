@@ -82,3 +82,17 @@ let drawAsset = (x, y, name, state, env) => {
       env
     )
   };
+
+let drawAssetf = (x, y, name, state, env) => {
+    let asset = StringMap.find(name, state.assets);
+    Reprocessing.Draw.subImage(
+      state.spritesheet,
+      ~pos=(int_of_float(x), int_of_float(y)),
+      ~width=tileSize,
+      ~height=tileSize,
+      ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+      ~texWidth=int_of_float(asset.size.x),
+      ~texHeight=int_of_float(asset.size.y),
+      env
+    )
+  };
