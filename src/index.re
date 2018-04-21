@@ -3,21 +3,23 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
-33333333333333333333
-33333333333333333333
-33333333333333333333
-34444444300000000003
-34444444300011111003
-34444444300011111003
-34444444300011111003
-34444444300000000003
-34444444300000000003
-33344433322222002222
-20000000000000000002
-20000000000000000002
-20000000000000000002
-20000000000000000002
-22222222222222222222
+3333333333333333333333
+3333333333333333333333
+3333333333333333333333
+3444444430000000000333
+3444444430001111100333
+3444444430001111100333
+3444444430001111100333
+3444444430000000000333
+3444444430000000000333
+3334443332222200222200
+2000000000000000000200
+2000000000000000000200
+2000000000000000000200
+2000000000000000000200
+2222222222222222222200
+0000000000000000000000
+0000000000000000000000
 |};
 
 let createGrid = (s) => {
@@ -35,6 +37,7 @@ let createGrid = (s) => {
             | '0' => Grass
             | '1' => Dirt
             | '2' => Fence
+            | '3' => Blocked
             | '4' => Floor
             | _ => Blocked
             }
@@ -46,7 +49,7 @@ let createGrid = (s) => {
   m
 };
 
-let checkCollision = (prevOffset, offset, state) => {
+let handleCollision = (prevOffset, offset, state) => {
   let l = [
     (0, 0),
     (1, 1),
@@ -61,6 +64,7 @@ let checkCollision = (prevOffset, offset, state) => {
   let collided =
     List.exists(
       ((dx, dy)) => {
+        let padding = 8.;
         let tx = dx + int_of_float((offset.x +. state.playerPos.x) /. tileSizef);
         let ty = dy + int_of_float((offset.y +. state.playerPos.y) /. tileSizef);
         if (tx >= Array.length(state.grid) || tx < 0 || ty > Array.length(state.grid[0]) || ty < 0) {
@@ -70,9 +74,12 @@ let checkCollision = (prevOffset, offset, state) => {
           | Blocked
           | Fence =>
             Utils.intersectRectRect(
-              ~rect1Pos=(state.playerPos.x, state.playerPos.y),
-              ~rect1W=tileSizef,
-              ~rect1H=tileSizef,
+              ~rect1Pos=(
+                state.playerPos.x +. offset.x +. padding,
+                state.playerPos.y +. offset.y +. padding
+              ),
+              ~rect1W=tileSizef -. padding -. padding,
+              ~rect1H=tileSizef -. padding -. padding,
               ~rect2Pos=(float_of_int(tx * tileSize), float_of_int(ty * tileSize)),
               ~rect2W=tileSizef,
               ~rect2H=tileSizef
@@ -83,8 +90,6 @@ let checkCollision = (prevOffset, offset, state) => {
       },
       l
     );
-  /*offset*/
-  /*print_endline("collided" ++ string_of_bool(collided));*/
   if (collided) {prevOffset} else {offset}
 };
 
@@ -95,36 +100,34 @@ let setup = (assets, env) => {
     grid,
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {x: 64. *. 10. +. 1., y: 64. *. 5. +. 1.},
+    playerFacing: RightD,
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
     gameobjects: GameObject.init(grid),
-    facingDir: {x: 0., y: 1.},
     currentItem: None,
     dayIndex: 1,
     journal: [||]
   }
 };
 
-
 let draw = (state, env) => {
   Draw.background(Utils.color(~r=199, ~g=217, ~b=229, ~a=255), env);
   let dt = Env.deltaTime(env);
   let playerSpeedDt = playerSpeed *. dt;
   let offset = {x: 0., y: 0.};
-  /* @Todo support both WSAD and arrow keys */
   let offset =
-    checkCollision(offset, Env.key(Left, env) ? {...offset, x: -. playerSpeedDt} : offset, state);
+    Env.key(Left, env) || Env.key(A, env) ?
+      handleCollision(offset, {...offset, x: -. playerSpeedDt}, state) : offset;
   let offset =
-    checkCollision(offset, Env.key(Right, env) ? {...offset, x: playerSpeedDt} : offset, state);
+    Env.key(Right, env) || Env.key(D, env) ?
+      handleCollision(offset, {...offset, x: playerSpeedDt}, state) : offset;
   let offset =
-    checkCollision(offset, Env.key(Up, env) ? {...offset, y: -. playerSpeedDt} : offset, state);
+    Env.key(Up, env) || Env.key(W, env) ?
+      handleCollision(offset, {...offset, y: -. playerSpeedDt}, state) : offset;
   let offset =
-    checkCollision(offset, Env.key(Down, env) ? {...offset, y: playerSpeedDt} : offset, state);
+    Env.key(Down, env) || Env.key(S, env) ?
+      handleCollision(offset, {...offset, y: playerSpeedDt}, state) : offset;
   let mag = Utils.magf((offset.x, offset.y));
-  /*let state = {
-      ...state,
-      playerPos: {x: state.playerPos.x +. offset.x, y: state.playerPos.y +. offset.y}
-    };*/
   let state =
     if (mag > 0.) {
       let dx = offset.x /. mag *. playerSpeedDt;
@@ -133,6 +136,14 @@ let draw = (state, env) => {
     } else {
       state
     };
+  let facing = state.playerFacing;
+  let facing = Env.key(Left, env) || Env.key(A, env) ? LeftD : facing;
+  let facing = Env.key(Right, env) || Env.key(D, env) ? RightD : facing;
+  let facing = Env.key(Up, env) || Env.key(W, env) ? UpD : facing;
+  let facing = Env.key(Down, env) || Env.key(S, env) ? DownD : facing;
+  let state = {...state, playerFacing: facing};
+  let facingOffset = facingToOffset(facing);
+
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -140,8 +151,8 @@ let draw = (state, env) => {
           Utils.distf(
             ~p1=(gameobject.pos.x, gameobject.pos.y),
             ~p2=(
-              state.playerPos.x +. state.facingDir.x *. tileSizef +. tileSizef /. 2.,
-              state.playerPos.y +. state.facingDir.y *. tileSizef +. tileSizef /. 2.
+              state.playerPos.x +. facingOffset.x *. tileSizef +. tileSizef /. 2.,
+              state.playerPos.y +. facingOffset.y *. tileSizef +. tileSizef /. 2.
             )
           );
         switch foundobject {
@@ -203,7 +214,7 @@ let draw = (state, env) => {
           | Fence =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
-            drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env);
+            drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
           | Blocked =>
             Draw.fill(Utils.color(~r=255, ~g=10, ~b=10, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -215,36 +226,32 @@ let draw = (state, env) => {
   /* @Todo sort player and gameobjects */
   GameObject.render(state, focusedObject, env);
   {
-    let playerAss =
-      if (state.currentItem == None) {
-        StringMap.find("farmer_hands_down_the_best.png", state.assets)
-      } else {
-        StringMap.find("everybody_put_your_hands_up.png", state.assets)
+    let imgName =
+      switch (
+        state.playerFacing,
+        anyKey([Up, Down, Right, Left, W, A, S, D], env),
+        state.currentItem == None
+      ) {
+      | (RightD, _, _) => "old_macdonald_right_face.png"
+      | (UpD, _, _) => "old_macdonald_back_face.png"
+      | (DownD, _, _) => "old_macdonald_front_face.png"
+      | (LeftD, _, _) => "old_macdonald_left_face.png"
       };
-    Draw.subImage(
-      state.spritesheet,
-      ~pos=(int_of_float(state.playerPos.x), int_of_float(state.playerPos.y)),
-      ~width=tileSize,
-      ~height=tileSize,
-      ~texPos=(int_of_float(playerAss.pos.x), int_of_float(playerAss.pos.y)),
-      ~texWidth=int_of_float(playerAss.size.x),
-      ~texHeight=int_of_float(playerAss.size.y),
-      env
-    )
+    drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env)
   };
   if (debug) {
-    List.iter(
-      (g: gameobjectT) => {
-        Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
-        Draw.rectf(~pos=(g.pos.x, g.pos.y), ~width=5., ~height=5., env)
-      },
-      state.gameobjects
-    );
+    /* List.iter( */
+    /*   (g: gameobjectT) => { */
+    /*     Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env); */
+    /*     Draw.rectf(~pos=(g.pos.x, g.pos.y), ~width=5., ~height=5., env) */
+    /*   }, */
+    /*   state.gameobjects */
+    /* ); */
     Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
     Draw.rectf(
       ~pos=(
-        state.playerPos.x +. state.facingDir.x *. tileSizef +. tileSizef /. 2.,
-        state.playerPos.y +. state.facingDir.y *. tileSizef +. tileSizef /. 2.
+        state.playerPos.x +. facingOffset.x *. tileSizef +. tileSizef /. 2.,
+        state.playerPos.y +. facingOffset.y *. tileSizef +. tileSizef /. 2.
       ),
       ~width=5.,
       ~height=5.,

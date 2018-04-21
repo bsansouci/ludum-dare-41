@@ -7,7 +7,14 @@ type tileT =
   | Grass
   | Fence
   | Floor
+  | Water
   | Blocked;
+
+type directionT =
+  | UpD
+  | DownD
+  | RightD
+  | LeftD;
 
 type vec2 = {
   x: float,
@@ -52,11 +59,11 @@ type stateT = {
   grid: array(array(tileT)),
   plants: array(array(plantT)),
   playerPos: vec2,
+  playerFacing: directionT,
   spritesheet: Reprocessing.imageT,
   assets: StringMap.t(assetT),
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
-  facingDir: vec2,
   dayIndex: int,
   journal: array(journalEntryT)
 };
@@ -96,3 +103,12 @@ let drawAssetf = (x, y, name, state, env) => {
       env
     )
   };
+
+let anyKey = (keys, env) => List.exists((k) => Reprocessing.Env.key(k, env), keys);
+
+let facingToOffset = (dir) => switch (dir) {
+ | UpD => {x: 0., y: -1.}
+ | DownD => {x: 0., y: 1.}
+ | RightD => {x: 1., y: 0.}
+ | LeftD => {x: -1., y: 0.}
+};
