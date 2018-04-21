@@ -99,7 +99,7 @@ let render = (state, focusedObject, env) =>
             "stage_three_middle_aged_corn.png"
           } else if (stage === 4) {
             "stage_four_almost_corn.png"
-          } else if (stage === 4) {
+          } else if (stage === 5) {
             "stage_five_le_ble_d_inde.png"
           } else {
             failwith("There is no other stage you fuck.")

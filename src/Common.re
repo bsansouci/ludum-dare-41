@@ -86,9 +86,10 @@ type dayTransitionT =
 
 type journalT = {
   dayIndex: int,
-  journalEntries: array(journalEntryT),
+  journalEntries: array(array(journalEntryT)),
   dayTransition: dayTransitionT,
-  animationTime: float
+  animationTime: float,
+  backgroundImage: Reprocessing.imageT
 };
 
 type stateT = {
@@ -111,19 +112,22 @@ let tileSize = 64;
 
 let tileSizef = float_of_int(tileSize);
 
-let drawAsset = (x, y, name, state, env) => {
-  let asset = StringMap.find(name, state.assets);
-  Reprocessing.Draw.subImage(
-    state.spritesheet,
-    ~pos=(x, y),
-    ~width=tileSize,
-    ~height=tileSize,
-    ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
-    ~texWidth=int_of_float(asset.size.x),
-    ~texHeight=int_of_float(asset.size.y),
-    env
-  )
-};
+let drawAsset = (x, y, name, state, env) =>
+  switch (StringMap.find(name, state.assets)) {
+  | exception Not_found =>
+    print_endline("Asset " ++ name ++ " not found. Get your shit together man.")
+  | asset =>
+    Reprocessing.Draw.subImage(
+      state.spritesheet,
+      ~pos=(x, y),
+      ~width=tileSize,
+      ~height=tileSize,
+      ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+      ~texWidth=int_of_float(asset.size.x),
+      ~texHeight=int_of_float(asset.size.y),
+      env
+    )
+  };
 
 let drawAssetf = (x, y, name, state, env) =>
   switch (StringMap.find(name, state.assets)) {
@@ -144,9 +148,10 @@ let drawAssetf = (x, y, name, state, env) =>
 
 let anyKey = (keys, env) => List.exists((k) => Reprocessing.Env.key(k, env), keys);
 
-let facingToOffset = (dir) => switch (dir) {
- | UpD => {x: 0., y: -1.}
- | DownD => {x: 0., y: 1.}
- | RightD => {x: 1., y: 0.}
- | LeftD => {x: -1., y: 0.}
-};
+let facingToOffset = (dir) =>
+  switch dir {
+  | UpD => {x: 0., y: (-1.)}
+  | DownD => {x: 0., y: 1.}
+  | RightD => {x: 1., y: 0.}
+  | LeftD => {x: (-1.), y: 0.}
+  };

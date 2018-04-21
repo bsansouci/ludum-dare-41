@@ -105,7 +105,7 @@ let setup = (assets, env) => {
     assets,
     gameobjects: GameObject.init(grid),
     currentItem: None,
-    journal: Journal.init()
+    journal: Journal.init(env)
   }
 };
 
@@ -131,7 +131,7 @@ let draw = (state, env) => {
     if (mag > 0.) {
       let dx = offset.x /. mag *. playerSpeedDt;
       let dy = offset.y /. mag *. playerSpeedDt;
-      {...state, playerPos: {x: state.playerPos.x +. offset.x, y: state.playerPos.y +. offset.y}}
+      {...state, playerPos: {x: state.playerPos.x +. dx, y: state.playerPos.y +. dy}}
     } else {
       state
     };
