@@ -52,15 +52,19 @@ type vec2 = {
   y: float
 };
 
+module StringMap = Map.Make(String);
+
+type assetT = {
+  size: vec2,
+  pos: vec2
+};
+
 type stateT = {
   grid: array(array(tileT)),
   plants: array(array(plantT)),
-  playerPos: vec2
-};
-
-let setup = (env) => {
-  Env.size(~width=600, ~height=600, env);
-  {grid: createGrid(mapString), plants: Array.make_matrix(4, 6, 0), playerPos: {x: 65., y: 65.}}
+  playerPos: vec2,
+  spritesheet: imageT,
+  assets: StringMap.t(assetT)
 };
 
 let screenSize = 600.;
@@ -108,7 +112,20 @@ let checkCollision = (prevOffset, offset, state) => {
       },
       l
     );
+  /*offset*/
+  /*print_endline("collided" ++ string_of_bool(collided));*/
   if (collided) {prevOffset} else {offset}
+};
+
+let setup = (assets, env) => {
+  Env.size(~width=600, ~height=600, env);
+  {
+    grid: createGrid(mapString),
+    plants: Array.make_matrix(4, 6, 0),
+    playerPos: {x: 65., y: 65.},
+    spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
+    assets
+  }
 };
 
 let draw = (state, env) => {
@@ -125,20 +142,19 @@ let draw = (state, env) => {
     checkCollision(offset, Env.key(Up, env) ? {...offset, y: -. playerSpeedDt} : offset, state);
   let offset =
     checkCollision(offset, Env.key(Down, env) ? {...offset, y: playerSpeedDt} : offset, state);
-  /*let mag = Utils.magf((offset.x, offset.y));*/
-  let state = {
-    ...state,
-    playerPos: {x: state.playerPos.x +. offset.x, y: state.playerPos.y +. offset.y}
-  };
-  /*let state =
+  let mag = Utils.magf((offset.x, offset.y));
+  /*let state = {
+      ...state,
+      playerPos: {x: state.playerPos.x +. offset.x, y: state.playerPos.y +. offset.y}
+    };*/
+  let state =
     if (mag > 0.) {
       let dx = offset.x /. mag *. playerSpeedDt;
       let dy = offset.y /. mag *. playerSpeedDt;
-      print_endline(string_of_float(dy));
-      {...state, playerPos: {x: state.playerPos.x +. offset.x, y: state.playerPos.y +. offset.y}}
+      {...state, playerPos: {x: state.playerPos.x +. dx, y: state.playerPos.y +. dy}}
     } else {
       state
-    };*/
+    };
   Draw.pushMatrix(env);
   Draw.translate(
     -. state.playerPos.x +. screenSize /. 2.,
@@ -152,7 +168,18 @@ let draw = (state, env) => {
           switch tile {
           | Plant =>
             Draw.fill(Utils.color(~r=180, ~g=180, ~b=100, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
+            let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
+            Draw.subImage(
+              state.spritesheet,
+              ~pos=(x * tileSize, y * tileSize),
+              ~width=tileSize,
+              ~height=tileSize,
+              ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
+              ~texWidth=int_of_float(corn.size.x),
+              ~texHeight=int_of_float(corn.size.y),
+              env
+            )
           | Grass =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -167,15 +194,49 @@ let draw = (state, env) => {
       ),
     state.grid
   );
-  Draw.fill(Utils.color(~r=41, ~g=0, ~b=244, ~a=255), env);
-  Draw.rectf(
-    ~pos=(state.playerPos.x, state.playerPos.y),
-    ~width=tileSizef,
-    ~height=tileSizef,
-    env
-  );
+  {
+    let playerAss = StringMap.find("farmer_hands_down_the_best.png", state.assets);
+    Draw.subImage(
+      state.spritesheet,
+      ~pos=(int_of_float(state.playerPos.x), int_of_float(state.playerPos.y)),
+      ~width=tileSize,
+      ~height=tileSize,
+      ~texPos=(int_of_float(playerAss.pos.x), int_of_float(playerAss.pos.y)),
+      ~texWidth=int_of_float(playerAss.size.x),
+      ~texHeight=int_of_float(playerAss.size.y),
+      env
+    )
+  };
   Draw.popMatrix(env);
   state
 };
 
-run(~setup, ~draw, ());
+let loadAssetsAsync = (filename) =>
+  Reasongl.Gl.File.readFile(
+    filename,
+    (jsonString) => {
+      open Json.Infix;
+      let json = Json.parse(jsonString);
+      let things = Json.get("frames", json) |?> Json.array |! "error";
+      let assets =
+        List.fold_left(
+          (assets, thing) => {
+            let frame = Json.get("frame", thing) |! "error";
+            let x = Json.get("x", frame) |?> Json.number |! "error";
+            let y = Json.get("y", frame) |?> Json.number |! "error";
+            let w = Json.get("w", frame) |?> Json.number |! "error";
+            let h = Json.get("h", frame) |?> Json.number |! "error";
+            StringMap.add(
+              Json.get("filename", thing) |?> Json.string |! "error",
+              {pos: {x, y}, size: {x: w, y: h}},
+              assets
+            )
+          },
+          StringMap.empty,
+          things
+        );
+      run(~setup=setup(assets), ~draw, ())
+    }
+  );
+
+loadAssetsAsync("spritesheet/sheet.json");
