@@ -59,15 +59,33 @@ let render = (state, focusedObject, env) =>
           env
         );
         Draw.tint(Constants.white, env)
-      | {pos: {x, y}, action: WaterCorn} =>
+      | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         switch focusedObject {
         | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
         | _ => ()
         };
+        /*if (isWatered) {
+          Draw.fill()
+        }*/
+        let assetName = if (stage === 0) {
+          "stage_zero_corn_fetus.png"
+        } else if (stage === 1) {
+          "stage_one_corn_toddler.png"
+        } else if (stage === 2) {
+          "stage_two_korn.png"
+        } else if (stage === 3) {
+          "stage_three_middle_aged_corn.png"
+        } else if (stage === 4) {
+          "stage_four_almost_corn.png"
+        } else if (stage === 4) {
+          "stage_five_le_ble_d_inde.png"
+        } else {
+          failwith("There is no other stage you fuck.");
+        };
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
-          "stage_zero_corn_fetus.png",
+          assetName,
           state,
           env
         );
@@ -94,14 +112,36 @@ let renderAction = (state, focusedObject, env) =>
   };
 
 let checkPickUp = (state, focusedObject, env) =>
-  switch focusedObject {
-  | Some({action: PickUp(Corn)} as go) =>
+  switch (state.currentItem, focusedObject) {
+  | (None, Some({action: PickUp(pickable)} as go)) =>
     if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
-          currentItem: Some(Corn),
+          currentItem: Some(pickable),
           gameobjects: List.filter((g) => g !== go, state.gameobjects)
+        },
+        None
+      )
+    } else {
+      (state, focusedObject)
+    }
+  | (Some(Water), Some({action: WaterCorn, state: Corn({stage})} as go)) =>
+    if (Env.keyPressed(X, env)) {
+      (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              (g) =>
+                if (g !== go) {
+                  g
+                } else {
+                  {...g, action: NoAction, state: Corn({stage, isWatered: true})}
+                },
+              state.gameobjects
+            )
         },
         None
       )
