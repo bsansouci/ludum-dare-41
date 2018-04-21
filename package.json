@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "Reprocessing": "schmavery/reprocessing#multifile-hotreloading",
-    "rex-json": "jaredly/rex-json"
+    "rex-json": "schmavery/rex-json"
   },
   "devDependencies": {
     "bs-platform": "bsansouci/bsb-native"
