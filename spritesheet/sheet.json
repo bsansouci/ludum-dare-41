@@ -1,7 +1,7 @@
 {"frames": [
 
 {
-	"filename": "001 farmer_hands_down.png",
+	"filename": "bet_he_would_make_some_nice_fried_chicken.png",
 	"frame": {"x":0,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -10,7 +10,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "002 farmer_hands_up.png",
+	"filename": "empty_bukket.png",
 	"frame": {"x":32,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -19,7 +19,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "003 big_chicken.png",
+	"filename": "everybody_put_your_hands_up.png",
 	"frame": {"x":64,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -28,12 +28,84 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "004 big_cow.png",
-	"frame": {"x":96,"y":0,"w":44,"h":32},
+	"filename": "farmer_hands_down_the_best.png",
+	"frame": {"x":96,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "full_bukket.png",
+	"frame": {"x":128,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "pile_of_bacon.png",
+	"frame": {"x":160,"y":0,"w":44,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
 	"sourceSize": {"w":44,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_five_le_ble_d_inde.png",
+	"frame": {"x":204,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_four_almost_corn.png",
+	"frame": {"x":236,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_one_corn_toddler.png",
+	"frame": {"x":268,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_three_middle_aged_corn.png",
+	"frame": {"x":300,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_two_korn.png",
+	"frame": {"x":332,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_zero_corn_fetus.png",
+	"frame": {"x":364,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
 	"pivot": {"x":0.5,"y":0.5}
 }],
 "meta": {
@@ -41,8 +113,8 @@
 	"version": "1.0",
 	"image": "assets.png",
 	"format": "RGBA8888",
-	"size": {"w":140,"h":32},
+	"size": {"w":396,"h":32},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:a8b328904cc9ce52c3357dce567fbab9:334c9096ad9f4afd4ce09c6ad09eff2b:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:af3a8d77a0ff52f9a71fa0c978263669:939ce177aa3cf3db0f36edd20d754923:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
 }
 }
