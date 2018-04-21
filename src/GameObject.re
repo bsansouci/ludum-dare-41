@@ -13,11 +13,17 @@ let init = (grid) => {
                 (
                   y + 1,
                   [
-                    {
-                      pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
-                      action: WaterCorn,
-                      state: Corn({stage: 1, isWatered: false})
-                    },
+                    x != 13 ?
+                      {
+                        pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                        action: WaterCorn,
+                        state: Corn({stage: 1, isWatered: false})
+                      } :
+                      {
+                        pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                        action: PickUp(Corn),
+                        state: NoState
+                      },
                     ...gameobjects
                   ]
                 )

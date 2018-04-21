@@ -213,12 +213,23 @@ let draw = (state, env) => {
         anyKey([Up, Down, Right, Left, W, A, S, D], env),
         state.currentItem == None
       ) {
-      | (RightD, _, _) => "old_macdonald_right_face.png"
-      | (UpD, _, _) => "old_macdonald_back_face.png"
-      | (DownD, _, _) => "old_macdonald_front_face.png"
-      | (LeftD, _, _) => "old_macdonald_left_face.png"
+      | (RightD, _, true) => "old_macdonald_right_face.png"
+      | (UpD, _, true) => "old_macdonald_back_face.png"
+      | (DownD, _, true) => "old_macdonald_front_face.png"
+      | (LeftD, _, true) => "old_macdonald_left_face.png"
+      | (RightD, _, false) => "old_macdonald_right_face_hands_up.png"
+      | (UpD, _, false) => "old_macdonald_back_face_hands_up.png"
+      | (DownD, _, false) => "everybody_put_your_hands_up.png"
+      | (LeftD, _, false) => "old_macdonald_left_face_hands_up.png"
       };
-    drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env)
+    drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env);
+
+    switch (state.currentItem) {
+      | None => ()
+      | Some(Corn) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "pick_up_corn.png", state, env)
+      | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "water_bucket.png", state, env)
+      | _ => ()
+    }
   };
   if (debug) {
     /* List.iter( */
