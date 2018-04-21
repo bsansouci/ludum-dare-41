@@ -32,17 +32,16 @@ let init = (grid) => {
       (0, []),
       grid
     );
-  let gameobjects = [{
-      pos: {x: 10. *. tileSizef, y: 6. *. tileSizef},
-      action: PickUp(Water),
-      state: NoState
-    }, ...gameobjects];
+  let gameobjects = [
+    {pos: {x: 10. *. tileSizef, y: 6. *. tileSizef}, action: PickUp(Water), state: NoState},
+    ...gameobjects
+  ];
   gameobjects
 };
 
 let updateDaily = (state) => state;
 
-let render = (state, focusedObject, env) => {
+let render = (state, focusedObject, env) =>
   List.iter(
     (g: gameobjectT) =>
       switch g {
@@ -73,14 +72,41 @@ let render = (state, focusedObject, env) => {
           env
         );
         Draw.tint(Constants.white, env)
+      | {pos: {x, y}, action: PickUp(Water)} =>
+        Draw.fill(Utils.color(~r=0, ~g=10, ~b=250, ~a=255), env);
+        Draw.rectf(
+          ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
+          ~width=tileSizef,
+          ~height=tileSizef,
+          env
+        )
       | _ => ()
       },
     state.gameobjects
   );
+
+let renderAction = (state, focusedObject, env) =>
   switch (state.currentItem, focusedObject) {
   | (None, Some({action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
   | (None, Some({action: PickUp(Water)})) => Draw.text(~body="Pick water", ~pos=(20, 20), env)
   | (Some(Water), Some({action: WaterCorn})) => Draw.text(~body="Water corn", ~pos=(20, 20), env)
   | _ => ()
-  }
-};
+  };
+
+let checkPickUp = (state, focusedObject, env) =>
+  switch focusedObject {
+  | Some({action: PickUp(Corn)} as go) =>
+    if (Env.keyPressed(X, env)) {
+      (
+        {
+          ...state,
+          currentItem: Some(Corn),
+          gameobjects: List.filter((g) => g !== go, state.gameobjects)
+        },
+        None
+      )
+    } else {
+      (state, focusedObject)
+    }
+  | _ => (state, focusedObject)
+  };

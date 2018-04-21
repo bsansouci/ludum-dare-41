@@ -170,22 +170,7 @@ let draw = (state, env) => {
     | Some((_, fgo)) => Some(fgo)
     };
   let (state, focusedObject) =
-    switch focusedObject {
-    | Some({action: PickUp(Corn)} as go) =>
-      if (Env.keyPressed(X, env)) {
-        (
-          {
-            ...state,
-            currentItem: Some(Corn),
-            gameobjects: List.filter((g) => g !== go, state.gameobjects)
-          },
-          None
-        )
-      } else {
-        (state, focusedObject)
-      }
-    | _ => (state, focusedObject)
-    };
+    GameObject.checkPickUp(state, focusedObject, env);
   let state = Journal.updateDay(state);
   Draw.pushMatrix(env);
   Draw.translate(
@@ -254,8 +239,9 @@ let draw = (state, env) => {
       env
     )
   };
-  let state = Journal.render(state, env);
   Draw.popMatrix(env);
+  GameObject.renderAction(state, focusedObject, env);
+  let state = Journal.render(state, env);
   state
 };
 
