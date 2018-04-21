@@ -184,7 +184,7 @@ let draw = (state, env) => {
         (y, tile) =>
           switch tile {
           | Dirt =>
-            Draw.fill(Utils.color(~r=180, ~g=180, ~b=100, ~a=255), env);
+            Draw.fill(Utils.color(~r=170, ~g=170, ~b=100, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Grass =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);

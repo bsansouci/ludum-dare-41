@@ -47,16 +47,26 @@ let init = (grid) => {
 
 let updateDaily = (state) => state;
 
+let maybeHighlight = (state, g, focusedObject, env) =>
+  switch focusedObject {
+  | Some(fgo) when fgo === g =>
+    switch (state.currentItem, fgo.action) {
+    | (Some(Water), WaterCorn)
+    | (None, PickUp(Seed))
+    | (None, PickUp(Water))
+    | (None, Cleanup) => Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
+    | _ => ()
+    }
+  | _ => ()
+  };
+
 let render = (state, focusedObject, env) =>
   List.iter(
     (g: gameobjectT) =>
       switch g {
       | {pos: {x, y}, action: PickUp(Corn)} =>
         /* Don't highlight when there's no action */
-        switch focusedObject {
-        | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
-        | _ => ()
-        };
+        maybeHighlight(state, g, focusedObject, env);
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
@@ -66,37 +76,36 @@ let render = (state, focusedObject, env) =>
         );
         Draw.tint(Constants.white, env)
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
-        switch focusedObject {
-        | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
-        | _ => ()
+        maybeHighlight(state, g, focusedObject, env);
+        if (isWatered) {
+          Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
+          Draw.rectf(
+            ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
+            ~width=tileSizef,
+            ~height=tileSizef,
+            env
+          )
         };
-        /*if (isWatered) {
-          Draw.fill()
-        }*/
-        let assetName = if (stage === 0) {
-          "stage_zero_corn_fetus.png"
-        } else if (stage === 1) {
-          "stage_one_corn_toddler.png"
-        } else if (stage === 2) {
-          "stage_two_korn.png"
-        } else if (stage === 3) {
-          "stage_three_middle_aged_corn.png"
-        } else if (stage === 4) {
-          "stage_four_almost_corn.png"
-        } else if (stage === 4) {
-          "stage_five_le_ble_d_inde.png"
-        } else {
-          failwith("There is no other stage you fuck.");
-        };
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          assetName,
-          state,
-          env
-        );
+        let assetName =
+          if (stage === 0) {
+            "stage_zero_corn_fetus.png"
+          } else if (stage === 1) {
+            "stage_one_corn_toddler.png"
+          } else if (stage === 2) {
+            "stage_two_korn.png"
+          } else if (stage === 3) {
+            "stage_three_middle_aged_corn.png"
+          } else if (stage === 4) {
+            "stage_four_almost_corn.png"
+          } else if (stage === 4) {
+            "stage_five_le_ble_d_inde.png"
+          } else {
+            failwith("There is no other stage you fuck.")
+          };
+        drawAssetf(x -. tileSizef /. 2., y -. tileSizef /. 2., assetName, state, env);
         Draw.tint(Constants.white, env)
       | {pos: {x, y}, action: PickUp(Water)} =>
+        maybeHighlight(state, g, focusedObject, env);
         Draw.fill(Utils.color(~r=0, ~g=10, ~b=250, ~a=255), env);
         Draw.rectf(
           ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
