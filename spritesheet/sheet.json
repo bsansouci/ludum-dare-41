@@ -29,11 +29,11 @@
 },
 {
 	"filename": "004 big_cow.png",
-	"frame": {"x":96,"y":0,"w":64,"h":32},
+	"frame": {"x":96,"y":0,"w":44,"h":32},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
-	"sourceSize": {"w":64,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
+	"sourceSize": {"w":44,"h":32},
 	"pivot": {"x":0.5,"y":0.5}
 }],
 "meta": {
@@ -41,8 +41,8 @@
 	"version": "1.0",
 	"image": "assets.png",
 	"format": "RGBA8888",
-	"size": {"w":160,"h":32},
+	"size": {"w":140,"h":32},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:fe4d6adb94084e4f08cfb91721bddc2d:888f223d6532a5cd947bcfbb93cc0128:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a8b328904cc9ce52c3357dce567fbab9:334c9096ad9f4afd4ce09c6ad09eff2b:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
 }
 }
