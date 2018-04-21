@@ -217,10 +217,11 @@ let draw = (state, env) => {
       None,
       state.gameobjects
     );
-  let focusedObject = switch (focusedObject){
+  let focusedObject =
+    switch focusedObject {
     | None => None
     | Some((_, fgo)) => Some(fgo)
-  };
+    };
   let (state, focusedObject) =
     switch focusedObject {
     | None => (state, focusedObject)
@@ -255,7 +256,7 @@ let draw = (state, env) => {
           switch tile {
           | Plant =>
             Draw.fill(Utils.color(~r=180, ~g=180, ~b=100, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
+            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Grass =>
             Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -291,32 +292,30 @@ let draw = (state, env) => {
       env
     )
   };
-    List.iter(
-      (g: gameobjectT) => {
-        switch (g){
-          | {pos: {x, y}, action: PickUp(Corn)} =>
-            switch (focusedObject) {
-              | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
-              | None => ()
-            };
-            let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
-            Draw.subImage(
-              state.spritesheet,
-              ~pos=(int_of_float(x -. (tileSizef /. 2.)), int_of_float(y -. (tileSizef /. 2.))),
-              ~width=tileSize,
-              ~height=tileSize,
-              ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
-              ~texWidth=int_of_float(corn.size.x),
-              ~texHeight=int_of_float(corn.size.y),
-              env
-            );
-            Draw.tint(Constants.white, env)
-          | _ => ()
-        }
+  List.iter(
+    (g: gameobjectT) =>
+      switch g {
+      | {pos: {x, y}, action: PickUp(Corn)} =>
+        switch focusedObject {
+        | Some(fgo) when fgo === g => Draw.tint(Utils.color(~r=10, ~g=255, ~b=0, ~a=255), env)
+        | None => ()
+        };
+        let corn = StringMap.find("stage_five_le_ble_d_inde.png", state.assets);
+        Draw.subImage(
+          state.spritesheet,
+          ~pos=(int_of_float(x -. tileSizef /. 2.), int_of_float(y -. tileSizef /. 2.)),
+          ~width=tileSize,
+          ~height=tileSize,
+          ~texPos=(int_of_float(corn.pos.x), int_of_float(corn.pos.y)),
+          ~texWidth=int_of_float(corn.size.x),
+          ~texHeight=int_of_float(corn.size.y),
+          env
+        );
+        Draw.tint(Constants.white, env)
+      | _ => ()
       },
-      state.gameobjects
-    );
-
+    state.gameobjects
+  );
   if (debug) {
     List.iter(
       (g: gameobjectT) => {
