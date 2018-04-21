@@ -7,11 +7,11 @@ let mapString = {|
 3333333333333333333333
 3333333333333333333333
 3444444430000000000333
-3444444430001111100333
-3444444430001111100333
-3444444430001111100333
-3444444430000000000333
-3444444430000000000333
+3444444430001111100555
+3444444430001111100555
+3444444430001111100555
+3444444430000000000555
+3444444430000000000555
 3334443332222200222200
 2000000000000000000200
 2000000000000000000200
@@ -27,18 +27,19 @@ let createGrid = (s) => {
   let strs = Utils.split(s, ~sep='\n');
   let width = String.length(List.nth(strs, 0));
   let height = List.length(strs);
-  let m = Array.make_matrix(width, height, Grass);
+  let m = Array.make_matrix(width, height, Blocked);
   List.iteri(
     (y, s) =>
       String.iteri(
         (x, c) =>
           m[x][y] = (
             switch c {
-            | '0' => Grass
+            | '0' => Grass(Utils.random(~min=0, ~max=10))
             | '1' => Dirt
             | '2' => Fence
             | '3' => Blocked
             | '4' => Floor
+            | '5' => Water
             | _ => Blocked
             }
           ),
@@ -72,6 +73,7 @@ let handleCollision = (prevOffset, offset, state) => {
         } else {
           switch state.grid[tx][ty] {
           | Blocked
+          | Water
           | Fence =>
             Utils.intersectRectRect(
               ~rect1Pos=(
@@ -157,7 +159,7 @@ let draw = (state, env) => {
         switch foundobject {
         | None when d < tileSizef /. 2. => Some((d, gameobject))
         | Some((d2, _)) when d2 < d => foundobject
-        | Some((d2, _)) => Some((d, gameobject))
+        | Some(_) => Some((d, gameobject))
         | None => None
         }
       },
@@ -178,23 +180,35 @@ let draw = (state, env) => {
     -. state.playerPos.y +. screenSize /. 2.,
     env
   );
+  /* Nighttime tint */
+  /* Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env); */
   Array.iteri(
     (x, row) =>
       Array.iteri(
         (y, tile) =>
           switch tile {
           | Dirt =>
-            Draw.fill(Utils.color(~r=170, ~g=170, ~b=100, ~a=255), env);
+            drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
+            drawAsset(x * tileSize, y * tileSize, "dry_mud.png", state, env);
+          | Water =>
+            Draw.fill(Utils.color(~r=50, ~g=50, ~b=255, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
-          | Grass =>
-            Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+          | Grass(0) =>
+            drawAsset(x * tileSize, y * tileSize, "different_flower_grass.png", state, env);
+          | Grass(1) =>
+            drawAsset(x * tileSize, y * tileSize, "flower_grass.png", state, env);
+          | Grass(2)
+          | Grass(3) =>
+            drawAsset(x * tileSize, y * tileSize, "more_grass.png", state, env);
+          | Grass(_) =>
+            drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
           | Floor =>
             Draw.fill(Utils.color(~r=200, ~g=180, ~b=200, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Fence =>
-            Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env);
+            /* Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env); */
+            /* Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env); */
+            drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
             drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
           | Blocked =>
             Draw.fill(Utils.color(~r=255, ~g=10, ~b=10, ~a=255), env);
@@ -228,17 +242,13 @@ let draw = (state, env) => {
       | None => ()
       | Some(Corn) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "pick_up_corn.png", state, env)
       | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "water_bucket.png", state, env)
-      | _ => ()
+      | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "corn_seed.png", state, env)
+      | Some(Egg) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "egg.png", state, env)
+      | Some(Milk) => print_endline("Can't draw milk")
+      | Some(Wood) => print_endline("Can't draw wood")
     }
   };
   if (debug) {
-    /* List.iter( */
-    /*   (g: gameobjectT) => { */
-    /*     Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env); */
-    /*     Draw.rectf(~pos=(g.pos.x, g.pos.y), ~width=5., ~height=5., env) */
-    /*   }, */
-    /*   state.gameobjects */
-    /* ); */
     Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
     Draw.rectf(
       ~pos=(
@@ -258,8 +268,8 @@ let draw = (state, env) => {
 
 let loadAssetsAsync = (filename) =>
   Reasongl.Gl.File.readFile(
-    filename,
-    (jsonString) => {
+    ~filename,
+    ~cb=(jsonString) => {
       open Json.Infix;
       let json = Json.parse(jsonString);
       let things = Json.get("frames", json) |?> Json.array |! "error";
@@ -272,9 +282,6 @@ let loadAssetsAsync = (filename) =>
             let w = Json.get("w", frame) |?> Json.number |! "error";
             let h = Json.get("h", frame) |?> Json.number |! "error";
             let name = Json.get("filename", thing) |?> Json.string |! "error";
-            /*if (debug) {
-              print_endline("Loading asset: " ++ name)
-            };*/
             StringMap.add(name, {pos: {x, y}, size: {x: w, y: h}}, assets)
           },
           StringMap.empty,

@@ -68,6 +68,7 @@ let render = (state, focusedObject, env) =>
       switch g {
       | {pos: {x, y}, action: PickUp(Corn)} =>
         /* Don't highlight when there's no action */
+        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         drawAssetf(
           x -. tileSizef /. 2.,
@@ -76,8 +77,9 @@ let render = (state, focusedObject, env) =>
           state,
           env
         );
-        Draw.tint(Constants.white, env)
+        Draw.popStyle(env);
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
+        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         if (isWatered) {
           Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
@@ -105,8 +107,9 @@ let render = (state, focusedObject, env) =>
             failwith("There is no other stage you fuck.")
           };
         drawAssetf(x -. tileSizef /. 2., y -. tileSizef /. 2., assetName, state, env);
-        Draw.tint(Constants.white, env)
+        Draw.popStyle(env);
       | {pos: {x, y}, action: PickUp(Water)} =>
+        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         Draw.fill(Utils.color(~r=0, ~g=10, ~b=250, ~a=255), env);
         Draw.rectf(
@@ -114,7 +117,8 @@ let render = (state, focusedObject, env) =>
           ~width=tileSizef,
           ~height=tileSizef,
           env
-        )
+        );
+        Draw.popStyle(env);
       | _ => ()
       },
     state.gameobjects

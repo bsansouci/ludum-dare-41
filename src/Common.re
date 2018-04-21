@@ -4,7 +4,7 @@ type plantT = int;
 
 type tileT =
   | Dirt
-  | Grass
+  | Grass(int)
   | Fence
   | Floor
   | Water
@@ -120,8 +120,8 @@ let drawAsset = (x, y, name, state, env) =>
     Reprocessing.Draw.subImage(
       state.spritesheet,
       ~pos=(x, y),
-      ~width=tileSize,
-      ~height=tileSize,
+      ~width=tileSize + 1,
+      ~height=tileSize + 1,
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
