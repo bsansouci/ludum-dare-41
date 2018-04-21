@@ -52,6 +52,8 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   | Some(fgo) when fgo === g =>
     switch (state.currentItem, fgo.action) {
     | (Some(Water), WaterCorn)
+    | (None, PickUp(Corn))
+    | (None, PickUp(Egg))
     | (None, PickUp(Seed))
     | (None, PickUp(Water))
     | (None, Cleanup) => Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
@@ -128,13 +130,37 @@ let renderAction = (state, focusedObject, env) =>
 
 let checkPickUp = (state, focusedObject, env) =>
   switch (state.currentItem, focusedObject) {
-  | (None, Some({action: PickUp(pickable)} as go)) =>
+  | (None, Some({action: PickUp(Corn)} as go)) =>
     if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
-          currentItem: Some(pickable),
+          currentItem: Some(Corn),
           gameobjects: List.filter((g) => g !== go, state.gameobjects)
+        },
+        None
+      )
+    } else {
+      (state, focusedObject)
+    }
+  | (None, Some({action: PickUp(Water)} as go)) =>
+    if (Env.keyPressed(X, env)) {
+      (
+        {
+          ...state,
+          currentItem: Some(Water),
+        },
+        None
+      )
+    } else {
+      (state, focusedObject)
+    }
+  | (None, Some({action: PickUp(Seed)} as go)) =>
+    if (Env.keyPressed(X, env)) {
+      (
+        {
+          ...state,
+          currentItem: Some(Seed),
         },
         None
       )

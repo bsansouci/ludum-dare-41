@@ -25,7 +25,7 @@ type carryableT =
   | Seed
   | Water
   | Milk
-  | Eggs
+  | Egg
   | Corn
   | Wood;
 
