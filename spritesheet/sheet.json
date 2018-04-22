@@ -2,7 +2,7 @@
 
 {
 	"filename": "barn_inside.png",
-	"frame": {"x":204,"y":32,"w":288,"h":288},
+	"frame": {"x":588,"y":32,"w":288,"h":288},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
@@ -11,7 +11,7 @@
 },
 {
 	"filename": "barn_outside.png",
-	"frame": {"x":492,"y":32,"w":288,"h":288},
+	"frame": {"x":300,"y":32,"w":288,"h":288},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
@@ -20,7 +20,16 @@
 },
 {
 	"filename": "bet_he_would_make_some_nice_fried_chicken.png",
-	"frame": {"x":608,"y":0,"w":32,"h":32},
+	"frame": {"x":640,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "bucket_with_milk.png",
+	"frame": {"x":704,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -29,7 +38,7 @@
 },
 {
 	"filename": "corn_seed.png",
-	"frame": {"x":672,"y":0,"w":32,"h":32},
+	"frame": {"x":608,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -38,7 +47,7 @@
 },
 {
 	"filename": "corner_fence.png",
-	"frame": {"x":576,"y":0,"w":32,"h":32},
+	"frame": {"x":736,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -56,7 +65,7 @@
 },
 {
 	"filename": "dry_mud.png",
-	"frame": {"x":480,"y":0,"w":32,"h":32},
+	"frame": {"x":576,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -65,51 +74,6 @@
 },
 {
 	"filename": "egg.png",
-	"frame": {"x":704,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "empty_bucket.png",
-	"frame": {"x":64,"y":32,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "everybody_put_your_hands_up.png",
-	"frame": {"x":32,"y":32,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "flower_grass.png",
-	"frame": {"x":768,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "grass.png",
-	"frame": {"x":140,"y":32,"w":64,"h":64},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-	"sourceSize": {"w":64,"h":64},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "keep_the_dogs_out.png",
 	"frame": {"x":0,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -118,8 +82,8 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "more_grass.png",
-	"frame": {"x":736,"y":0,"w":32,"h":32},
+	"filename": "empty_bucket.png",
+	"frame": {"x":32,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -127,7 +91,43 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "old_macdonald_back_face.png",
+	"filename": "everybody_put_your_hands_up.png",
+	"frame": {"x":832,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "flower_grass.png",
+	"frame": {"x":800,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "grass.png",
+	"frame": {"x":768,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "keep_the_dogs_out.png",
+	"frame": {"x":864,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "more_grass.png",
 	"frame": {"x":544,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -136,43 +136,16 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "old_macdonald_back_face.png",
+	"frame": {"x":64,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "old_macdonald_back_face_hands_up.png",
-	"frame": {"x":32,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "old_macdonald_front_face.png",
-	"frame": {"x":448,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "old_macdonald_left_face.png",
-	"frame": {"x":128,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "old_macdonald_left_face_hands_up.png",
-	"frame": {"x":96,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "old_macdonald_right_face.png",
 	"frame": {"x":160,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -181,8 +154,44 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "old_macdonald_front_face.png",
+	"frame": {"x":128,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "old_macdonald_left_face.png",
+	"frame": {"x":192,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "old_macdonald_left_face_hands_up.png",
+	"frame": {"x":480,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "old_macdonald_right_face.png",
+	"frame": {"x":96,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "old_macdonald_right_face_hands_up.png",
-	"frame": {"x":64,"y":0,"w":32,"h":32},
+	"frame": {"x":32,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -200,7 +209,7 @@
 },
 {
 	"filename": "pile_of_bacon.png",
-	"frame": {"x":96,"y":32,"w":44,"h":32},
+	"frame": {"x":64,"y":32,"w":44,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
@@ -209,69 +218,6 @@
 },
 {
 	"filename": "pond_top_left.png",
-	"frame": {"x":192,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_five_le_ble_d_inde.png",
-	"frame": {"x":288,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_four_almost_corn.png",
-	"frame": {"x":384,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_one_corn_toddler.png",
-	"frame": {"x":352,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_three_middle_aged_corn.png",
-	"frame": {"x":416,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_two_korn.png",
-	"frame": {"x":320,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "stage_zero_corn_fetus.png",
-	"frame": {"x":256,"y":0,"w":32,"h":32},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "vertical_fence.png",
 	"frame": {"x":224,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -280,8 +226,116 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "seed_bucket.png",
+	"frame": {"x":108,"y":32,"w":64,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
+	"sourceSize": {"w":64,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_five_le_ble_d_inde.png",
+	"frame": {"x":320,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_four_almost_corn.png",
+	"frame": {"x":416,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_one_corn_toddler.png",
+	"frame": {"x":384,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_three_middle_aged_corn.png",
+	"frame": {"x":448,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_two_korn.png",
+	"frame": {"x":352,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "stage_zero_corn_fetus.png",
+	"frame": {"x":288,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "trough_empty.png",
+	"frame": {"x":268,"y":32,"w":32,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":64},
+	"sourceSize": {"w":32,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "trough_empty_water.png",
+	"frame": {"x":204,"y":32,"w":32,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":64},
+	"sourceSize": {"w":32,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "trough_food_full.png",
+	"frame": {"x":236,"y":32,"w":32,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":64},
+	"sourceSize": {"w":32,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "trough_food_half_full.png",
+	"frame": {"x":172,"y":32,"w":32,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":64},
+	"sourceSize": {"w":32,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "vertical_fence.png",
+	"frame": {"x":256,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "water_bucket.png",
-	"frame": {"x":640,"y":0,"w":32,"h":32},
+	"frame": {"x":672,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -293,8 +347,8 @@
 	"version": "1.0",
 	"image": "assets.png",
 	"format": "RGBA8888",
-	"size": {"w":800,"h":320},
+	"size": {"w":896,"h":320},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:9167e362be3442d10e7a5c67cc77f546:0fdf66b980f8c34124fe2b566062b1b8:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:302699887eb96d48a4a92762770bd512:827a41f4a8730af7d06ee2b39e5f4f9d:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
 }
 }
