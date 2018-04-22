@@ -131,6 +131,9 @@ let updateDay = (state, env) =>
         animationTime: 0.,
         dayIndex: dayIndex + 1,
       },
+      playerPos: {x:tileSizef *. 12.8, y: tileSizef *. 2.},
+      playerFacing: DownD,
+      currentItem: None,
       gameobjects,
     };
   | {journal: {dayTransition: FadeIn, animationTime}}
