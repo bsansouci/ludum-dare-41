@@ -185,14 +185,6 @@ let update = (state, env) => {
 let renderBefore = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
   switch (g) {
-  | {pos: {x, y}, action: NoAction, state: Corn(_)} =>
-    Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
-    Draw.rectf(
-      ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
-      ~width=tileSizef,
-      ~height=tileSizef,
-      env,
-    );
   | {pos: {x, y}, action: PickUp(Corn)} =>
     /* Don't highlight when there's no action */
     drawAssetf(
