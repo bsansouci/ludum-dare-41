@@ -50,7 +50,7 @@ let init = grid => {
                     ...gameobjects,
                   ],
                 )
-              | Trough => (
+              | WaterTrough => (
                   y + 1,
                   [
                     {
@@ -61,6 +61,21 @@ let init = grid => {
                         ),
                       action: WaterAnimals,
                       state: WaterTank(Empty),
+                    },
+                    ...gameobjects,
+                  ],
+                )
+              | FoodTrough => (
+                  y + 1,
+                  [
+                    {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: FeedAnimals,
+                      state: FoodTank(Empty),
                     },
                     ...gameobjects,
                   ],
@@ -160,6 +175,13 @@ let render = (state, focusedObject, env) =>
       switch (g) {
       | {pos: {x, y}, action: PickUp(Corn)} =>
         /* Don't highlight when there's no action */
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "dry_mud.png",
+          state,
+          env,
+        );
         maybeHighlight(state, g, focusedObject, env);
         drawAssetf(
           x -. tileSizef /. 2.,
@@ -186,16 +208,42 @@ let render = (state, focusedObject, env) =>
           state,
           env,
         )
+      | {pos: {x, y}, state: WaterTank(s)} =>
+        let assetName = switch(s){
+          | Empty => "trough_empty_water.png"
+          | HalfFull => "trough_water_half_full.png"
+          | Full => "trough_water_full.png"
+        };
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          assetName,
+          state,
+          env,
+        )
+      | {pos: {x, y}, state: FoodTank(s)} =>
+        let assetName = switch(s){
+          | Empty => "trough_empty.png"
+          | HalfFull => "trough_food_half_full.png"
+          | Full => "trough_food_full.png"
+        };
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          assetName,
+          state,
+          env,
+        )
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         maybeHighlight(state, g, focusedObject, env);
         if (isWatered) {
-          Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
-          Draw.rectf(
-            ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
-            ~width=tileSizef,
-            ~height=tileSizef,
+          drawAssetf(
+            x -. tileSizef /. 2.,
+            y -. tileSizef /. 2.,
+            "dry_mud.png",
+            state,
             env,
-          );
+          )
         };
         let assetName =
           if (stage === 0) {
@@ -222,13 +270,7 @@ let render = (state, focusedObject, env) =>
         );
       | {pos: {x, y}, action: PickUp(Water)} =>
         maybeHighlight(state, g, focusedObject, env);
-        Draw.fill(Utils.color(~r=0, ~g=10, ~b=250, ~a=255), env);
-        Draw.rectf(
-          ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
-          ~width=tileSizef,
-          ~height=tileSizef,
-          env,
-        );
+        /*TODO Draw highlighted pond*/
       | _ => ()
       };
       Draw.popStyle(env);
@@ -247,6 +289,7 @@ let renderAction = (state, focusedObject, env) => {
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Drop seed"
     | (Some(Water), Some({action: WaterCorn})) => "Water corn"
     | (Some(Water), Some({action: WaterAnimals})) => "Water animals"
+    | (Some(Corn), Some({action: FeedAnimals})) => "Feed animals"
     | _ => ""
     };
   if (body != "") {
@@ -314,6 +357,34 @@ let checkPickUp = (state, focusedObject, env) =>
                     ...g,
                     action: s == Empty ? WaterAnimals : NoAction,
                     state: WaterTank(s == Empty ? HalfFull : Full),
+                  };
+                },
+              state.gameobjects,
+            ),
+        },
+        None,
+      )
+    | (
+        Some(Corn),
+        Some({action: FeedAnimals, state: FoodTank(Empty as s)} as go),
+      )
+    | (
+        Some(Corn),
+        Some({action: FeedAnimals, state: FoodTank(HalfFull as s)} as go),
+      ) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g =>
+                if (g !== go) {
+                  g;
+                } else {
+                  {
+                    ...g,
+                    action: s == Empty ? FeedAnimals : NoAction,
+                    state: FoodTank(s == Empty ? HalfFull : Full),
                   };
                 },
               state.gameobjects,

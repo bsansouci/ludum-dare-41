@@ -63,11 +63,16 @@ let updateDay = (state, env) =>
             switch go.state {
             | Corn({stage: 5}) => Corn({isWatered: true, stage: 5})
             | Corn({stage}) => Corn({isWatered: false, stage: stage + 1})
+            | WaterTank(_) => WaterTank(Empty)
+            | FoodTank(s) => FoodTank(s == Full ? HalfFull : Empty)
             | _ => go.state
             };
           let action =
             switch go.state {
             | Corn({stage: 5}) => PickUp(Corn)
+            | WaterTank(_) => WaterAnimals
+            | FoodTank(s) => FeedAnimals
+            | Cow(_) => PickUp(Milk)
             | _ => go.action
             };
           {...go, state, action}

@@ -9,7 +9,8 @@ type tileT =
   | Floor
   | Water
   | Blocked
-  | Trough;
+  | WaterTrough
+  | FoodTrough;
 
 type directionT =
   | UpD
@@ -35,8 +36,8 @@ type actionT =
   | Cleanup
   | WaterCorn
   | WaterAnimals
+  | FeedAnimals
   | PlantSeed
-  | Harvest
   | PutBackWater
   | PutBackSeed
   | Sell(carryableT)
@@ -47,7 +48,7 @@ type cornStateT = {
   isWatered: bool
 };
 
-type waterTankStateT =
+type tankStateT =
   | HalfFull
   | Full
   | Empty;
@@ -55,7 +56,8 @@ type waterTankStateT =
 type gameobjectStateT =
   | Corn(cornStateT)
   | Cow(float, float)
-  | WaterTank(waterTankStateT)
+  | WaterTank(tankStateT)
+  | FoodTank(tankStateT)
   | Chicken(float, float)
   | NoState;
 
@@ -180,7 +182,9 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
           switch grid[tx][ty] {
           | Blocked
           | Water
-          | Fence =>
+          | Fence
+          | WaterTrough
+          | FoodTrough =>
             Reprocessing.Utils.intersectRectRect(
               ~rect1Pos=(
                 pos.x +. offset.x +. padding,
