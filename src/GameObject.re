@@ -262,13 +262,13 @@ let renderBefore = (g, focusedObject, state, env) => {
       );
     };
   | {pos: {x, y}, action: Cleanup} =>
-    Draw.fill(Utils.color(~r=100, ~g=100, ~b=10, ~a=255), env);
-    Draw.rectf(
-      ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
-      ~width=tileSizef,
-      ~height=tileSizef,
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "poo.png",
+      state,
       env,
-    );
+    )
   | _ => ()
   };
   Draw.popStyle(env);
@@ -421,6 +421,10 @@ let checkPickUp = (state, focusedObject, env) =>
       )
     | (None, Some({action: PickUp(Seed)})) => (
         {...state, currentItem: Some(Seed)},
+        None,
+      )
+    | (Some(Seed), Some({action: PickUp(Seed)})) => (
+        {...state, currentItem: None},
         None,
       )
     | (Some(_), Some({action: PickUp(Water)})) => (
