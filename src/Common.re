@@ -119,8 +119,8 @@ let drawAsset = (x, y, name, state, env) =>
     Reprocessing.Draw.subImage(
       state.spritesheet,
       ~pos=(x, y),
-      ~width=int_of_float(asset.size.x) + 1,
-      ~height=int_of_float(asset.size.y) + 1,
+      ~width=int_of_float(asset.size.x),
+      ~height=int_of_float(asset.size.y),
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
@@ -149,10 +149,10 @@ let anyKey = (keys, env) => List.exists((k) => Reprocessing.Env.key(k, env), key
 
 let facingToOffset = (dir) =>
   switch dir {
-  | UpD => {x: 0., y: (-1.)}
-  | DownD => {x: 0., y: 1.}
-  | RightD => {x: 1., y: 0.}
-  | LeftD => {x: (-1.), y: 0.}
+  | UpD => {x: 0., y: (-0.5)}
+  | DownD => {x: 0., y: 0.5}
+  | RightD => {x: 0.5, y: 0.}
+  | LeftD => {x: (-0.5), y: 0.}
   };
 
 

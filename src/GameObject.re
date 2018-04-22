@@ -87,7 +87,7 @@ let init = grid => {
     {
       pos: {
         x: 8. *. tileSizef,
-        y: 13. *. tileSizef,
+        y: 11. *. tileSizef,
       },
       action: NoAction,
       state: Chicken(0., 0.),

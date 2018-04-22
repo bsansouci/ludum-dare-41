@@ -3,23 +3,23 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
-3333333333333333333333
-3333333333333333333333
-3333333333333333333333
-3444444430000000000333
-3444444430001111100555
-3444444430001111100555
-3444444430001111100555
-3444444430000000000555
-3444444430000000000555
-3334443332222200222200
-2000000000000000000200
-2000000000000000006200
-2000000000000000006200
-2000000000000000000200
-2222222222222222222200
-0000000000000000000000
-0000000000000000000000
+33333333333333333333330
+33333333333333333333330
+34444444300000000003330
+34444444300011111005550
+34444444300011111005550
+34444444300011111005550
+34444444300000000005550
+34444444300000000005550
+33344433322222002222000
+20000000000000000002000
+20000000000000000062000
+20000000000000000062000
+20000000000000000002000
+22222222222222222222000
+00000000000000000000000
+00000000000000000000000
+00000000000000000000000
 |};
 
 let createGrid = (s) => {
@@ -115,7 +115,7 @@ let draw = (state, env) => {
             )
           );
         switch foundobject {
-        | None when d < tileSizef /. 2. => Some((d, gameobject))
+        | None when d < tileSizef /. 1.5 => Some((d, gameobject))
         | Some((d2, _)) when d2 < d => foundobject
         | Some(_) => Some((d, gameobject))
         | None => None
@@ -165,13 +165,10 @@ let draw = (state, env) => {
             Draw.fill(Utils.color(~r=200, ~g=180, ~b=200, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Fence =>
-            /* Draw.fill(Utils.color(~r=20, ~g=180, ~b=50, ~a=255), env); */
-            /* Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env); */
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
             drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
           | Blocked =>
-            Draw.fill(Utils.color(~r=255, ~g=10, ~b=10, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+            drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
           | Trough =>
             Draw.fill(Utils.color(~r=140, ~g=140, ~b=140, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -180,8 +177,29 @@ let draw = (state, env) => {
       ),
     state.grid
   );
-  /* @Todo sort player and gameobjects */
+
+  let playerInBarn =
+      Utils.intersectRectRect(
+      ~rect1Pos=(state.playerPos.x +. tileSizef /. 2., state.playerPos.y +. tileSizef /. 2.),
+      ~rect1W=(tileSizef /. 4.),
+      ~rect1H=tileSizef /. 4.,
+      ~rect2Pos=(0., 0.),
+      ~rect2W=288.,
+      ~rect2H=288.
+      );
+
+  /** Draw large game objects */
+  if (playerInBarn){
+    drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
+  };
+
+  /* @Todo sort player and gameobjects and barn outside */
   GameObject.render(state, focusedObject, env);
+
+  if (!playerInBarn){
+    drawAsset(0 * tileSize, 0 * tileSize, "barn_outside.png", state, env);
+  };
+
   {
     let imgName =
       switch (
@@ -210,18 +228,6 @@ let draw = (state, env) => {
       | Some(Milk) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "bucket_with_milk.png", state, env)
       | Some(Wood) => print_endline("Can't draw wood")
     }
-  };
-  if (debug) {
-    Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
-    Draw.rectf(
-      ~pos=(
-        state.playerPos.x +. facingOffset.x *. tileSizef +. tileSizef /. 2.,
-        state.playerPos.y +. facingOffset.y *. tileSizef +. tileSizef /. 2.
-      ),
-      ~width=5.,
-      ~height=5.,
-      env
-    )
   };
   Draw.popMatrix(env);
   GameObject.renderAction(state, focusedObject, env);
