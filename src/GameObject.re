@@ -223,6 +223,15 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     };
+  | {pos: {x, y}, action: Cleanup} =>
+    maybeHighlight(state, g, focusedObject, env);
+    Draw.fill(Utils.color(~r=100, ~g=100, ~b=10, ~a=255), env);
+    Draw.rectf(
+      ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
+      ~width=tileSizef,
+      ~height=tileSizef,
+      env,
+    );
   | _ => ()
   };
   Draw.popStyle(env);
@@ -355,6 +364,7 @@ let renderAction = (state, focusedObject, env) => {
     | (Some(Corn), Some({action: FeedAnimals})) => "Feed animals"
     | (Some(Egg), Some({action: Sell})) => "Sell egg"
     | (Some(Milk), Some({action: Sell})) => "Sell milk"
+    | (Some(Water), Some({action: Cleanup})) => "Cleanup mess"
     | _ => ""
     };
   if (body != "") {
@@ -489,6 +499,14 @@ let checkPickUp = (state, focusedObject, env) =>
     | (Some(Egg), Some({action: Sell}))
     | (Some(Milk), Some({action: Sell})) => (
         {...state, currentItem: None, dollarAnimation: 0.},
+        None,
+      )
+    | (Some(Water), Some({action: Cleanup} as go)) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects: List.filter(g => g !== go, state.gameobjects),
+        },
         None,
       )
     | (Some(Water), Some({action: WaterCorn, state: Corn(stage)} as go)) => (
