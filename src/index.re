@@ -58,17 +58,43 @@ let renderPlayer = (state, env) => {
   let imgName =
     switch (
       state.playerFacing,
-      anyKey([Up, Down, Right, Left, W, A, S, D], env),
+      anyKey([Up, Down, Right, Left, W, A, S, D], env) ?
+        int_of_float(state.time /. 0.2) mod 4 : 0,
       state.currentItem == None,
     ) {
-    | (RightD, _, true) => "old_macdonald_right_face.png"
-    | (UpD, _, true) => "old_macdonald_back_face.png"
-    | (DownD, _, true) => "old_macdonald_front_face.png"
-    | (LeftD, _, true) => "old_macdonald_left_face.png"
-    | (RightD, _, false) => "old_macdonald_right_face_hands_up.png"
-    | (UpD, _, false) => "old_macdonald_back_face_hands_up.png"
-    | (DownD, _, false) => "everybody_put_your_hands_up.png"
-    | (LeftD, _, false) => "old_macdonald_left_face_hands_up.png"
+    | (RightD, 0, true)
+    | (RightD, 2, true) => "old_macdonald_right_face.png"
+    | (RightD, 1, true) => "old_macdonald_right_face_walk_one.png"
+    | (RightD, 3, true) => "old_macdonald_right_face_walk_two.png"
+    | (UpD, 0, true)
+    | (UpD, 2, true) => "old_macdonald_back_face.png"
+    | (UpD, 1, true) => "old_macdonald_back_face_walk_one.png"
+    | (UpD, 3, true) => "old_macdonald_back_face_walk_two.png"
+    | (DownD, 0, true)
+    | (DownD, 2, true) => "old_macdonald_front_face.png"
+    | (DownD, 1, true) => "old_macdonald_front_face_walk_one.png"
+    | (DownD, 3, true) => "old_macdonald_front_face_walk_two.png"
+    | (LeftD, 0, true)
+    | (LeftD, 2, true) => "old_macdonald_left_face.png"
+    | (LeftD, 1, true) => "old_macdonald_left_face_walk_one.png"
+    | (LeftD, 3, true) => "old_macdonald_left_face_walk_two.png"
+    | (RightD, 0, false)
+    | (RightD, 2, false) => "old_macdonald_right_face_hands_up.png"
+    | (RightD, 1, false) => "old_macdonald_right_face_hands_up_walk_one.png"
+    | (RightD, 3, false) => "old_macdonald_right_face_hands_up_walk_two.png"
+    | (UpD, 0, false)
+    | (UpD, 2, false) => "old_macdonald_back_face_hands_up.png"
+    | (UpD, 1, false) => "old_macdonald_back_face_hands_up_walk_one.png"
+    | (UpD, 3, false) => "old_macdonald_back_face_hands_up_walk_two.png"
+    | (DownD, 0, false)
+    | (DownD, 2, false) => "everybody_put_your_hands_up.png"
+    | (DownD, 1, false) => "everybody_put_your_hands_up_walk_one.png"
+    | (DownD, 3, false) => "everybody_put_your_hands_up_walk_two.png"
+    | (LeftD, 0, false)
+    | (LeftD, 2, false) => "old_macdonald_left_face_hands_up.png"
+    | (LeftD, 1, false) => "old_macdonald_left_face_hands_up_walk_one.png"
+    | (LeftD, 3, false) => "old_macdonald_left_face_hands_up_walk_two.png"
+    | _ => failwith("Impossible walk state");
     };
   drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env);
   let holdOffset = tileSizef -. 4.;
@@ -136,6 +162,7 @@ let setup = (assets, env) => {
     currentItem: None,
     journal: Journal.init(env),
     dollarAnimation: (-1.),
+    time: 0.
   };
 };
 
@@ -143,6 +170,7 @@ let draw = (state, env) => {
   Utils.randomSeed(0);
   Draw.background(Utils.color(~r=199, ~g=217, ~b=229, ~a=255), env);
   let dt = Env.deltaTime(env);
+  let state = {...state, time: state.time +. dt};
   let playerSpeedDt = playerSpeed *. dt;
   let offset = {x: 0., y: 0.};
   let offset =

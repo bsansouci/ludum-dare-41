@@ -101,7 +101,8 @@ type stateT = {
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
   journal: journalT,
-  dollarAnimation: float
+  dollarAnimation: float,
+  time: float
 };
 
 let screenSize = 600.;
