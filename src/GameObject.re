@@ -172,7 +172,7 @@ let update = (state, env) => {
 
 let renderBefore = (g, focusedObject, state, env) =>
   switch (g) {
-  | {pos: {x, y}, state: Corn({isWatered: true})} =>
+  | {pos: {x, y}, action: NoAction, state: Corn(_)} =>
     Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
     Draw.rectf(
       ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
@@ -189,9 +189,10 @@ let renderBefore = (g, focusedObject, state, env) =>
       state,
       env,
     )
-  | {pos: {x, y}, state: Corn({stage, isWatered})} when stage <= 1 =>
+  | {pos: {x, y}, action, state: Corn(0 as stage)}
+  | {pos: {x, y}, action, state: Corn(1 as stage)} =>
     maybeHighlight(state, g, focusedObject, env);
-    if (isWatered) {
+    if (action == NoAction) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
