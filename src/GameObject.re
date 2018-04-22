@@ -170,125 +170,121 @@ let update = (state, env) => {
     ),
 };
 
-let render = (state, focusedObject, env) =>
-  List.iter(
-    (g: gameobjectT) => {
-      Draw.pushStyle(env);
-      switch (g) {
-      | {pos: {x, y}, action: PickUp(Corn)} =>
-        /* Don't highlight when there's no action */
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          "dry_mud.png",
-          state,
-          env,
-        );
-        maybeHighlight(state, g, focusedObject, env);
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          "stage_five_le_ble_d_inde.png",
-          state,
-          env,
-        );
-      | {pos: {x, y}, action: PickUp(Seed)} =>
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          "seed_bucket.png",
-          state,
-          env,
-        )
-      | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
-      | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
-        maybeHighlight(state, g, focusedObject, env);
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          "pile_of_bacon.png",
-          state,
-          env,
-        );
-      | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          "bet_he_would_make_some_nice_fried_chicken.png",
-          state,
-          env,
-        )
-      | {pos: {x, y}, state: WaterTank(s)} =>
-        let assetName =
-          switch (s) {
-          | Empty => "trough_empty_water.png"
-          | HalfFull => "trough_water_half_full.png"
-          | Full => "trough_water_full.png"
-          };
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          assetName,
-          state,
-          env,
-        );
-      | {pos: {x, y}, state: FoodTank(s)} =>
-        let assetName =
-          switch (s) {
-          | Empty => "trough_empty.png"
-          | HalfFull => "trough_food_half_full.png"
-          | Full => "trough_food_full.png"
-          };
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          assetName,
-          state,
-          env,
-        );
-      | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
-        maybeHighlight(state, g, focusedObject, env);
-        if (isWatered) {
-          drawAssetf(
-            x -. tileSizef /. 2.,
-            y -. tileSizef /. 2.,
-            "dry_mud.png",
-            state,
-            env,
-          );
-        };
-        let assetName =
-          if (stage === 0) {
-            "stage_zero_corn_fetus.png";
-          } else if (stage === 1) {
-            "stage_one_corn_toddler.png";
-          } else if (stage === 2) {
-            "stage_two_korn.png";
-          } else if (stage === 3) {
-            "stage_three_middle_aged_corn.png";
-          } else if (stage === 4) {
-            "stage_four_almost_corn.png";
-          } else if (stage === 5) {
-            "stage_five_le_ble_d_inde.png";
-          } else {
-            failwith("There is no other stage you fuck.");
-          };
-        drawAssetf(
-          x -. tileSizef /. 2.,
-          y -. tileSizef /. 2.,
-          assetName,
-          state,
-          env,
-        );
-      | {pos: {x, y}, action: PickUp(Water)} =>
-        maybeHighlight(state, g, focusedObject, env)
-      /*TODO Draw highlighted pond*/
-      | _ => ()
+let renderObject = (g, focusedObject, state, env) => {
+  Draw.pushStyle(env);
+  switch (g) {
+  | {pos: {x, y}, action: PickUp(Corn)} =>
+    /* Don't highlight when there's no action */
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "dry_mud.png",
+      state,
+      env,
+    );
+    maybeHighlight(state, g, focusedObject, env);
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "stage_five_le_ble_d_inde.png",
+      state,
+      env,
+    );
+  | {pos: {x, y}, action: PickUp(Seed)} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "seed_bucket.png",
+      state,
+      env,
+    )
+  | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
+  | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
+    maybeHighlight(state, g, focusedObject, env);
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "pile_of_bacon.png",
+      state,
+      env,
+    );
+  | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "bet_he_would_make_some_nice_fried_chicken.png",
+      state,
+      env,
+    )
+  | {pos: {x, y}, state: WaterTank(s)} =>
+    let assetName =
+      switch (s) {
+      | Empty => "trough_empty_water.png"
+      | HalfFull => "trough_water_half_full.png"
+      | Full => "trough_water_full.png"
       };
-      Draw.popStyle(env);
-    },
-    state.gameobjects,
-  );
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      assetName,
+      state,
+      env,
+    );
+  | {pos: {x, y}, state: FoodTank(s)} =>
+    let assetName =
+      switch (s) {
+      | Empty => "trough_empty.png"
+      | HalfFull => "trough_food_half_full.png"
+      | Full => "trough_food_full.png"
+      };
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      assetName,
+      state,
+      env,
+    );
+  | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
+    maybeHighlight(state, g, focusedObject, env);
+    if (isWatered) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dry_mud.png",
+        state,
+        env,
+      );
+    };
+    let assetName =
+      if (stage === 0) {
+        "stage_zero_corn_fetus.png";
+      } else if (stage === 1) {
+        "stage_one_corn_toddler.png";
+      } else if (stage === 2) {
+        "stage_two_korn.png";
+      } else if (stage === 3) {
+        "stage_three_middle_aged_corn.png";
+      } else if (stage === 4) {
+        "stage_four_almost_corn.png";
+      } else if (stage === 5) {
+        "stage_five_le_ble_d_inde.png";
+      } else {
+        failwith("There is no other stage you fuck.");
+      };
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      assetName,
+      state,
+      env,
+    );
+  | {pos: {x, y}, action: PickUp(Water)} =>
+    maybeHighlight(state, g, focusedObject, env)
+  /*TODO Draw highlighted pond*/
+  | _ => ()
+  };
+  Draw.popStyle(env);
+};
 
 let renderAction = (state, focusedObject, env) => {
   let body =
