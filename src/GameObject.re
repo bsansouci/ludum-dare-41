@@ -170,9 +170,16 @@ let update = (state, env) => {
     ),
 };
 
-let renderObject = (g, focusedObject, state, env) => {
-  Draw.pushStyle(env);
+let renderBefore = (g, focusedObject, state, env) =>
   switch (g) {
+  | {pos: {x, y}, state: Corn({isWatered: true})} =>
+    Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
+    Draw.rectf(
+      ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
+      ~width=tileSizef,
+      ~height=tileSizef,
+      env,
+    );
   | {pos: {x, y}, action: PickUp(Corn)} =>
     /* Don't highlight when there's no action */
     drawAssetf(
@@ -181,7 +188,42 @@ let renderObject = (g, focusedObject, state, env) => {
       "dry_mud.png",
       state,
       env,
-    );
+    )
+  | {pos: {x, y}, state: Corn({stage, isWatered})} when stage <= 1 =>
+    maybeHighlight(state, g, focusedObject, env);
+    if (isWatered) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dry_mud.png",
+        state,
+        env,
+      );
+    };
+    if (stage === 0) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "stage_zero_corn_fetus.png",
+        state,
+        env,
+      );
+    } else if (stage === 1) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "stage_one_corn_toddler.png",
+        state,
+        env,
+      );
+    };
+  | _ => ()
+  };
+
+let renderObject = (g, focusedObject, state, env) => {
+  Draw.pushStyle(env);
+  switch (g) {
+  | {pos: {x, y}, action: PickUp(Corn)} =>
     maybeHighlight(state, g, focusedObject, env);
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -244,7 +286,7 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
-  | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
+  | {pos: {x, y}, state: Corn({stage, isWatered})} when stage > 1 =>
     maybeHighlight(state, g, focusedObject, env);
     if (isWatered) {
       drawAssetf(
@@ -256,11 +298,7 @@ let renderObject = (g, focusedObject, state, env) => {
       );
     };
     let assetName =
-      if (stage === 0) {
-        "stage_zero_corn_fetus.png";
-      } else if (stage === 1) {
-        "stage_one_corn_toddler.png";
-      } else if (stage === 2) {
+      if (stage === 2) {
         "stage_two_korn.png";
       } else if (stage === 3) {
         "stage_three_middle_aged_corn.png";

@@ -193,7 +193,7 @@ let draw = (state, env) => {
   let facing = Env.key(Down, env) || Env.key(S, env) ? DownD : facing;
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
-  let state = GameObject.update(state, env);
+  /*let state = GameObject.update(state, env);*/
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -324,29 +324,16 @@ let draw = (state, env) => {
   /** Draw large game objects */
   drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
   /* Render `isWatered` first because they're part of the terrain. */
-  let gameObjectsWithoutWateredCorn =
-    List.filter(
-      g =>
-        switch (g) {
-        | {pos: {x, y}, state: Corn({isWatered: true})} =>
-          Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
-          Draw.rectf(
-            ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
-            ~width=tileSizef,
-            ~height=tileSizef,
-            env,
-          );
-          false;
-        | _ => true
-        },
-      state.gameobjects,
-    );
-  /* @Todo sort player and gameobjects */
+  List.iter(
+    g => GameObject.renderBefore(g, focusedObject, state, env),
+    state.gameobjects,
+  );
+  /* Sort gameobjects by y, then place the player and barn while iterating over objects */
   let sortedGameObjects =
     List.sort(
       (a: gameobjectT, b: gameobjectT) =>
         int_of_float(a.pos.y -. b.pos.y +. tileSizef),
-      gameObjectsWithoutWateredCorn,
+      state.gameobjects,
     );
   let firstGameObject = List.hd(sortedGameObjects);
   if (firstGameObject.pos.y >= state.playerPos.y +. tileSizef /. 2.) {
@@ -357,17 +344,13 @@ let draw = (state, env) => {
   let lastGameObject =
     List.fold_left(
       (prevGameOjbect: gameobjectT, curGameObject: gameobjectT) => {
-        GameObject.renderObject(curGameObject, focusedObject, state, env);
-        if (prevGameOjbect.pos.y < state.playerPos.y
+        if (! playerInBarn
+            && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2.
-            && curGameObject.pos.y >= state.playerPos.y
+            /. 2. < 288.
+            && curGameObject.pos.y
             +. tileSizef
-            /. 2.) {
-          renderPlayer(state, env);
-        } else if (! playerInBarn
-                   && prevGameOjbect.pos.y < 288.
-                   && curGameObject.pos.y >= 288.) {
+            /. 2. >= 288.) {
           drawAsset(
             0 * tileSize,
             0 * tileSize,
@@ -376,6 +359,15 @@ let draw = (state, env) => {
             env,
           );
         };
+        if (prevGameOjbect.pos.y < state.playerPos.y
+            +. tileSizef
+            /. 2.
+            && curGameObject.pos.y >= state.playerPos.y
+            +. tileSizef
+            /. 2.) {
+          renderPlayer(state, env);
+        };
+        GameObject.renderObject(curGameObject, focusedObject, state, env);
         curGameObject;
       },
       firstGameObject,
@@ -406,16 +398,17 @@ let loadAssetsAsync = filename =>
             let w = Json.get("w", frame) |?> Json.number |! "error";
             let h = Json.get("h", frame) |?> Json.number |! "error";
             let name = Json.get("filename", thing) |?> Json.string |! "error";
-            StringMap.add(name, {
-                                  pos: {
-                                    x,
-                                    y,
-                                  },
-                                  size: {
-                                    x: w,
-                                    y: h,
-                                  },
-                                }, assets);
+            let newAsset = {
+              pos: {
+                x,
+                y,
+              },
+              size: {
+                x: w,
+                y: h,
+              },
+            };
+            StringMap.add(name, newAsset, assets);
           },
           StringMap.empty,
           things,
@@ -423,7 +416,5 @@ let loadAssetsAsync = filename =>
       run(~setup=setup(assets), ~draw, ());
     },
   );
-
-loadAssetsAsync("spritesheet/sheet.json");
 
 loadAssetsAsync("spritesheet/sheet.json");
