@@ -1,8 +1,17 @@
 {"frames": [
 
 {
+	"filename": "baby_its_dark_outside.png",
+	"frame": {"x":696,"y":32,"w":288,"h":288},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
+	"sourceSize": {"w":288,"h":288},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "barn_inside.png",
-	"frame": {"x":192,"y":256,"w":288,"h":288},
+	"frame": {"x":1560,"y":32,"w":288,"h":288},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
@@ -11,7 +20,7 @@
 },
 {
 	"filename": "barn_outside.png",
-	"frame": {"x":0,"y":832,"w":288,"h":288},
+	"frame": {"x":984,"y":32,"w":288,"h":288},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
@@ -20,7 +29,7 @@
 },
 {
 	"filename": "bet_he_would_make_some_nice_fried_chicken.png",
-	"frame": {"x":416,"y":64,"w":32,"h":32},
+	"frame": {"x":1362,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -29,7 +38,7 @@
 },
 {
 	"filename": "blood_splatter.png",
-	"frame": {"x":0,"y":96,"w":32,"h":32},
+	"frame": {"x":1426,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -38,7 +47,7 @@
 },
 {
 	"filename": "bucket_with_milk.png",
-	"frame": {"x":96,"y":96,"w":32,"h":32},
+	"frame": {"x":1522,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -56,7 +65,7 @@
 },
 {
 	"filename": "corner_fence.png",
-	"frame": {"x":32,"y":96,"w":32,"h":32},
+	"frame": {"x":1458,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -65,7 +74,7 @@
 },
 {
 	"filename": "dead_chick.png",
-	"frame": {"x":64,"y":96,"w":32,"h":32},
+	"frame": {"x":1490,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -74,7 +83,7 @@
 },
 {
 	"filename": "dead_chicken.png",
-	"frame": {"x":448,"y":64,"w":32,"h":32},
+	"frame": {"x":1394,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -83,7 +92,7 @@
 },
 {
 	"filename": "dead_cown.png",
-	"frame": {"x":108,"y":128,"w":44,"h":32},
+	"frame": {"x":172,"y":32,"w":44,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
@@ -92,7 +101,7 @@
 },
 {
 	"filename": "different_flower_grass.png",
-	"frame": {"x":352,"y":64,"w":32,"h":32},
+	"frame": {"x":1298,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -101,7 +110,7 @@
 },
 {
 	"filename": "dolla_dolla_bills.png",
-	"frame": {"x":128,"y":64,"w":32,"h":32},
+	"frame": {"x":1074,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -110,7 +119,7 @@
 },
 {
 	"filename": "drier_dirt.png",
-	"frame": {"x":160,"y":64,"w":32,"h":32},
+	"frame": {"x":1106,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -119,7 +128,7 @@
 },
 {
 	"filename": "dry_mud.png",
-	"frame": {"x":224,"y":64,"w":32,"h":32},
+	"frame": {"x":1170,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -128,7 +137,7 @@
 },
 {
 	"filename": "egg.png",
-	"frame": {"x":320,"y":64,"w":32,"h":32},
+	"frame": {"x":1266,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -137,7 +146,7 @@
 },
 {
 	"filename": "empty_bucket.png",
-	"frame": {"x":256,"y":64,"w":32,"h":32},
+	"frame": {"x":1202,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -146,7 +155,7 @@
 },
 {
 	"filename": "fence_bottom_left.png",
-	"frame": {"x":288,"y":64,"w":32,"h":32},
+	"frame": {"x":1234,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -155,7 +164,7 @@
 },
 {
 	"filename": "fence_broken.png",
-	"frame": {"x":192,"y":64,"w":32,"h":32},
+	"frame": {"x":1138,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -164,7 +173,7 @@
 },
 {
 	"filename": "fence_top_left_corner.png",
-	"frame": {"x":416,"y":96,"w":32,"h":32},
+	"frame": {"x":1618,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -173,7 +182,7 @@
 },
 {
 	"filename": "fence_top_right_corner.png",
-	"frame": {"x":0,"y":128,"w":32,"h":32},
+	"frame": {"x":64,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -182,7 +191,7 @@
 },
 {
 	"filename": "flower_grass.png",
-	"frame": {"x":448,"y":96,"w":32,"h":32},
+	"frame": {"x":96,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -191,7 +200,7 @@
 },
 {
 	"filename": "grass.png",
-	"frame": {"x":32,"y":128,"w":32,"h":32},
+	"frame": {"x":32,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -200,7 +209,7 @@
 },
 {
 	"filename": "im_coming_home.png",
-	"frame": {"x":0,"y":256,"w":192,"h":160},
+	"frame": {"x":504,"y":32,"w":192,"h":160},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":192,"h":160},
@@ -209,7 +218,7 @@
 },
 {
 	"filename": "journal_page.png",
-	"frame": {"x":0,"y":544,"w":288,"h":288},
+	"frame": {"x":1272,"y":32,"w":288,"h":288},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":288,"h":288},
@@ -218,7 +227,7 @@
 },
 {
 	"filename": "keep_the_dogs_out.png",
-	"frame": {"x":224,"y":96,"w":32,"h":32},
+	"frame": {"x":1650,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -227,7 +236,7 @@
 },
 {
 	"filename": "more_grass.png",
-	"frame": {"x":160,"y":96,"w":32,"h":32},
+	"frame": {"x":1586,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -236,7 +245,7 @@
 },
 {
 	"filename": "old_macdonald_back_face.png",
-	"frame": {"x":192,"y":96,"w":32,"h":32},
+	"frame": {"x":0,"y":32,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -245,7 +254,7 @@
 },
 {
 	"filename": "old_macdonald_back_face_hands_up.png",
-	"frame": {"x":256,"y":96,"w":32,"h":32},
+	"frame": {"x":1682,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -254,7 +263,7 @@
 },
 {
 	"filename": "old_macdonald_back_face_hands_up_walk_two.png",
-	"frame": {"x":288,"y":96,"w":32,"h":32},
+	"frame": {"x":1714,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -263,7 +272,7 @@
 },
 {
 	"filename": "old_macdonald_back_face_hands_walk_one.png",
-	"frame": {"x":352,"y":96,"w":32,"h":32},
+	"frame": {"x":1778,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -272,7 +281,7 @@
 },
 {
 	"filename": "old_macdonald_back_face_walk_one.png",
-	"frame": {"x":384,"y":96,"w":32,"h":32},
+	"frame": {"x":1810,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -281,7 +290,7 @@
 },
 {
 	"filename": "old_macdonald_back_face_walk_two.png",
-	"frame": {"x":320,"y":96,"w":32,"h":32},
+	"frame": {"x":1746,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -290,7 +299,7 @@
 },
 {
 	"filename": "old_macdonald_front_face.png",
-	"frame": {"x":128,"y":96,"w":32,"h":32},
+	"frame": {"x":1554,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -299,7 +308,7 @@
 },
 {
 	"filename": "old_macdonald_front_face_hands_up.png",
-	"frame": {"x":128,"y":32,"w":32,"h":32},
+	"frame": {"x":594,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -317,7 +326,7 @@
 },
 {
 	"filename": "old_macdonald_front_face_hands_up_walk_two.png",
-	"frame": {"x":96,"y":64,"w":32,"h":32},
+	"frame": {"x":1042,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -344,7 +353,7 @@
 },
 {
 	"filename": "old_macdonald_left_face.png",
-	"frame": {"x":0,"y":32,"w":32,"h":32},
+	"frame": {"x":466,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -452,7 +461,7 @@
 },
 {
 	"filename": "pick_up_corn.png",
-	"frame": {"x":32,"y":32,"w":32,"h":32},
+	"frame": {"x":498,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -461,7 +470,7 @@
 },
 {
 	"filename": "pile_of_bacon.png",
-	"frame": {"x":64,"y":128,"w":44,"h":32},
+	"frame": {"x":128,"y":32,"w":44,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
@@ -470,7 +479,7 @@
 },
 {
 	"filename": "pond.png",
-	"frame": {"x":216,"y":128,"w":96,"h":128},
+	"frame": {"x":280,"y":32,"w":96,"h":128},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":128},
@@ -479,7 +488,7 @@
 },
 {
 	"filename": "poo.png",
-	"frame": {"x":320,"y":32,"w":32,"h":32},
+	"frame": {"x":786,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -488,7 +497,7 @@
 },
 {
 	"filename": "seed.png",
-	"frame": {"x":352,"y":32,"w":32,"h":32},
+	"frame": {"x":818,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -497,7 +506,7 @@
 },
 {
 	"filename": "seed_bucket.png",
-	"frame": {"x":152,"y":128,"w":64,"h":32},
+	"frame": {"x":216,"y":32,"w":64,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":32},
@@ -506,7 +515,7 @@
 },
 {
 	"filename": "stage_five_le_ble_d_inde.png",
-	"frame": {"x":416,"y":32,"w":32,"h":32},
+	"frame": {"x":882,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -515,7 +524,7 @@
 },
 {
 	"filename": "stage_four_almost_corn.png",
-	"frame": {"x":448,"y":32,"w":32,"h":32},
+	"frame": {"x":914,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -524,7 +533,7 @@
 },
 {
 	"filename": "stage_one_corn_toddler.png",
-	"frame": {"x":32,"y":64,"w":32,"h":32},
+	"frame": {"x":978,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -533,7 +542,7 @@
 },
 {
 	"filename": "stage_three_middle_aged_corn.png",
-	"frame": {"x":64,"y":64,"w":32,"h":32},
+	"frame": {"x":1010,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -542,7 +551,7 @@
 },
 {
 	"filename": "stage_two_korn.png",
-	"frame": {"x":0,"y":64,"w":32,"h":32},
+	"frame": {"x":946,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -551,7 +560,7 @@
 },
 {
 	"filename": "stage_zero_corn_fetus.png",
-	"frame": {"x":384,"y":32,"w":32,"h":32},
+	"frame": {"x":850,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -560,7 +569,7 @@
 },
 {
 	"filename": "trough_empty.png",
-	"frame": {"x":288,"y":32,"w":32,"h":32},
+	"frame": {"x":754,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -569,7 +578,7 @@
 },
 {
 	"filename": "trough_empty_water.png",
-	"frame": {"x":64,"y":32,"w":32,"h":32},
+	"frame": {"x":530,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -578,7 +587,7 @@
 },
 {
 	"filename": "trough_food_full.png",
-	"frame": {"x":96,"y":32,"w":32,"h":32},
+	"frame": {"x":562,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -587,7 +596,7 @@
 },
 {
 	"filename": "trough_food_half_full.png",
-	"frame": {"x":160,"y":32,"w":32,"h":32},
+	"frame": {"x":626,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -596,7 +605,7 @@
 },
 {
 	"filename": "trough_water_full.png",
-	"frame": {"x":256,"y":32,"w":32,"h":32},
+	"frame": {"x":722,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -605,7 +614,7 @@
 },
 {
 	"filename": "trough_water_half_full.png",
-	"frame": {"x":192,"y":32,"w":32,"h":32},
+	"frame": {"x":658,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -614,7 +623,7 @@
 },
 {
 	"filename": "truck.png",
-	"frame": {"x":312,"y":128,"w":128,"h":64},
+	"frame": {"x":376,"y":32,"w":128,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":64},
@@ -623,7 +632,7 @@
 },
 {
 	"filename": "vertical_fence.png",
-	"frame": {"x":224,"y":32,"w":32,"h":32},
+	"frame": {"x":690,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -632,7 +641,7 @@
 },
 {
 	"filename": "water_bucket.png",
-	"frame": {"x":384,"y":64,"w":32,"h":32},
+	"frame": {"x":1330,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -644,8 +653,8 @@
 	"version": "1.0",
 	"image": "assets.png",
 	"format": "RGBA8888",
-	"size": {"w":480,"h":1120},
+	"size": {"w":1848,"h":320},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:81567f505207b1a78257a810013eca20:9097e270d318648ca8b148bcdc11cee7:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:ce79ba7584a07d2246f777255a1d3adc:5971a98866e43342cdcc5b02c8608cbe:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
 }
 }
