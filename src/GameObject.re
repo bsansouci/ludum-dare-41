@@ -2,7 +2,7 @@ open Reprocessing;
 
 open Common;
 
-let init = (grid) => {
+let init = grid => {
   let (_, gameobjects) =
     Array.fold_left(
       ((x, gameobjects), col) => {
@@ -10,51 +10,97 @@ let init = (grid) => {
           Array.fold_left(
             ((y, gameobjects), tile) =>
               switch (tile) {
-                | Dirt => (
+              | Dirt => (
                   y + 1,
                   [
                     x != 13 ?
                       {
-                        pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                        pos:
+                          posMake(
+                            x * tileSize + tileSize / 2,
+                            y * tileSize + tileSize / 2,
+                          ),
                         action: WaterCorn,
-                        state: Corn({stage: 1, isWatered: false})
+                        state: Corn({stage: 1, isWatered: false}),
                       } :
                       {
-                        pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                        pos:
+                          posMake(
+                            x * tileSize + tileSize / 2,
+                            y * tileSize + tileSize / 2,
+                          ),
                         action: PickUp(Corn),
-                        state: NoState
+                        state: NoState,
                       },
-                    ...gameobjects
-                  ]
+                    ...gameobjects,
+                  ],
                 )
-                | Water =>
-                  (y + 1, [{
-                    pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
-                    action: PickUp(Water),
-                    state: NoState
-                  }, ...gameobjects])
-                | _ => (y + 1, gameobjects)
+              | Water => (
+                  y + 1,
+                  [
+                    {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: PickUp(Water),
+                      state: NoState,
+                    },
+                    ...gameobjects,
+                  ],
+                )
+              | Trough => (
+                  y + 1,
+                  [
+                    {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterAnimals,
+                      state: WaterTank(Empty),
+                    },
+                    ...gameobjects,
+                  ],
+                )
+              | _ => (y + 1, gameobjects)
               },
             (0, gameobjects),
-            col
+            col,
           );
-        (x + 1, gameobjects)
+        (x + 1, gameobjects);
       },
       (0, []),
-      grid
+      grid,
     );
   let gameobjects = [
-    {pos: {x: 4. *. tileSizef, y: 12. *. tileSizef}, action: MilkCow, state: Cow(HasMilk)},
-    {pos: {x: 8. *. tileSizef, y: 13. *. tileSizef}, action: NoAction, state: Chicken},
-    ...gameobjects
+    {
+      pos: {
+        x: 4. *. tileSizef,
+        y: 12. *. tileSizef,
+      },
+      action: MilkCow,
+      state: Cow(0., 0., HasMilk),
+    },
+    {
+      pos: {
+        x: 8. *. tileSizef,
+        y: 13. *. tileSizef,
+      },
+      action: NoAction,
+      state: Chicken(0., 0.),
+    },
+    ...gameobjects,
   ];
-  gameobjects
+  gameobjects;
 };
 
-let updateDaily = (state) => state;
+let updateDaily = state => state;
 
 let maybeHighlight = (state, g, focusedObject, env) =>
-  switch focusedObject {
+  switch (focusedObject) {
   | Some(fgo) when fgo === g =>
     switch (state.currentItem, fgo.action) {
     | (Some(Water), WaterCorn)
@@ -62,20 +108,54 @@ let maybeHighlight = (state, g, focusedObject, env) =>
     | (None, PickUp(Egg))
     | (None, PickUp(Seed))
     | (None, PickUp(Water))
-    | (None, Cleanup) => Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
+    | (None, Cleanup) =>
+      Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
     | _ => ()
     }
   | _ => ()
   };
 
-let update = (state, env) =>
-  {...state, gameobjects: List.map(
-      (g: gameobjectT) => g, state.gameobjects)};
+let moveAnimal = (mx, my, speed, pos, grid, env) => {
+  let mx =
+    Utils.constrain(
+      ~amt=mx +. Random.float(2.) -. 1.,
+      ~low=(-5.) *. speed,
+      ~high=5. *. speed,
+    );
+  let my =
+    Utils.constrain(
+      ~amt=my +. Random.float(2.) -. 1.,
+      ~low=(-5.) *. speed,
+      ~high=5. *. speed,
+    );
+  let dt = Reprocessing.Env.deltaTime(env);
+  let offset =
+    handleCollision({x: 0., y: 0.}, {x: dt *. mx, y: dt *. my}, pos, grid);
+  ({x: pos.x +. offset.x, y: pos.y +. offset.y}, mx, my);
+};
+
+let update = (state, env) => {
+  ...state,
+  gameobjects:
+    List.map(
+      (g: gameobjectT) =>
+        switch (g) {
+        | {pos, state: Cow(mx, my, x)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 1., pos, state.grid, env);
+          {...g, pos, state: Cow(mx, my, x)};
+        | {pos, state: Chicken(mx, my)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
+          {...g, pos, state: Chicken(mx, my)};
+        | _ => g
+        },
+      state.gameobjects,
+    ),
+};
 
 let render = (state, focusedObject, env) =>
   List.iter(
     (g: gameobjectT) =>
-      switch g {
+      switch (g) {
       | {pos: {x, y}, action: PickUp(Corn)} =>
         /* Don't highlight when there's no action */
         Draw.pushStyle(env);
@@ -85,26 +165,26 @@ let render = (state, focusedObject, env) =>
           y -. tileSizef /. 2.,
           "stage_five_le_ble_d_inde.png",
           state,
-          env
+          env,
         );
         Draw.popStyle(env);
-      | {pos: {x, y}, action: MilkCow, state: Cow(NoMilk)}
-      | {pos: {x, y}, action: MilkCow, state: Cow(HasMilk)} =>
+      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, NoMilk)}
+      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, HasMilk)} =>
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           "pile_of_bacon.png",
           state,
-          env
-        );
-      | {pos: {x, y}, action: NoAction, state: Chicken} =>
+          env,
+        )
+      | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           "bet_he_would_make_some_nice_fried_chicken.png",
           state,
-          env
-        );
+          env,
+        )
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
@@ -114,26 +194,32 @@ let render = (state, focusedObject, env) =>
             ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
             ~width=tileSizef,
             ~height=tileSizef,
-            env
-          )
+            env,
+          );
         };
         let assetName =
           if (stage === 0) {
-            "stage_zero_corn_fetus.png"
+            "stage_zero_corn_fetus.png";
           } else if (stage === 1) {
-            "stage_one_corn_toddler.png"
+            "stage_one_corn_toddler.png";
           } else if (stage === 2) {
-            "stage_two_korn.png"
+            "stage_two_korn.png";
           } else if (stage === 3) {
-            "stage_three_middle_aged_corn.png"
+            "stage_three_middle_aged_corn.png";
           } else if (stage === 4) {
-            "stage_four_almost_corn.png"
+            "stage_four_almost_corn.png";
           } else if (stage === 5) {
-            "stage_five_le_ble_d_inde.png"
+            "stage_five_le_ble_d_inde.png";
           } else {
-            failwith("There is no other stage you fuck.")
+            failwith("There is no other stage you fuck.");
           };
-        drawAssetf(x -. tileSizef /. 2., y -. tileSizef /. 2., assetName, state, env);
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          assetName,
+          state,
+          env,
+        );
         Draw.popStyle(env);
       | {pos: {x, y}, action: PickUp(Water)} =>
         Draw.pushStyle(env);
@@ -143,82 +229,110 @@ let render = (state, focusedObject, env) =>
           ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
           ~width=tileSizef,
           ~height=tileSizef,
-          env
+          env,
         );
         Draw.popStyle(env);
       | _ => ()
       },
-    state.gameobjects
+    state.gameobjects,
   );
 
-let renderAction = (state, focusedObject, env) =>
-  switch (state.currentItem, focusedObject) {
-  | (None, Some({action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
-  | (None, Some({action: PickUp(Water)})) => Draw.text(~body="Pick water", ~pos=(20, 20), env)
-  | (Some(Water), Some({action: WaterCorn})) => Draw.text(~body="Water corn", ~pos=(20, 20), env)
-  | _ => ()
+let renderAction = (state, focusedObject, env) => {
+  let body =
+    switch (state.currentItem, focusedObject) {
+    | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
+    | (None, Some({action: PickUp(Water)})) => "Pickup water"
+    | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
+    | (None, Some({action: PickUp(Milk)})) => "Milk cow"
+    | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
+    | (Some(Seed), Some({action: PickUp(Seed)})) => "Drop seed"
+    | (Some(Water), Some({action: WaterCorn})) => "Water corn"
+    | (Some(Water), Some({action: WaterAnimals})) => "Water animals"
+    | _ => ""
+    };
+  if (body != "") {
+    Draw.fill(Utils.color(~r=255, ~g=255, ~b=255, ~a=255), env);
+    let padding = 16;
+    let width = Draw.textWidth(~body, env);
+    Draw.rect(~pos=(0, 0), ~width=width + padding * 2, ~height=70, env);
+    Draw.text(~body, ~pos=(padding, 20), env);
   };
+};
 
 let checkPickUp = (state, focusedObject, env) =>
-  switch (state.currentItem, focusedObject) {
-  | (None, Some({action: PickUp(Corn)} as go)) =>
-    if (Env.keyPressed(X, env)) {
-      (
+  if (Env.keyPressed(X, env) || Env.keyPressed(Space, env)) {
+    switch (state.currentItem, focusedObject) {
+    | (None, Some({action: PickUp(Corn)} as go)) => (
         {
           ...state,
           currentItem: Some(Corn),
-          gameobjects: List.filter((g) => g !== go, state.gameobjects)
+          gameobjects: List.filter(g => g !== go, state.gameobjects),
         },
-        None
+        None,
       )
-    } else {
-      (state, focusedObject)
-    }
-  | (None, Some({action: PickUp(Water)} as go)) =>
-    if (Env.keyPressed(X, env)) {
-      (
-        {
-          ...state,
-          currentItem: Some(Water),
-        },
-        None
+    | (None, Some({action: PickUp(Water)})) => (
+        {...state, currentItem: Some(Water)},
+        None,
       )
-    } else {
-      (state, focusedObject)
-    }
-  | (None, Some({action: PickUp(Seed)} as go)) =>
-    if (Env.keyPressed(X, env)) {
-      (
-        {
-          ...state,
-          currentItem: Some(Seed),
-        },
-        None
+    | (None, Some({action: PickUp(Seed)})) => (
+        {...state, currentItem: Some(Seed)},
+        None,
       )
-    } else {
-      (state, focusedObject)
-    }
-  | (Some(Water), Some({action: WaterCorn, state: Corn({stage})} as go)) =>
-    if (Env.keyPressed(X, env)) {
-      (
+    | (Some(_), Some({action: PickUp(Water)})) => (
+        {...state, currentItem: None},
+        focusedObject,
+      )
+    | (
+        Some(Water),
+        Some({action: WaterAnimals, state: WaterTank(Empty as s)} as go),
+      )
+    | (
+        Some(Water),
+        Some({action: WaterAnimals, state: WaterTank(HalfFull as s)} as go),
+      ) => (
         {
           ...state,
           currentItem: None,
           gameobjects:
             List.map(
-              (g) =>
+              g =>
                 if (g !== go) {
-                  g
+                  g;
                 } else {
-                  {...g, action: NoAction, state: Corn({stage, isWatered: true})}
+                  {
+                    ...g,
+                    action: s == Empty ? WaterAnimals : NoAction,
+                    state: WaterTank(s == Empty ? HalfFull : Full),
+                  };
                 },
-              state.gameobjects
-            )
+              state.gameobjects,
+            ),
         },
-        None
+        None,
       )
-    } else {
-      (state, focusedObject)
-    }
-  | _ => (state, focusedObject)
+    | (Some(Water), Some({action: WaterCorn, state: Corn({stage})} as go)) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g =>
+                if (g !== go) {
+                  g;
+                } else {
+                  {
+                    ...g,
+                    action: NoAction,
+                    state: Corn({stage, isWatered: true}),
+                  };
+                },
+              state.gameobjects,
+            ),
+        },
+        None,
+      )
+    | _ => (state, focusedObject)
+    };
+  } else {
+    (state, focusedObject);
   };
