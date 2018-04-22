@@ -101,7 +101,7 @@ let setup = (assets, env) => {
   {
     grid,
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {x: 64. *. 10. +. 1., y: 64. *. 5. +. 1.},
+    playerPos: {x: tileSizef *. 10. +. 1., y: tileSizef *. 5. +. 1.},
     playerFacing: RightD,
     spritesheet: Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
@@ -175,9 +175,10 @@ let draw = (state, env) => {
     GameObject.checkPickUp(state, focusedObject, env);
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
+  Draw.scale(2., 2., env);
   Draw.translate(
-    -. state.playerPos.x +. screenSize /. 2.,
-    -. state.playerPos.y +. screenSize /. 2.,
+    -. state.playerPos.x +. screenSize /. 4.,
+    -. state.playerPos.y +. screenSize /. 4.,
     env
   );
   /* Nighttime tint */
@@ -238,12 +239,13 @@ let draw = (state, env) => {
       };
     drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env);
 
-    switch (state.currentItem) {
+    let holdOffset = tileSizef -. 4.;
+   switch (state.currentItem) {
       | None => ()
-      | Some(Corn) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "pick_up_corn.png", state, env)
-      | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "water_bucket.png", state, env)
-      | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "corn_seed.png", state, env)
-      | Some(Egg) => drawAssetf(state.playerPos.x, state.playerPos.y -. 58., "egg.png", state, env)
+      | Some(Corn) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "pick_up_corn.png", state, env)
+      | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "water_bucket.png", state, env)
+      | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "corn_seed.png", state, env)
+      | Some(Egg) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "egg.png", state, env)
       | Some(Milk) => print_endline("Can't draw milk")
       | Some(Wood) => print_endline("Can't draw wood")
     }

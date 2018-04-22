@@ -59,6 +59,7 @@ type gameobjectStateT =
   | Corn(cornStateT)
   | Cow(cowStateT)
   | WaterTank(waterTankStateT)
+  | Chicken
   | NoState;
 
 type gameobjectT = {
@@ -107,9 +108,9 @@ type stateT = {
 
 let screenSize = 600.;
 
-let playerSpeed = 300.;
+let playerSpeed = 150.;
 
-let tileSize = 64;
+let tileSize = 32;
 
 let tileSizef = float_of_int(tileSize);
 
@@ -121,8 +122,8 @@ let drawAsset = (x, y, name, state, env) =>
     Reprocessing.Draw.subImage(
       state.spritesheet,
       ~pos=(x, y),
-      ~width=tileSize + 1,
-      ~height=tileSize + 1,
+      ~width=int_of_float(asset.size.x) + 1,
+      ~height=int_of_float(asset.size.y) + 1,
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
@@ -135,11 +136,11 @@ let drawAssetf = (x, y, name, state, env) =>
   | exception Not_found =>
     print_endline("Asset " ++ name ++ " not found. Get your shit together man.")
   | asset =>
-    Reprocessing.Draw.subImage(
+    Reprocessing.Draw.subImagef(
       state.spritesheet,
-      ~pos=(int_of_float(x), int_of_float(y)),
-      ~width=tileSize,
-      ~height=tileSize,
+      ~pos=(x, y),
+      ~width=asset.size.x,
+      ~height=asset.size.y,
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
