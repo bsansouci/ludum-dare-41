@@ -19,7 +19,7 @@ JSONStream@^1.3.2:
 
 Reprocessing@schmavery/reprocessing#multifile-hotreloading:
   version "0.1.0"
-  resolved "https://codeload.github.com/schmavery/reprocessing/tar.gz/25a5d0125c685ce913f75f90b8770e5b4d7b6b72"
+  resolved "https://codeload.github.com/schmavery/reprocessing/tar.gz/4acbfbaa87b2940b76a65ec2d54f56274a27e174"
   dependencies:
     Reasongl "github:bsansouci/reasongl"
 

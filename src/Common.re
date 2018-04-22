@@ -9,6 +9,7 @@ type tileT =
   | Floor
   | Water
   | Blocked
+  | SeedBin
   | WaterTrough
   | FoodTrough;
 
@@ -59,6 +60,7 @@ type gameobjectStateT =
   | WaterTank(tankStateT)
   | FoodTank(tankStateT)
   | Chicken(float, float)
+  | IsASeedBin
   | NoState;
 
 type gameobjectT = {
@@ -183,6 +185,7 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
           | Blocked
           | Water
           | Fence
+          | SeedBin
           | WaterTrough
           | FoodTrough =>
             Reprocessing.Utils.intersectRectRect(
