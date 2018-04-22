@@ -104,25 +104,47 @@ let init = grid => {
       (0, []),
       grid,
     );
-  let gameobjects = [
+  let addChick = gos => [
     {
       pos: {
-        x: 6. *. tileSizef,
-        y: 12. *. tileSizef,
-      },
-      action: PickUp(Milk),
-      state: Cow(0., 0.),
-    },
-    {
-      pos: {
-        x: 8. *. tileSizef,
-        y: 11. *. tileSizef,
+        x: Utils.randomf(6., 22.) *. tileSizef,
+        y: Utils.randomf(13., 15.) *. tileSizef,
       },
       action: NoAction,
-      state: Chicken(0., 0.),
+      state: Chick(0., 0.),
     },
-    ...gameobjects,
+    ...gos,
   ];
+  let gameobjects =
+    addChick(
+      addChick(
+        addChick(
+          addChick(
+            addChick(
+              addChick([
+                {
+                  pos: {
+                    x: 6. *. tileSizef,
+                    y: 12. *. tileSizef,
+                  },
+                  action: PickUp(Milk),
+                  state: Cow(0., 0.),
+                },
+                {
+                  pos: {
+                    x: 8. *. tileSizef,
+                    y: 11. *. tileSizef,
+                  },
+                  action: NoAction,
+                  state: Chicken(0., 0.),
+                },
+                ...gameobjects,
+              ]),
+            ),
+          ),
+        ),
+      ),
+    );
   gameobjects;
 };
 
@@ -183,6 +205,9 @@ let update = (state, env) => {
         | {pos, state: Chicken(mx, my)} =>
           let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
           {...g, pos, state: Chicken(mx, my)};
+        | {pos, state: Chick(mx, my)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 4., pos, state.grid, env);
+          {...g, pos, state: Chick(mx, my)};
         | _ => g
         },
       state.gameobjects,
@@ -273,6 +298,14 @@ let renderObject = (g, focusedObject, state, env) =>
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
       "bet_he_would_make_some_nice_fried_chicken.png",
+      state,
+      env,
+    )
+  | {pos: {x, y}, action: NoAction, state: Chick(_, _)} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "chick.png",
       state,
       env,
     )

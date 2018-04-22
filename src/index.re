@@ -14,7 +14,7 @@ let mapString = {|
 0000034444444300011111005550
 0000034444444300011111005550
 0000034444444300000000005550
-0000qx3344433xxxxxx00xxxe000
+0000qx3344433xxxxxx0xxxxe000
 0000a0000000000000000006d000
 0000a0000000000000000000d000
 0000a0000000000000000000d000
@@ -375,7 +375,7 @@ let draw = (state, env) => {
   drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
   drawAssetf(
     16.6 *. tileSizef,
-    (0.5) *. tileSizef,
+    (0.2) *. tileSizef,
     "im_coming_home.png",
     state,
     env,

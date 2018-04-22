@@ -56,6 +56,7 @@ type gameobjectStateT =
   | WaterTank(tankStateT)
   | FoodTank(tankStateT)
   | Chicken(float, float)
+  | Chick(float, float)
   | IsASeedBin
   | NoState;
 
