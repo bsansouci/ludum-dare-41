@@ -111,7 +111,13 @@ let init = grid => {
         y: Utils.randomf(13., 15.) *. tileSizef,
       },
       action: NoAction,
-      state: Chick(0., 0.),
+      state: Chick({
+               momentum: {
+                 x: 0.,
+                 y: 0.,
+               },
+               health: 1,
+             }),
     },
     ...gos,
   ];
@@ -128,7 +134,13 @@ let init = grid => {
                     y: 12. *. tileSizef,
                   },
                   action: PickUp(Milk),
-                  state: Cow(0., 0.),
+                  state: Cow({
+                           momentum: {
+                             x: 0.,
+                             y: 0.,
+                           },
+                           health: 4,
+                         }),
                 },
                 {
                   pos: {
@@ -136,7 +148,13 @@ let init = grid => {
                     y: 11. *. tileSizef,
                   },
                   action: NoAction,
-                  state: Chicken(0., 0.),
+                  state: Chicken({
+                           momentum: {
+                             x: 0.,
+                             y: 0.,
+                           },
+                           health: 1,
+                         }),
                 },
                 ...gameobjects,
               ]),
@@ -199,15 +217,33 @@ let update = (state, env) => {
     List.map(
       (g: gameobjectT) =>
         switch (g) {
-        | {pos, state: Cow(mx, my)} =>
-          let (pos, mx, my) = moveAnimal(mx, my, 1., pos, state.grid, env);
-          {...g, pos, state: Cow(mx, my)};
-        | {pos, state: Chicken(mx, my)} =>
-          let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
-          {...g, pos, state: Chicken(mx, my)};
-        | {pos, state: Chick(mx, my)} =>
-          let (pos, mx, my) = moveAnimal(mx, my, 4., pos, state.grid, env);
-          {...g, pos, state: Chick(mx, my)};
+        | {pos, state: Cow({momentum: {x, y}} as cow)} =>
+          let (pos, x, y) = moveAnimal(x, y, 1., pos, state.grid, env);
+          {...g, pos, state: Cow({
+                               ...cow,
+                               momentum: {
+                                 x,
+                                 y,
+                               },
+                             })};
+        | {pos, state: Chicken({momentum: {x, y}} as chicken)} =>
+          let (pos, x, y) = moveAnimal(x, y, 2., pos, state.grid, env);
+          {...g, pos, state: Chicken({
+                               ...chicken,
+                               momentum: {
+                                 x,
+                                 y,
+                               },
+                             })};
+        | {pos, state: Chick({momentum: {x, y}} as chick)} =>
+          let (pos, x, y) = moveAnimal(x, y, 4., pos, state.grid, env);
+          {...g, pos, state: Chick({
+                               ...chick,
+                               momentum: {
+                                 x,
+                                 y,
+                               },
+                             })};
         | _ => g
         },
       state.gameobjects,
@@ -284,8 +320,8 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
-  | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
-  | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
+  | {pos: {x, y}, action: NoAction, state: Cow(_)}
+  | {pos: {x, y}, action: PickUp(Milk), state: Cow(_)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
@@ -293,7 +329,7 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
-  | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
+  | {pos: {x, y}, action: NoAction, state: Chicken(_)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
@@ -301,7 +337,7 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
-  | {pos: {x, y}, action: NoAction, state: Chick(_, _)} =>
+  | {pos: {x, y}, action: NoAction, state: Chick(_)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,

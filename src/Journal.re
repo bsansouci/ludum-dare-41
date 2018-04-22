@@ -39,7 +39,7 @@ let updateDay = (state, env) =>
             | {action: PickUp(Corn)}
             | {state: WaterTank(HalfFull)}
             | {state: WaterTank(Empty)}
-            | {action: PickUp(Milk), state: Cow(_, _)}
+            | {action: PickUp(Milk), state: Cow(_)}
             | {action: WaterCorn} => false
             | _ => true
             },
@@ -123,7 +123,10 @@ let updateDay = (state, env) =>
         animationTime: 0.,
         dayIndex: dayIndex + 1,
       },
-      playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
+      playerPos: {
+        x: tileSizef *. 17.8,
+        y: tileSizef *. 5.,
+      },
       playerFacing: DownD,
       currentItem: None,
       gameobjects,

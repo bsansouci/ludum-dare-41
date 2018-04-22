@@ -22,7 +22,7 @@ type directionT =
 
 type vec2 = {
   x: float,
-  y: float
+  y: float,
 };
 
 type carryableT =
@@ -50,20 +50,33 @@ type tankStateT =
   | Full
   | Empty;
 
+type cowStateT = {
+  momentum: vec2,
+  health: int,
+};
+
+type chickenStateT = {
+  momentum: vec2,
+  health: int,
+};
+
+type bossStateT = {hunger: int};
+
 type gameobjectStateT =
   | Corn(int)
-  | Cow(float, float)
+  | Cow(cowStateT)
   | WaterTank(tankStateT)
   | FoodTank(tankStateT)
-  | Chicken(float, float)
-  | Chick(float, float)
+  | Chicken(chickenStateT)
+  | Boss(bossStateT)
+  | Chick(chickenStateT)
   | IsASeedBin
   | NoState;
 
-type gameobjectT = {
+type gameobjectT =  {
   pos: vec2,
   action: actionT,
-  state: gameobjectStateT
+  state: gameobjectStateT,
 };
 
 let posMake = (x, y) => {x: float_of_int(x), y: float_of_int(y)};
@@ -72,7 +85,7 @@ module StringMap = Map.Make(String);
 
 type assetT = {
   size: vec2,
-  pos: vec2
+  pos: vec2,
 };
 
 type journalEntryT = string;
@@ -89,7 +102,7 @@ type journalT = {
   journalEntries: array(array(journalEntryT)),
   dayTransition: dayTransitionT,
   animationTime: float,
-  backgroundImage: Reprocessing.imageT
+  backgroundImage: Reprocessing.imageT,
 };
 
 type stateT = {
@@ -103,7 +116,7 @@ type stateT = {
   gameobjects: list(gameobjectT),
   journal: journalT,
   dollarAnimation: float,
-  time: float
+  time: float,
 };
 
 let screenSize = 600.;
@@ -117,7 +130,9 @@ let tileSizef = float_of_int(tileSize);
 let drawAsset = (x, y, name, state, env) =>
   switch (StringMap.find(name, state.assets)) {
   | exception Not_found =>
-    print_endline("Asset " ++ name ++ " not found. Get your shit together man.")
+    print_endline(
+      "Asset " ++ name ++ " not found. Get your shit together man.",
+    )
   | asset =>
     Reprocessing.Draw.subImage(
       state.spritesheet,
@@ -127,14 +142,16 @@ let drawAsset = (x, y, name, state, env) =>
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
-      env
+      env,
     )
   };
 
 let drawAssetf = (x, y, name, state, env) =>
   switch (StringMap.find(name, state.assets)) {
   | exception Not_found =>
-    print_endline("Asset " ++ name ++ " not found. Get your shit together man.")
+    print_endline(
+      "Asset " ++ name ++ " not found. Get your shit together man.",
+    )
   | asset =>
     Reprocessing.Draw.subImagef(
       state.spritesheet,
@@ -144,20 +161,20 @@ let drawAssetf = (x, y, name, state, env) =>
       ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
       ~texWidth=int_of_float(asset.size.x),
       ~texHeight=int_of_float(asset.size.y),
-      env
+      env,
     )
   };
 
-let anyKey = (keys, env) => List.exists((k) => Reprocessing.Env.key(k, env), keys);
+let anyKey = (keys, env) =>
+  List.exists(k => Reprocessing.Env.key(k, env), keys);
 
-let facingToOffset = (dir) =>
-  switch dir {
+let facingToOffset = dir =>
+  switch (dir) {
   | UpD => {x: 0., y: (-0.5)}
   | DownD => {x: 0., y: 0.5}
   | RightD => {x: 0.5, y: 0.}
   | LeftD => {x: (-0.5), y: 0.}
   };
-
 
 let handleCollision = (prevOffset, offset, pos, grid) => {
   let l = [
@@ -169,7 +186,7 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
     (0, (-1)),
     (1, (-1)),
     (1, 0),
-    (0, 1)
+    (0, 1),
   ];
   let collided =
     List.exists(
@@ -177,10 +194,13 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
         let padding = 8.;
         let tx = dx + int_of_float((offset.x +. pos.x) /. tileSizef);
         let ty = dy + int_of_float((offset.y +. pos.y) /. tileSizef);
-        if (tx >= Array.length(grid) || tx < 0 || ty > Array.length(grid[0]) || ty < 0) {
-          true
+        if (tx >= Array.length(grid)
+            || tx < 0
+            || ty > Array.length(grid[0])
+            || ty < 0) {
+          true;
         } else {
-          switch grid[tx][ty] {
+          switch (grid[tx][ty]) {
           | Blocked
           | Water
           | Fence(_)
@@ -191,19 +211,22 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
             Reprocessing.Utils.intersectRectRect(
               ~rect1Pos=(
                 pos.x +. offset.x +. padding,
-                pos.y +. offset.y +. padding
+                pos.y +. offset.y +. padding,
               ),
               ~rect1W=tileSizef -. padding -. padding,
               ~rect1H=tileSizef -. padding -. padding,
-              ~rect2Pos=(float_of_int(tx * tileSize), float_of_int(ty * tileSize)),
+              ~rect2Pos=(
+                float_of_int(tx * tileSize),
+                float_of_int(ty * tileSize),
+              ),
               ~rect2W=tileSizef,
-              ~rect2H=tileSizef
+              ~rect2H=tileSizef,
             )
           | _ => false
-          }
-        }
+          };
+        };
       },
-      l
+      l,
     );
-  if (collided) {prevOffset} else {offset}
+  if (collided) {prevOffset} else {offset};
 };

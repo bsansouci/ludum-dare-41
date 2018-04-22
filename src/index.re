@@ -159,7 +159,10 @@ let setup = (assets, env) => {
   {
     grid,
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
+    playerPos: {
+      x: tileSizef *. 17.8,
+      y: tileSizef *. 5.,
+    },
     playerFacing: DownD,
     spritesheet:
       Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
@@ -333,8 +336,10 @@ let draw = (state, env) => {
             | 'c' => drawAsset(px, py, "corner_fence.png", state, env)
             | 'a'
             | 'd' => drawAsset(px, py, "vertical_fence.png", state, env)
-            | 'e' => drawAsset(px, py, "fence_top_right_corner.png", state, env)
-            | 'q' => drawAsset(px, py, "fence_top_left_corner.png", state, env)
+            | 'e' =>
+              drawAsset(px, py, "fence_top_right_corner.png", state, env)
+            | 'q' =>
+              drawAsset(px, py, "fence_top_left_corner.png", state, env)
             | 'z' => drawAsset(px, py, "fence_bottom_left.png", state, env)
             /* | 'z' => */
             /* Draw.pushMatrix(env); */
@@ -404,10 +409,14 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 288. +. tileSizef *. 3.
+            /. 2. < 288.
+            +. tileSizef
+            *. 3.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 288. +. tileSizef *. 3.) {
+            /. 2. >= 288.
+            +. tileSizef
+            *. 3.) {
           drawAsset(
             5 * tileSize,
             3 * tileSize,
@@ -445,7 +454,13 @@ let draw = (state, env) => {
           ~b=255,
           ~a=
             int_of_float(
-              Utils.remapf(state.dollarAnimation, 0., totalTimeSec, 255., 0.),
+              Utils.remapf(
+                ~value=state.dollarAnimation,
+                ~low1=0.,
+                ~high1=totalTimeSec,
+                ~low2=255.,
+                ~high2=0.,
+              ),
             ),
         ),
         env,
@@ -456,11 +471,11 @@ let draw = (state, env) => {
           25 * tileSize,
           int_of_float(
             Utils.remapf(
-              state.dollarAnimation,
-              0.,
-              totalTimeSec,
-              3.5 *. tileSizef,
-              1. *. tileSizef,
+              ~value=state.dollarAnimation,
+              ~low1=0.,
+              ~high1=totalTimeSec,
+              ~low2=3.5 *. tileSizef,
+              ~high2=1. *. tileSizef,
             ),
           ),
         ),
