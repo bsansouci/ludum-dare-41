@@ -465,20 +465,17 @@ let draw = (state, env) => {
         ),
         env,
       );
-      Draw.text(
-        ~body="$",
-        ~pos=(
-          25 * tileSize,
-          int_of_float(
-            Utils.remapf(
-              ~value=state.dollarAnimation,
-              ~low1=0.,
-              ~high1=totalTimeSec,
-              ~low2=3.5 *. tileSizef,
-              ~high2=1. *. tileSizef,
-            ),
-          ),
+      drawAssetf(
+        25. *. tileSizef,
+        Utils.remapf(
+          ~value=state.dollarAnimation,
+          ~low1=0.,
+          ~high1=totalTimeSec,
+          ~low2=5. *. tileSizef,
+          ~high2=2. *. tileSizef,
         ),
+        "dolla_dolla_bills.png",
+        state,
         env,
       );
       Draw.popStyle(env);
