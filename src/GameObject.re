@@ -107,8 +107,8 @@ let init = grid => {
   let addChick = gos => [
     {
       pos: {
-        x: Utils.randomf(6., 22.) *. tileSizef,
-        y: Utils.randomf(13., 15.) *. tileSizef,
+        x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
+        y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
       },
       action: NoAction,
       state: Chick({
@@ -177,7 +177,7 @@ let maybeHighlight = (state, g, focusedObject, env) =>
     | (Some(Water), WaterAnimals)
     | (Some(Corn), FeedAnimals)
     | (Some(Seed), PlantSeed) =>
-      Draw.fill(Utils.color(150, 150, 40, 100), env);
+      Draw.fill(Utils.color(~r=150, ~g=150, ~b=40, ~a=100), env);
       /*Draw.strokeWeight(6, env);*/
       /*Draw.stroke(Utils.color(150, 150, 40, 255), env);*/
       Draw.rectf(
@@ -375,10 +375,10 @@ let renderObject = (g, focusedObject, state, env) =>
       env,
     );
     maybeHighlight(state, g, focusedObject, env);
-  | {pos: {x, y}, action, state: Corn(2 as stage)}
-  | {pos: {x, y}, action, state: Corn(3 as stage)}
-  | {pos: {x, y}, action, state: Corn(4 as stage)}
-  | {pos: {x, y}, action, state: Corn(5 as stage)} =>
+  | {pos: {x, y}, state: Corn(2 as stage)}
+  | {pos: {x, y}, state: Corn(3 as stage)}
+  | {pos: {x, y}, state: Corn(4 as stage)}
+  | {pos: {x, y}, state: Corn(5 as stage)} =>
     let assetName =
       switch (stage) {
       | 2 => "stage_two_korn.png"

@@ -73,7 +73,7 @@ type gameobjectStateT =
   | IsASeedBin
   | NoState;
 
-type gameobjectT =  {
+type gameobjectT = {
   pos: vec2,
   action: actionT,
   state: gameobjectStateT,

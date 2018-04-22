@@ -87,7 +87,7 @@ let updateDay = (state, env) =>
             | Corn(5) => PickUp(Corn)
             | Corn((-1)) => PlantSeed
             | WaterTank(_) => WaterAnimals
-            | FoodTank(s) => FeedAnimals
+            | FoodTank(_) => FeedAnimals
             | Cow(_) => PickUp(Milk)
             | Corn(n) when n >= 0 && n < 5 => WaterCorn
             | _ => go.action
@@ -99,16 +99,16 @@ let updateDay = (state, env) =>
     let gameobjects = [
       {
         pos: {
-          x: Utils.randomf(6., 22.) *. tileSizef,
-          y: Utils.randomf(13., 15.) *. tileSizef,
+          x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
+          y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
         },
         action: PickUp(Egg),
         state: NoState,
       },
       {
         pos: {
-          x: Utils.randomf(6., 22.) *. tileSizef,
-          y: Utils.randomf(13., 15.) *. tileSizef,
+          x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
+          y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
         },
         action: Cleanup,
         state: NoState,
@@ -153,7 +153,13 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=0,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, 0., 255.),
+            Utils.remapf(
+              ~value=animationTime,
+              ~low1=0.,
+              ~high1=fadeTimeSec,
+              ~low2=0.,
+              ~high2=255.,
+            ),
           ),
       ),
       env,
@@ -171,14 +177,7 @@ let renderTransition = (state, deltaTime, env) =>
         animationTime: animationTime +. deltaTime,
       },
     };
-  | {
-      journal: {
-        dayTransition: FadeIn,
-        animationTime,
-        dayIndex,
-        backgroundImage,
-      },
-    } =>
+  | {journal: {dayTransition: FadeIn, animationTime}} =>
     Draw.fill(
       Utils.color(
         ~r=0,
@@ -186,7 +185,13 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=0,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, 255., 0.),
+            Utils.remapf(
+              ~value=animationTime,
+              ~low1=0.,
+              ~high1=fadeTimeSec,
+              ~low2=255.,
+              ~high2=0.,
+            ),
           ),
       ),
       env,
@@ -241,7 +246,13 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=255,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha),
+            Utils.remapf(
+              ~value=animationTime,
+              ~low1=0.,
+              ~high1=fadeTimeSec,
+              ~low2=minAlpha,
+              ~high2=maxAlpha,
+            ),
           ),
       ),
       env,

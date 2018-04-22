@@ -380,7 +380,7 @@ let draw = (state, env) => {
   drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
   drawAssetf(
     16.6 *. tileSizef,
-    (0.2) *. tileSizef,
+    0.2 *. tileSizef,
     "im_coming_home.png",
     state,
     env,
