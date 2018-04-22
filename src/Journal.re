@@ -8,20 +8,18 @@ let init = env => {
   dayIndex: 1,
   journalEntries: [|
     [|
-      "I was happy today. I woke up to the",
-      "early morning crow of the Rooster today.",
-      "I had lots to do. I cleaned up the cow's",
-      "manure, used it to fertilize the soil, ",
-      "planted seeds in the last patches of ",
-      "dirt available, watered the beautiful ",
-      "growing corn and gave water to my ",
-      "domestic companions.",
+      "I was happy today. I woke up to",
+      "the early cry of the rooster.",
+      "I had lots to do. I cleaned up",
+      "the cow's manure, planted some",
+      "more seeds, watered the ",
+      "beautiful growing corn and gave",
+      "water to my domestic",
+      "companions.",
     |],
   |],
   dayTransition: NoTransition,
   animationTime: 0.,
-  backgroundImage:
-    Draw.loadImage(~filename="journal_background.png", ~isPixel=false, env),
 };
 
 let updateDay = (state, env) =>
@@ -39,7 +37,7 @@ let updateDay = (state, env) =>
             | {action: PickUp(Corn)}
             | {state: WaterTank(HalfFull)}
             | {state: WaterTank(Empty)}
-            | {action: PickUp(Milk), state: Cow(_, _)}
+            | {action: PickUp(Milk), state: Cow(_)}
             | {action: WaterCorn} => false
             | _ => true
             },
@@ -87,7 +85,7 @@ let updateDay = (state, env) =>
             | Corn(5) => PickUp(Corn)
             | Corn((-1)) => PlantSeed
             | WaterTank(_) => WaterAnimals
-            | FoodTank(s) => FeedAnimals
+            | FoodTank(_) => FeedAnimals
             | Cow(_) => PickUp(Milk)
             | Corn(n) when n >= 0 && n < 5 => WaterCorn
             | _ => go.action
@@ -99,22 +97,39 @@ let updateDay = (state, env) =>
     let gameobjects = [
       {
         pos: {
-          x: Utils.randomf(6., 22.) *. tileSizef,
-          y: Utils.randomf(13., 15.) *. tileSizef,
+          x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
+          y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
         },
         action: PickUp(Egg),
         state: NoState,
       },
       {
         pos: {
-          x: Utils.randomf(6., 22.) *. tileSizef,
-          y: Utils.randomf(13., 15.) *. tileSizef,
+          x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
+          y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
         },
         action: Cleanup,
         state: NoState,
       },
       ...gameobjects,
     ];
+    let shouldAddBoss = dayIndex + 1 === 2;
+    let gameobjects =
+      if (shouldAddBoss) {
+        [
+          {
+            pos: {
+              x: tileSizef *. 17.8,
+              y: tileSizef *. 5.,
+            },
+            action: NoAction,
+            state: Boss({hunger: 4, eatingTime: 0., killed: [], eating: false}),
+          },
+          ...gameobjects,
+        ];
+      } else {
+        gameobjects;
+      };
     {
       ...state,
       journal: {
@@ -123,7 +138,10 @@ let updateDay = (state, env) =>
         animationTime: 0.,
         dayIndex: dayIndex + 1,
       },
-      playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
+      playerPos: {
+        x: tileSizef *. 17.8,
+        y: tileSizef *. 5.,
+      },
       playerFacing: DownD,
       currentItem: None,
       gameobjects,
@@ -150,7 +168,13 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=0,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, 0., 255.),
+            Utils.remapf(
+              ~value=animationTime,
+              ~low1=0.,
+              ~high1=fadeTimeSec,
+              ~low2=0.,
+              ~high2=255.,
+            ),
           ),
       ),
       env,
@@ -168,14 +192,7 @@ let renderTransition = (state, deltaTime, env) =>
         animationTime: animationTime +. deltaTime,
       },
     };
-  | {
-      journal: {
-        dayTransition: FadeIn,
-        animationTime,
-        dayIndex,
-        backgroundImage,
-      },
-    } =>
+  | {journal: {dayTransition: FadeIn, animationTime}} =>
     Draw.fill(
       Utils.color(
         ~r=0,
@@ -183,7 +200,13 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=0,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, 255., 0.),
+            Utils.remapf(
+              ~value=animationTime,
+              ~low1=0.,
+              ~high1=fadeTimeSec,
+              ~low2=255.,
+              ~high2=0.,
+            ),
           ),
       ),
       env,
@@ -205,7 +228,6 @@ let renderTransition = (state, deltaTime, env) =>
       journal: {
         dayTransition: JournalOut as dayTransition,
         dayIndex,
-        backgroundImage,
         animationTime,
       },
     }
@@ -213,7 +235,6 @@ let renderTransition = (state, deltaTime, env) =>
       journal: {
         dayTransition: JournalIn as dayTransition,
         dayIndex,
-        backgroundImage,
         animationTime,
       },
     } =>
@@ -238,23 +259,41 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=255,
         ~a=
           int_of_float(
-            Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha),
+            Utils.constrain(
+              ~amt=
+                Utils.remapf(
+                  animationTime,
+                  0.,
+                  fadeTimeSec,
+                  minAlpha,
+                  maxAlpha,
+                ),
+              ~low=0.,
+              ~high=255.,
+            ),
           ),
       ),
       env,
     );
-    Draw.image(
-      backgroundImage,
-      ~pos=(0, 0),
-      ~width=Env.width(env),
-      ~height=Env.height(env),
-      env,
-    );
-    Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(16, 40), env);
+    switch (StringMap.find("journal_page.png", state.assets)) {
+    | exception Not_found => print_endline("Journal asset not found")
+    | asset =>
+      Reprocessing.Draw.subImagef(
+        state.spritesheet,
+        ~pos=(10., 10.),
+        ~width=asset.size.x *. 2.,
+        ~height=asset.size.y *. 2.,
+        ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+        ~texWidth=int_of_float(asset.size.x),
+        ~texHeight=int_of_float(asset.size.y),
+        env,
+      )
+    };
+    Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(55, 40), env);
     ignore @@
     Array.fold_left(
       (y, line) => {
-        Draw.text(~body=line, ~pos=(16, y), env);
+        Draw.text(~body=line, ~pos=(55, y), env);
         y + 32;
       },
       100,

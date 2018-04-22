@@ -150,6 +150,8 @@ let renderPlayer = (state, env) => {
       env,
     )
   | Some(Wood) => print_endline("Can't draw wood")
+  | Some(Knife) => ()
+  | _ => print_endline("You piece of shit ben")
   };
 };
 
@@ -159,7 +161,10 @@ let setup = (assets, env) => {
   {
     grid,
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
+    playerPos: {
+      x: tileSizef *. 17.8,
+      y: tileSizef *. 5.,
+    },
     playerFacing: DownD,
     spritesheet:
       Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
@@ -237,6 +242,55 @@ let draw = (state, env) => {
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
   let state = GameObject.update(state, env);
+  /* Kill off the animals that have been eaten by the monster. */
+  let state =
+    switch (
+      List.filter(
+        g =>
+          switch (g) {
+          | {state: Boss(_)} => true
+          | _ => false
+          },
+        state.gameobjects,
+      )
+    ) {
+    | [] => state
+    | [{state: Boss(boss)}] =>
+      let gameobjects =
+        List.map(
+          go =>
+            switch (List.exists(k => k === go, boss.killed)) {
+            | false => go
+            | true =>
+              switch (go) {
+              | {state: Cow(cowState)} => {
+                  ...go,
+                  state: Cow({...cowState, health: (-1)}),
+                }
+              | {state: Chicken(cowState)} => {
+                  ...go,
+                  state: Chicken({...cowState, health: (-1)}),
+                }
+              | {state: Chick(cowState)} => {
+                  ...go,
+                  state: Chick({...cowState, health: (-1)}),
+                }
+              | _ => go
+              }
+            },
+          state.gameobjects,
+        );
+      /* This is another piece of code to remove the animals from the gameobjects if we want to */
+      /*let (gameobjects, _) = List.fold_left(((newGameobjects, killed), go) => {
+          switch (List.exists(k => k === go, killed)) {
+          | false => ([go, ...newGameobjects], killed)
+          | true => (newGameobjects, List.filter(k => k !== go, killed))
+          }
+        }, ([], boss.killed), state.gameobjects);*/
+      {...state, gameobjects};
+    | _ =>
+      failwith("Well we certainly didn't think this could happen�\132�")
+    };
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -333,8 +387,10 @@ let draw = (state, env) => {
             | 'c' => drawAsset(px, py, "corner_fence.png", state, env)
             | 'a'
             | 'd' => drawAsset(px, py, "vertical_fence.png", state, env)
-            | 'e' => drawAsset(px, py, "fence_top_right_corner.png", state, env)
-            | 'q' => drawAsset(px, py, "fence_top_left_corner.png", state, env)
+            | 'e' =>
+              drawAsset(px, py, "fence_top_right_corner.png", state, env)
+            | 'q' =>
+              drawAsset(px, py, "fence_top_left_corner.png", state, env)
             | 'z' => drawAsset(px, py, "fence_bottom_left.png", state, env)
             /* | 'z' => */
             /* Draw.pushMatrix(env); */
@@ -348,11 +404,10 @@ let draw = (state, env) => {
           | SeedBin
           | Floor
           | Blocked
+          | Truck
           | FoodTrough
           | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
-          | Truck =>
-            drawAsset(x * tileSize, y * tileSize, "truck.png", state, env)
           },
         row,
       ),
@@ -373,9 +428,10 @@ let draw = (state, env) => {
   /** Draw large game objects */
   drawAsset(5 * tileSize, 3 * tileSize, "barn_inside.png", state, env);
   drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
+  drawAsset(24 * tileSize, 5 * tileSize, "truck.png", state, env);
   drawAssetf(
     16.6 *. tileSizef,
-    (0.2) *. tileSizef,
+    0.2 *. tileSizef,
     "im_coming_home.png",
     state,
     env,
@@ -404,10 +460,14 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 288. +. tileSizef *. 3.
+            /. 2. < 288.
+            +. tileSizef
+            *. 3.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 288. +. tileSizef *. 3.) {
+            /. 2. >= 288.
+            +. tileSizef
+            *. 3.) {
           drawAsset(
             5 * tileSize,
             3 * tileSize,
@@ -445,25 +505,28 @@ let draw = (state, env) => {
           ~b=255,
           ~a=
             int_of_float(
-              Utils.remapf(state.dollarAnimation, 0., totalTimeSec, 255., 0.),
+              Utils.remapf(
+                ~value=state.dollarAnimation,
+                ~low1=0.,
+                ~high1=totalTimeSec,
+                ~low2=255.,
+                ~high2=0.,
+              ),
             ),
         ),
         env,
       );
-      Draw.text(
-        ~body="$",
-        ~pos=(
-          25 * tileSize,
-          int_of_float(
-            Utils.remapf(
-              state.dollarAnimation,
-              0.,
-              totalTimeSec,
-              3.5 *. tileSizef,
-              1. *. tileSizef,
-            ),
-          ),
+      drawAssetf(
+        25. *. tileSizef,
+        Utils.remapf(
+          ~value=state.dollarAnimation,
+          ~low1=0.,
+          ~high1=totalTimeSec,
+          ~low2=5. *. tileSizef,
+          ~high2=2. *. tileSizef,
         ),
+        "dolla_dolla_bills.png",
+        state,
         env,
       );
       Draw.popStyle(env);
