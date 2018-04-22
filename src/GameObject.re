@@ -29,7 +29,7 @@ let init = grid => {
                           y * tileSize + tileSize / 2,
                         ),
                       action: PickUp(Corn),
-                      state: NoState,
+                      state: Corn(5),
                     },
                   ...gameobjects,
                 ]
@@ -133,13 +133,19 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   | Some(fgo) when fgo === g =>
     switch (state.currentItem, fgo.action) {
     | (Some(Water), WaterCorn)
-    | (None, PickUp(Corn))
-    | (None, PickUp(Egg))
-    | (None, PickUp(Seed))
-    | (None, PickUp(Water))
-    | (None, PickUp(Milk))
-    | (None, Cleanup) =>
-      Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
+    | (Some(Water), WaterAnimals)
+    | (Some(Corn), FeedAnimals)
+    | (Some(Seed), PlantSeed) =>
+      Draw.fill(Utils.color(150, 150, 40, 100), env);
+      /*Draw.strokeWeight(6, env);*/
+      /*Draw.stroke(Utils.color(150, 150, 40, 255), env);*/
+      Draw.rectf(
+        ~pos=(g.pos.x -. tileSizef /. 2., g.pos.y -. tileSizef /. 2.),
+        ~width=tileSizef,
+        ~height=tileSizef,
+        env,
+      );
+    /*Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)*/
     | _ => ()
     }
   | _ => ()
@@ -186,6 +192,7 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
   switch (g) {
   | {pos: {x, y}, action: PickUp(Corn)} =>
+    maybeHighlight(state, g, focusedObject, env);
     /* Don't highlight when there's no action */
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -193,7 +200,8 @@ let renderBefore = (g, focusedObject, state, env) => {
       "dry_mud.png",
       state,
       env,
-    )
+    );
+  | {state: Corn((-1))} => maybeHighlight(state, g, focusedObject, env)
   | {pos: {x, y}, action, state: Corn(0 as stage)}
   | {pos: {x, y}, action, state: Corn(1 as stage)} =>
     maybeHighlight(state, g, focusedObject, env);
@@ -224,7 +232,6 @@ let renderBefore = (g, focusedObject, state, env) => {
       );
     };
   | {pos: {x, y}, action: Cleanup} =>
-    maybeHighlight(state, g, focusedObject, env);
     Draw.fill(Utils.color(~r=100, ~g=100, ~b=10, ~a=255), env);
     Draw.rectf(
       ~pos=(x -. tileSizef /. 2., y -. tileSizef /. 2.),
@@ -237,18 +244,8 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.popStyle(env);
 };
 
-let renderObject = (g, focusedObject, state, env) => {
-  Draw.pushStyle(env);
+let renderObject = (g, focusedObject, state, env) =>
   switch (g) {
-  | {pos: {x, y}, action: PickUp(Corn)} =>
-    maybeHighlight(state, g, focusedObject, env);
-    drawAssetf(
-      x -. tileSizef /. 2.,
-      y -. tileSizef /. 2.,
-      "stage_five_le_ble_d_inde.png",
-      state,
-      env,
-    );
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -259,14 +256,13 @@ let renderObject = (g, focusedObject, state, env) => {
     )
   | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
   | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
-    maybeHighlight(state, g, focusedObject, env);
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
       "pile_of_bacon.png",
       state,
       env,
-    );
+    )
   | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -289,6 +285,7 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
+    maybeHighlight(state, g, focusedObject, env);
   | {pos: {x, y}, state: FoodTank(s)} =>
     let assetName =
       switch (s) {
@@ -303,10 +300,11 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
+    maybeHighlight(state, g, focusedObject, env);
   | {pos: {x, y}, action, state: Corn(2 as stage)}
   | {pos: {x, y}, action, state: Corn(3 as stage)}
-  | {pos: {x, y}, action, state: Corn(4 as stage)} =>
-    maybeHighlight(state, g, focusedObject, env);
+  | {pos: {x, y}, action, state: Corn(4 as stage)}
+  | {pos: {x, y}, action, state: Corn(5 as stage)} =>
     if (action == NoAction) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -331,21 +329,18 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
-  | {action: PickUp(Water)} => maybeHighlight(state, g, focusedObject, env)
+  /*| {action: PickUp(Water)} => maybeHighlight(state, g, focusedObject, env)*/
   | {pos: {x, y}, action: PickUp(Egg)} =>
-    maybeHighlight(state, g, focusedObject, env);
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
       "egg.png",
       state,
       env,
-    );
+    )
   /*TODO Draw highlighted pond*/
   | _ => ()
   };
-  Draw.popStyle(env);
-};
 
 let renderAction = (state, focusedObject, env) => {
   let body =
