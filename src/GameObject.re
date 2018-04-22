@@ -107,7 +107,7 @@ let init = grid => {
   let gameobjects = [
     {
       pos: {
-        x: 4. *. tileSizef,
+        x: 6. *. tileSizef,
         y: 12. *. tileSizef,
       },
       action: PickUp(Milk),

@@ -99,24 +99,16 @@ let updateDay = (state, env) =>
     let gameobjects = [
       {
         pos: {
-          x: Utils.randomf(1., 17.) *. tileSizef,
-          y: Utils.randomf(9., 12.) *. tileSizef,
+          x: Utils.randomf(6., 22.) *. tileSizef,
+          y: Utils.randomf(13., 15.) *. tileSizef,
         },
         action: PickUp(Egg),
         state: NoState,
       },
       {
         pos: {
-          x: Utils.randomf(1., 17.) *. tileSizef,
-          y: Utils.randomf(9., 12.) *. tileSizef,
-        },
-        action: PickUp(Egg),
-        state: NoState,
-      },
-      {
-        pos: {
-          x: Utils.randomf(1., 17.) *. tileSizef,
-          y: Utils.randomf(9., 12.) *. tileSizef,
+          x: Utils.randomf(6., 22.) *. tileSizef,
+          y: Utils.randomf(13., 15.) *. tileSizef,
         },
         action: Cleanup,
         state: NoState,
@@ -131,7 +123,7 @@ let updateDay = (state, env) =>
         animationTime: 0.,
         dayIndex: dayIndex + 1,
       },
-      playerPos: {x:tileSizef *. 12.8, y: tileSizef *. 2.},
+      playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
       playerFacing: DownD,
       currentItem: None,
       gameobjects,

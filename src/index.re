@@ -3,23 +3,26 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
-00000000000000000000000
-33333333xxxxxxxxxxxxxxx
-38344444300000000009999
-34444444300000000009999
-34444444300011111005550
-34444444300011111005550
-34444444300011111005550
-34444444300000000005550
-333444333xxxxx00xxxe000
-a000000000000000006d000
-a000000000000000000d000
-a000000000000000000d000
-a000000000000000007d000
-zxxxxxxxxxxxxxxxxxxc000
-00000000000000000000000
-00000000000000000000000
-00000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000033333333xxxxxxxxxxxxxxx
+0000038344444300000000009999
+0000034444444300000000009999
+0000034444444300011111005550
+0000034444444300011111005550
+0000034444444300011111005550
+0000034444444300000000005550
+0000qx3344433xxxxxx00xxxe000
+0000a0000000000000000006d000
+0000a0000000000000000000d000
+0000a0000000000000000000d000
+0000a0000000000000000007d000
+0000zxxxxxxxxxxxxxxxxxxxc000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
 |};
 
 let createGrid = s => {
@@ -331,19 +334,17 @@ let draw = (state, env) => {
             switch (c) {
             | 'x' => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
             | 'c' => drawAsset(px, py, "corner_fence.png", state, env)
+            | 'a'
             | 'd' => drawAsset(px, py, "vertical_fence.png", state, env)
-            | 'z' =>
-            Draw.pushMatrix(env);
-            Draw.scale(~x=(-1.), ~y=(1.), env);
-            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
-            drawAsset(0, 0, "corner_fence.png", state, env);
-            Draw.popMatrix(env);
-            | 'a' =>
-            Draw.pushMatrix(env);
-            Draw.scale(~x=(-1.), ~y=(1.), env);
-            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
-            drawAsset(0, 0, "vertical_fence.png", state, env);
-            Draw.popMatrix(env);
+            | 'e' => drawAsset(px, py, "fence_top_right_corner.png", state, env)
+            | 'q' => drawAsset(px, py, "fence_top_left_corner.png", state, env)
+            | 'z' => drawAsset(px, py, "fence_bottom_left.png", state, env)
+            /* | 'z' => */
+            /* Draw.pushMatrix(env); */
+            /* Draw.scale(~x=(-1.), ~y=(1.), env); */
+            /* Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env); */
+            /* drawAsset(0, 0, "corner_fence.png", state, env); */
+            /* Draw.popMatrix(env); */
             | _ => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
             };
           | Water
@@ -366,18 +367,18 @@ let draw = (state, env) => {
         state.playerPos.x +. tileSizef /. 2.,
         state.playerPos.y +. tileSizef /. 2.,
       ),
-      ~rect1W=tileSizef /. 4.,
-      ~rect1H=tileSizef /. 4.,
-      ~rect2Pos=(0., 0.),
+      ~rect1W=tileSizef /. 2.,
+      ~rect1H=tileSizef /. 2.,
+      ~rect2Pos=(5. *. tileSizef, 3. *. tileSizef),
       ~rect2W=288.,
       ~rect2H=288.,
     );
   /** Draw large game objects */
-  drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
-  drawAsset(19 * tileSize, 4 * tileSize, "pond.png", state, env);
+  drawAsset(5 * tileSize, 3 * tileSize, "barn_inside.png", state, env);
+  drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
   drawAssetf(
-    11.6 *. tileSizef,
-    (-2.5) *. tileSizef,
+    16.6 *. tileSizef,
+    (0.5) *. tileSizef,
     "im_coming_home.png",
     state,
     env,
@@ -406,13 +407,13 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 288.
+            /. 2. < 288. +. tileSizef *. 3.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 288.) {
+            /. 2. >= 288. +. tileSizef *. 3.) {
           drawAsset(
-            0 * tileSize,
-            0 * tileSize,
+            5 * tileSize,
+            3 * tileSize,
             "barn_outside.png",
             state,
             env,
@@ -455,13 +456,13 @@ let draw = (state, env) => {
       Draw.text(
         ~body="$",
         ~pos=(
-          20 * tileSize,
+          25 * tileSize,
           int_of_float(
             Utils.remapf(
               state.dollarAnimation,
               0.,
               totalTimeSec,
-              2.5 *. tileSizef,
+              3.5 *. tileSizef,
               1. *. tileSizef,
             ),
           ),
