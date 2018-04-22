@@ -47,16 +47,16 @@
 },
 {
 	"filename": "chick.png",
-	"frame": {"x":384,"y":288,"w":32,"h":32},
+	"frame": {"x":384,"y":288,"w":18,"h":18},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
-	"sourceSize": {"w":32,"h":32},
+	"spriteSourceSize": {"x":0,"y":0,"w":18,"h":18},
+	"sourceSize": {"w":18,"h":18},
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
 	"filename": "corner_fence.png",
-	"frame": {"x":416,"y":288,"w":32,"h":32},
+	"frame": {"x":402,"y":288,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -64,8 +64,8 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "different_flower_grass.png",
-	"frame": {"x":448,"y":288,"w":32,"h":32},
+	"filename": "dead_chick.png",
+	"frame": {"x":434,"y":288,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -73,7 +73,7 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "drier_dirt.png",
+	"filename": "dead_chicken.png",
 	"frame": {"x":0,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -82,8 +82,44 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "dead_cown.png",
+	"frame": {"x":32,"y":576,"w":44,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":44,"h":32},
+	"sourceSize": {"w":44,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "different_flower_grass.png",
+	"frame": {"x":76,"y":576,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "dolla_dolla_bills.png",
+	"frame": {"x":108,"y":576,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "drier_dirt.png",
+	"frame": {"x":140,"y":576,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "dry_mud.png",
-	"frame": {"x":32,"y":576,"w":32,"h":32},
+	"frame": {"x":172,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -92,7 +128,7 @@
 },
 {
 	"filename": "egg.png",
-	"frame": {"x":64,"y":576,"w":32,"h":32},
+	"frame": {"x":204,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -101,7 +137,7 @@
 },
 {
 	"filename": "empty_bucket.png",
-	"frame": {"x":96,"y":576,"w":32,"h":32},
+	"frame": {"x":236,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -110,7 +146,7 @@
 },
 {
 	"filename": "fence_bottom_left.png",
-	"frame": {"x":128,"y":576,"w":32,"h":32},
+	"frame": {"x":268,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -119,7 +155,7 @@
 },
 {
 	"filename": "fence_broken.png",
-	"frame": {"x":160,"y":576,"w":32,"h":32},
+	"frame": {"x":300,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -128,7 +164,7 @@
 },
 {
 	"filename": "fence_top_left_corner.png",
-	"frame": {"x":192,"y":576,"w":32,"h":32},
+	"frame": {"x":332,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -137,7 +173,7 @@
 },
 {
 	"filename": "fence_top_right_corner.png",
-	"frame": {"x":224,"y":576,"w":32,"h":32},
+	"frame": {"x":364,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -146,7 +182,7 @@
 },
 {
 	"filename": "flower_grass.png",
-	"frame": {"x":256,"y":576,"w":32,"h":32},
+	"frame": {"x":396,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -155,7 +191,7 @@
 },
 {
 	"filename": "grass.png",
-	"frame": {"x":288,"y":576,"w":32,"h":32},
+	"frame": {"x":428,"y":576,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -610,6 +646,6 @@
 	"format": "RGBA8888",
 	"size": {"w":480,"h":1120},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:b2d27e1665e96b9deeebde194a1180d3:bca6dbab673aedb4176be4b41b9e1de9:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:e90882983fce0ac0b79c9914a7393294:2cbd285c4bde0031afd29a71a8602224:e4233b137b5b6e6f70b2dcbfb9e5c09b$"
 }
 }
