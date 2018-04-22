@@ -12,7 +12,7 @@ let init = grid => {
               y + 1,
               switch (tile) {
               | Dirt => [
-                  x != 13 ?
+                  x != 21 ?
                     {
                       pos:
                         posMake(
@@ -104,25 +104,47 @@ let init = grid => {
       (0, []),
       grid,
     );
-  let gameobjects = [
+  let addChick = gos => [
     {
       pos: {
-        x: 4. *. tileSizef,
-        y: 12. *. tileSizef,
-      },
-      action: PickUp(Milk),
-      state: Cow(0., 0.),
-    },
-    {
-      pos: {
-        x: 8. *. tileSizef,
-        y: 11. *. tileSizef,
+        x: Utils.randomf(6., 22.) *. tileSizef,
+        y: Utils.randomf(13., 15.) *. tileSizef,
       },
       action: NoAction,
-      state: Chicken(0., 0.),
+      state: Chick(0., 0.),
     },
-    ...gameobjects,
+    ...gos,
   ];
+  let gameobjects =
+    addChick(
+      addChick(
+        addChick(
+          addChick(
+            addChick(
+              addChick([
+                {
+                  pos: {
+                    x: 6. *. tileSizef,
+                    y: 12. *. tileSizef,
+                  },
+                  action: PickUp(Milk),
+                  state: Cow(0., 0.),
+                },
+                {
+                  pos: {
+                    x: 8. *. tileSizef,
+                    y: 11. *. tileSizef,
+                  },
+                  action: NoAction,
+                  state: Chicken(0., 0.),
+                },
+                ...gameobjects,
+              ]),
+            ),
+          ),
+        ),
+      ),
+    );
   gameobjects;
 };
 
@@ -132,6 +154,7 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   switch (focusedObject) {
   | Some(fgo) when fgo === g =>
     switch (state.currentItem, fgo.action) {
+    | (None, PickUp(Corn))
     | (Some(Water), WaterCorn)
     | (Some(Water), WaterAnimals)
     | (Some(Corn), FeedAnimals)
@@ -182,6 +205,9 @@ let update = (state, env) => {
         | {pos, state: Chicken(mx, my)} =>
           let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
           {...g, pos, state: Chicken(mx, my)};
+        | {pos, state: Chick(mx, my)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 4., pos, state.grid, env);
+          {...g, pos, state: Chick(mx, my)};
         | _ => g
         },
       state.gameobjects,
@@ -192,7 +218,6 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
   switch (g) {
   | {pos: {x, y}, action: PickUp(Corn)} =>
-    maybeHighlight(state, g, focusedObject, env);
     /* Don't highlight when there's no action */
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -201,10 +226,14 @@ let renderBefore = (g, focusedObject, state, env) => {
       state,
       env,
     );
+    maybeHighlight(state, g, focusedObject, env);
   | {state: Corn((-1))} => maybeHighlight(state, g, focusedObject, env)
   | {pos: {x, y}, action, state: Corn(0 as stage)}
-  | {pos: {x, y}, action, state: Corn(1 as stage)} =>
-    maybeHighlight(state, g, focusedObject, env);
+  | {pos: {x, y}, action, state: Corn(1 as stage)}
+  | {pos: {x, y}, action, state: Corn(2 as stage)}
+  | {pos: {x, y}, action, state: Corn(3 as stage)}
+  | {pos: {x, y}, action, state: Corn(4 as stage)}
+  | {pos: {x, y}, action, state: Corn(5 as stage)} =>
     if (action == NoAction) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -214,6 +243,7 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     };
+    maybeHighlight(state, g, focusedObject, env);
     if (stage === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -271,6 +301,14 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
+  | {pos: {x, y}, action: NoAction, state: Chick(_, _)} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "chick.png",
+      state,
+      env,
+    )
   | {pos: {x, y}, state: WaterTank(s)} =>
     let assetName =
       switch (s) {
@@ -305,15 +343,6 @@ let renderObject = (g, focusedObject, state, env) =>
   | {pos: {x, y}, action, state: Corn(3 as stage)}
   | {pos: {x, y}, action, state: Corn(4 as stage)}
   | {pos: {x, y}, action, state: Corn(5 as stage)} =>
-    if (action == NoAction) {
-      drawAssetf(
-        x -. tileSizef /. 2.,
-        y -. tileSizef /. 2.,
-        "dry_mud.png",
-        state,
-        env,
-      );
-    };
     let assetName =
       switch (stage) {
       | 2 => "stage_two_korn.png"
