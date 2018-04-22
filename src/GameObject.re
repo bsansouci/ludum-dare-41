@@ -182,7 +182,8 @@ let update = (state, env) => {
     ),
 };
 
-let renderBefore = (g, focusedObject, state, env) =>
+let renderBefore = (g, focusedObject, state, env) => {
+  Draw.pushStyle(env);
   switch (g) {
   | {pos: {x, y}, action: NoAction, state: Corn(_)} =>
     Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
@@ -232,6 +233,8 @@ let renderBefore = (g, focusedObject, state, env) =>
     };
   | _ => ()
   };
+  Draw.popStyle(env);
+};
 
 let renderObject = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
