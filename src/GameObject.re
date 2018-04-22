@@ -12,7 +12,7 @@ let init = grid => {
               y + 1,
               switch (tile) {
               | Dirt => [
-                  x != 13 ?
+                  x != 21 ?
                     {
                       pos:
                         posMake(
@@ -132,6 +132,7 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   switch (focusedObject) {
   | Some(fgo) when fgo === g =>
     switch (state.currentItem, fgo.action) {
+    | (None, PickUp(Corn))
     | (Some(Water), WaterCorn)
     | (Some(Water), WaterAnimals)
     | (Some(Corn), FeedAnimals)
@@ -192,7 +193,6 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
   switch (g) {
   | {pos: {x, y}, action: PickUp(Corn)} =>
-    maybeHighlight(state, g, focusedObject, env);
     /* Don't highlight when there's no action */
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -201,10 +201,14 @@ let renderBefore = (g, focusedObject, state, env) => {
       state,
       env,
     );
+    maybeHighlight(state, g, focusedObject, env);
   | {state: Corn((-1))} => maybeHighlight(state, g, focusedObject, env)
   | {pos: {x, y}, action, state: Corn(0 as stage)}
-  | {pos: {x, y}, action, state: Corn(1 as stage)} =>
-    maybeHighlight(state, g, focusedObject, env);
+  | {pos: {x, y}, action, state: Corn(1 as stage)}
+  | {pos: {x, y}, action, state: Corn(2 as stage)}
+  | {pos: {x, y}, action, state: Corn(3 as stage)}
+  | {pos: {x, y}, action, state: Corn(4 as stage)}
+  | {pos: {x, y}, action, state: Corn(5 as stage)} =>
     if (action == NoAction) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -214,6 +218,7 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     };
+    maybeHighlight(state, g, focusedObject, env);
     if (stage === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -305,15 +310,6 @@ let renderObject = (g, focusedObject, state, env) =>
   | {pos: {x, y}, action, state: Corn(3 as stage)}
   | {pos: {x, y}, action, state: Corn(4 as stage)}
   | {pos: {x, y}, action, state: Corn(5 as stage)} =>
-    if (action == NoAction) {
-      drawAssetf(
-        x -. tileSizef /. 2.,
-        y -. tileSizef /. 2.,
-        "dry_mud.png",
-        state,
-        env,
-      );
-    };
     let assetName =
       switch (stage) {
       | 2 => "stage_two_korn.png"

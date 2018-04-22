@@ -159,11 +159,8 @@ let setup = (assets, env) => {
   {
     grid,
     plants: Array.make_matrix(4, 6, 0),
-    playerPos: {
-      x: tileSizef *. 10. +. 1.,
-      y: tileSizef *. 5. +. 1.,
-    },
-    playerFacing: RightD,
+    playerPos: {x:tileSizef *. 17.8, y: tileSizef *. 5.},
+    playerFacing: DownD,
     spritesheet:
       Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
