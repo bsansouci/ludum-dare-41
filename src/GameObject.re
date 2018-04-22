@@ -257,7 +257,7 @@ let update = (state, env) => {
                              })};
         | {
             pos: {x: bx, y: by} as pos,
-            state: Boss({hunger, eatingTime} as bossState),
+            state: Boss({hunger, eatingTime, eating} as bossState),
           } =>
           if (eatingTime <= 0.) {
             let allNextTargets =
@@ -287,13 +287,22 @@ let update = (state, env) => {
               );
             let (nextTarget, isPlayer) =
               switch (allNextTargets) {
-              | [] => (state.playerPos, true)
-              | [first, ...rest] => (first.pos, false)
+              | [] => (
+                  {
+                    x: state.playerPos.x +. tileSizef /. 2.,
+                    y: state.playerPos.y +. tileSizef /. 2.,
+                  },
+                  true,
+                )
+              | [first, ..._] => (first.pos, false)
               };
             let dx = nextTarget.x -. bx;
             let dy = nextTarget.y -. by;
             let mag = Utils.magf((dx, dy));
             let isTargetCloseEnough = mag < 32.;
+            if (isTargetCloseEnough) {
+              print_endline("CLOSE");
+            };
             if (isPlayer && isTargetCloseEnough) {
               print_endline("You should be dead by now");
             };
@@ -325,10 +334,11 @@ let update = (state, env) => {
                 Boss({
                   ...bossState,
                   killed:
-                    isTargetCloseEnough && ! isPlayer ?
+                    isTargetCloseEnough && ! isPlayer && eating ?
                       [List.hd(allNextTargets), ...bossState.killed] :
                       bossState.killed,
-                  eatingTime: isTargetCloseEnough ? 3. : 0.,
+                  eating: isTargetCloseEnough && ! eating,
+                  eatingTime: isTargetCloseEnough && ! eating ? 3. : 0.,
                 }),
             };
           } else {

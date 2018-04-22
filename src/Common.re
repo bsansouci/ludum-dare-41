@@ -65,6 +65,7 @@ type bossStateT = {
   hunger: int,
   eatingTime: float,
   killed: list(gameobjectT),
+  eating: bool
 }
 and gameobjectStateT =
   | Corn(int)

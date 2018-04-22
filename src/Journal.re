@@ -123,7 +123,7 @@ let updateDay = (state, env) =>
               y: tileSizef *. 5.,
             },
             action: NoAction,
-            state: Boss({hunger: 4, eatingTime: 0., killed: []}),
+            state: Boss({hunger: 4, eatingTime: 0., killed: [], eating: false}),
           },
           ...gameobjects,
         ];
