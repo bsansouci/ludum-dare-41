@@ -8,80 +8,82 @@ let init = grid => {
       ((x, gameobjects), col) => {
         let (_, gameobjects) =
           Array.fold_left(
-            ((y, gameobjects), tile) =>
+            ((y, gameobjects), tile) => (
+              y + 1,
               switch (tile) {
-              | Dirt => (
-                  y + 1,
-                  [
-                    x != 13 ?
-                      {
-                        pos:
-                          posMake(
-                            x * tileSize + tileSize / 2,
-                            y * tileSize + tileSize / 2,
-                          ),
-                        action: WaterCorn,
-                        state: Corn({stage: 1, isWatered: false}),
-                      } :
-                      {
-                        pos:
-                          posMake(
-                            x * tileSize + tileSize / 2,
-                            y * tileSize + tileSize / 2,
-                          ),
-                        action: PickUp(Corn),
-                        state: NoState,
-                      },
-                    ...gameobjects,
-                  ],
-                )
-              | Water => (
-                  y + 1,
-                  [
+              | Dirt => [
+                  x != 13 ?
                     {
                       pos:
                         posMake(
                           x * tileSize + tileSize / 2,
                           y * tileSize + tileSize / 2,
                         ),
-                      action: PickUp(Water),
+                      action: WaterCorn,
+                      state: Corn({stage: 1, isWatered: false}),
+                    } :
+                    {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: PickUp(Corn),
                       state: NoState,
                     },
-                    ...gameobjects,
-                  ],
-                )
-              | WaterTrough => (
-                  y + 1,
-                  [
-                    {
-                      pos:
-                        posMake(
-                          x * tileSize + tileSize / 2,
-                          y * tileSize + tileSize / 2,
-                        ),
-                      action: WaterAnimals,
-                      state: WaterTank(Empty),
-                    },
-                    ...gameobjects,
-                  ],
-                )
-              | FoodTrough => (
-                  y + 1,
-                  [
-                    {
-                      pos:
-                        posMake(
-                          x * tileSize + tileSize / 2,
-                          y * tileSize + tileSize / 2,
-                        ),
-                      action: FeedAnimals,
-                      state: FoodTank(Empty),
-                    },
-                    ...gameobjects,
-                  ],
-                )
-              | _ => (y + 1, gameobjects)
+                  ...gameobjects,
+                ]
+              | Water => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: PickUp(Water),
+                    state: NoState,
+                  },
+                  ...gameobjects,
+                ]
+              | WaterTrough => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: WaterAnimals,
+                    state: WaterTank(Empty),
+                  },
+                  ...gameobjects,
+                ]
+              | FoodTrough => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: FeedAnimals,
+                    state: FoodTank(Empty),
+                  },
+                  ...gameobjects,
+                ]
+              | SeedBin => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: PickUp(Seed),
+                    state: IsASeedBin,
+                  },
+                  ...gameobjects,
+                ]
+              | _ => gameobjects
               },
+            ),
             (0, gameobjects),
             col,
           );
@@ -190,6 +192,14 @@ let render = (state, focusedObject, env) =>
           state,
           env,
         );
+      | {pos: {x, y}, action: PickUp(Seed)} =>
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "seed_bucket.png",
+          state,
+          env,
+        )
       | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
       | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
         maybeHighlight(state, g, focusedObject, env);
@@ -209,31 +219,33 @@ let render = (state, focusedObject, env) =>
           env,
         )
       | {pos: {x, y}, state: WaterTank(s)} =>
-        let assetName = switch(s){
+        let assetName =
+          switch (s) {
           | Empty => "trough_empty_water.png"
           | HalfFull => "trough_water_half_full.png"
           | Full => "trough_water_full.png"
-        };
+          };
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           assetName,
           state,
           env,
-        )
+        );
       | {pos: {x, y}, state: FoodTank(s)} =>
-        let assetName = switch(s){
+        let assetName =
+          switch (s) {
           | Empty => "trough_empty.png"
           | HalfFull => "trough_food_half_full.png"
           | Full => "trough_food_full.png"
-        };
+          };
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           assetName,
           state,
           env,
-        )
+        );
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         maybeHighlight(state, g, focusedObject, env);
         if (isWatered) {
@@ -243,7 +255,7 @@ let render = (state, focusedObject, env) =>
             "dry_mud.png",
             state,
             env,
-          )
+          );
         };
         let assetName =
           if (stage === 0) {
@@ -269,8 +281,8 @@ let render = (state, focusedObject, env) =>
           env,
         );
       | {pos: {x, y}, action: PickUp(Water)} =>
-        maybeHighlight(state, g, focusedObject, env);
-        /*TODO Draw highlighted pond*/
+        maybeHighlight(state, g, focusedObject, env)
+      /*TODO Draw highlighted pond*/
       | _ => ()
       };
       Draw.popStyle(env);
@@ -285,6 +297,7 @@ let renderAction = (state, focusedObject, env) => {
     | (None, Some({action: PickUp(Water)})) => "Pickup water"
     | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
     | (None, Some({action: PickUp(Milk)})) => "Milk cow"
+    | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Drop seed"
     | (Some(Water), Some({action: WaterCorn})) => "Water corn"

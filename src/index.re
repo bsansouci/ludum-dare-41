@@ -5,7 +5,7 @@ open Common;
 let mapString = {|
 33333333333333333333330
 33333333333333333333330
-34444444300000000003330
+38344444300000000003330
 34444444300011111005550
 34444444300011111005550
 34444444300011111005550
@@ -42,6 +42,7 @@ let createGrid = (s) => {
             | '5' => Water
             | '6' => WaterTrough
             | '7' => FoodTrough
+            | '8' => SeedBin
             | _ => Blocked
             }
           ),
@@ -165,6 +166,7 @@ let draw = (state, env) => {
           | Fence =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
             drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
+          | SeedBin
           | Floor
           | Blocked
           | FoodTrough
@@ -187,9 +189,7 @@ let draw = (state, env) => {
       );
 
   /** Draw large game objects */
-  if (playerInBarn){
-    drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
-  };
+  drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
 
   /* @Todo sort player and gameobjects and barn outside */
   GameObject.render(state, focusedObject, env);
@@ -221,7 +221,7 @@ let draw = (state, env) => {
       | None => ()
       | Some(Corn) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "pick_up_corn.png", state, env)
       | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "water_bucket.png", state, env)
-      | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "corn_seed.png", state, env)
+      | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "seed.png", state, env)
       | Some(Egg) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "egg.png", state, env)
       | Some(Milk) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "bucket_with_milk.png", state, env)
       | Some(Wood) => print_endline("Can't draw wood")
