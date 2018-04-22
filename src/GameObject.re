@@ -151,18 +151,37 @@ let render = (state, focusedObject, env) =>
     state.gameobjects
   );
 
-let renderAction = (state, focusedObject, env) =>
-  switch (state.currentItem, focusedObject) {
-  | (None, Some({action: PickUp(Corn)})) => Draw.text(~body="Pick corn", ~pos=(20, 20), env)
-  | (None, Some({action: PickUp(Water)})) => Draw.text(~body="Pick water", ~pos=(20, 20), env)
-  | (Some(Water), Some({action: WaterCorn})) => Draw.text(~body="Water corn", ~pos=(20, 20), env)
-  | _ => ()
+let renderAction = (state, focusedObject, env) => {
+  let body = switch (state.currentItem, focusedObject) {
+  | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
+  | (None, Some({action: PickUp(Water)})) => "Pickup water"
+  | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
+  | (None, Some({action: PickUp(Milk)})) => "Milk cow"
+  | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
+  | (Some(Water), Some({action: WaterCorn})) => "Water corn"
+  | _ => ""
   };
+  if (body != "") {
+    Draw.fill(
+      Utils.color(
+        ~r=255,
+        ~g=255,
+        ~b=255,
+        ~a=255
+      ),
+      env
+    );
+    let padding = 16;
+    let width = Draw.textWidth(~body, env);
+    Draw.rect(~pos=(0, 0), ~width=width + padding * 2, ~height=70, env);
+    Draw.text(~body, ~pos=(padding, 20), env)
+  };
+};
 
 let checkPickUp = (state, focusedObject, env) =>
+    if (Env.keyPressed(X, env) || Env.keyPressed(Space, env)) {
   switch (state.currentItem, focusedObject) {
   | (None, Some({action: PickUp(Corn)} as go)) =>
-    if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
@@ -171,11 +190,7 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None
       )
-    } else {
-      (state, focusedObject)
-    }
   | (None, Some({action: PickUp(Water)} as go)) =>
-    if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
@@ -183,11 +198,7 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None
       )
-    } else {
-      (state, focusedObject)
-    }
   | (None, Some({action: PickUp(Seed)} as go)) =>
-    if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
@@ -195,11 +206,12 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None
       )
-    } else {
-      (state, focusedObject)
-    }
+  | (Some(water), Some({action: PickUp(Water)})) =>
+      ({
+        ...state,
+        currentItem: None
+      }, focusedObject)
   | (Some(Water), Some({action: WaterCorn, state: Corn({stage})} as go)) =>
-    if (Env.keyPressed(X, env)) {
       (
         {
           ...state,
@@ -217,8 +229,8 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None
       )
-    } else {
-      (state, focusedObject)
-    }
   | _ => (state, focusedObject)
-  };
+}
+} else {
+  (state, focusedObject)
+};
