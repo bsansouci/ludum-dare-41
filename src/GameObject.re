@@ -9,8 +9,8 @@ let init = (grid) => {
         let (_, gameobjects) =
           Array.fold_left(
             ((y, gameobjects), tile) =>
-              if (tile == Dirt) {
-                (
+              switch (tile) {
+                | Dirt => (
                   y + 1,
                   [
                     x != 13 ?
@@ -27,8 +27,13 @@ let init = (grid) => {
                     ...gameobjects
                   ]
                 )
-              } else {
-                (y + 1, gameobjects)
+                | Water =>
+                  (y + 1, [{
+                    pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
+                    action: PickUp(Water),
+                    state: NoState
+                  }, ...gameobjects])
+                | _ => (y + 1, gameobjects)
               },
             (0, gameobjects),
             col
@@ -39,7 +44,8 @@ let init = (grid) => {
       grid
     );
   let gameobjects = [
-    {pos: {x: 10. *. tileSizef, y: 6. *. tileSizef}, action: PickUp(Water), state: NoState},
+    {pos: {x: 4. *. tileSizef, y: 12. *. tileSizef}, action: MilkCow, state: Cow(HasMilk)},
+    {pos: {x: 8. *. tileSizef, y: 13. *. tileSizef}, action: NoAction, state: Chicken},
     ...gameobjects
   ];
   gameobjects
@@ -62,6 +68,10 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   | _ => ()
   };
 
+let update = (state, env) =>
+  {...state, gameobjects: List.map(
+      (g: gameobjectT) => g, state.gameobjects)};
+
 let render = (state, focusedObject, env) =>
   List.iter(
     (g: gameobjectT) =>
@@ -78,6 +88,23 @@ let render = (state, focusedObject, env) =>
           env
         );
         Draw.popStyle(env);
+      | {pos: {x, y}, action: MilkCow, state: Cow(NoMilk)}
+      | {pos: {x, y}, action: MilkCow, state: Cow(HasMilk)} =>
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "pile_of_bacon.png",
+          state,
+          env
+        );
+      | {pos: {x, y}, action: NoAction, state: Chicken} =>
+        drawAssetf(
+          x -. tileSizef /. 2.,
+          y -. tileSizef /. 2.,
+          "bet_he_would_make_some_nice_fried_chicken.png",
+          state,
+          env
+        );
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
