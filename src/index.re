@@ -5,8 +5,8 @@ open Common;
 let mapString = {|
 33333333333333333333330
 33333333333333333333330
-38344444300000000003330
-34444444300011111005550
+38344444300000000009999
+34444444300011111009999
 34444444300011111005550
 34444444300011111005550
 34444444300000000005550
@@ -43,6 +43,7 @@ let createGrid = s => {
             | '6' => WaterTrough
             | '7' => FoodTrough
             | '8' => SeedBin
+            | '9' => Truck
             | _ => Blocked
             }
           ),
@@ -134,6 +135,7 @@ let setup = (assets, env) => {
     gameobjects: GameObject.init(grid),
     currentItem: None,
     journal: Journal.init(env),
+    dollarAnimation: (-1.),
   };
 };
 
@@ -200,7 +202,7 @@ let draw = (state, env) => {
   let facing = Env.key(Down, env) || Env.key(S, env) ? DownD : facing;
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
-  /*let state = GameObject.update(state, env);*/
+  let state = GameObject.update(state, env);
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -311,6 +313,8 @@ let draw = (state, env) => {
           | FoodTrough
           | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
+          | Truck =>
+            drawAsset(x * tileSize, y * tileSize, "truck.png", state, env)
           },
         row,
       ),
@@ -383,6 +387,48 @@ let draw = (state, env) => {
   if (lastGameObject.pos.y < state.playerPos.y +. tileSizef /. 2.) {
     renderPlayer(state, env);
   };
+  /* @Todo we need to update this each time we update the map */
+  let state =
+    if (state.dollarAnimation >= 0.) {
+      let totalTimeSec = 1.5;
+      Draw.pushStyle(env);
+      Draw.tint(
+        Utils.color(
+          ~r=255,
+          ~g=255,
+          ~b=255,
+          ~a=
+            int_of_float(
+              Utils.remapf(state.dollarAnimation, 0., totalTimeSec, 255., 0.),
+            ),
+        ),
+        env,
+      );
+      Draw.text(
+        ~body="$",
+        ~pos=(
+          20 * tileSize,
+          int_of_float(
+            Utils.remapf(
+              state.dollarAnimation,
+              0.,
+              totalTimeSec,
+              2.5 *. tileSizef,
+              1. *. tileSizef,
+            ),
+          ),
+        ),
+        env,
+      );
+      Draw.popStyle(env);
+      if (state.dollarAnimation > totalTimeSec) {
+        {...state, dollarAnimation: (-1.)};
+      } else {
+        {...state, dollarAnimation: state.dollarAnimation +. dt};
+      };
+    } else {
+      state;
+    };
   Draw.popMatrix(env);
   GameObject.renderAction(state, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);

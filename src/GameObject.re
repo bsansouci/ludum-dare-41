@@ -19,8 +19,8 @@ let init = grid => {
                           x * tileSize + tileSize / 2,
                           y * tileSize + tileSize / 2,
                         ),
-                      action: WaterCorn,
-                      state: Corn(1),
+                      action: PlantSeed,
+                      state: Corn(-1),
                     } :
                     {
                       pos:
@@ -78,6 +78,18 @@ let init = grid => {
                       ),
                     action: PickUp(Seed),
                     state: IsASeedBin,
+                  },
+                  ...gameobjects,
+                ]
+              | Truck => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: Sell,
+                    state: NoState,
                   },
                   ...gameobjects,
                 ]
@@ -338,6 +350,8 @@ let renderAction = (state, focusedObject, env) => {
     | (Some(Water), Some({action: WaterCorn})) => "Water corn"
     | (Some(Water), Some({action: WaterAnimals})) => "Water animals"
     | (Some(Corn), Some({action: FeedAnimals})) => "Feed animals"
+    | (Some(Egg), Some({action: Sell})) => "Sell egg"
+    | (Some(Milk), Some({action: Sell})) => "Sell milk"
     | _ => ""
     };
   if (body != "") {
@@ -360,7 +374,7 @@ let checkPickUp = (state, focusedObject, env) =>
             List.map(
               g => g === go ? {...g, action: PlantSeed, state: Corn(-1)} : g,
               state.gameobjects,
-            )
+            ),
         },
         None,
       )
@@ -459,6 +473,11 @@ let checkPickUp = (state, focusedObject, env) =>
               state.gameobjects,
             ),
         },
+        None,
+      )
+    | (Some(Egg), Some({action: Sell}))
+    | (Some(Milk), Some({action: Sell})) => (
+        {...state, currentItem: None, dollarAnimation: 0.},
         None,
       )
     | (Some(Water), Some({action: WaterCorn, state: Corn(stage)} as go)) => (
