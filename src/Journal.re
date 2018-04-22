@@ -39,7 +39,7 @@ let updateDay = (state, env) =>
             | {state: WaterTank(HalfFull)}
             | {state: WaterTank(Empty)}
             | {action: PickUp(Milk), state: Cow(_, _)}
-            | {state: Corn({isWatered: false})} => false
+            | {action: WaterCorn} => false
             | _ => true
             },
           gameobjects
@@ -61,18 +61,21 @@ let updateDay = (state, env) =>
         (go: gameobjectT) => {
           let state =
             switch go.state {
-            | Corn({stage: 5}) => Corn({isWatered: true, stage: 5})
-            | Corn({stage}) => Corn({isWatered: false, stage: stage + 1})
+            | Corn(5) => Corn(5)
+            | Corn(-1) => Corn(-1)
+            | Corn(stage) => Corn(stage + 1)
             | WaterTank(_) => WaterTank(Empty)
             | FoodTank(s) => FoodTank(s == Full ? HalfFull : Empty)
             | _ => go.state
             };
           let action =
             switch go.state {
-            | Corn({stage: 5}) => PickUp(Corn)
+            | Corn(5) => PickUp(Corn)
+            | Corn(-1) => PlantSeed
             | WaterTank(_) => WaterAnimals
             | FoodTank(s) => FeedAnimals
             | Cow(_) => PickUp(Milk)
+            | Corn(n) when n >= 0 && n < 5 => WaterCorn
             | _ => go.action
             };
           {...go, state, action}

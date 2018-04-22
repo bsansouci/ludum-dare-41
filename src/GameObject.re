@@ -20,7 +20,7 @@ let init = grid => {
                           y * tileSize + tileSize / 2,
                         ),
                       action: WaterCorn,
-                      state: Corn({stage: 1, isWatered: false}),
+                      state: Corn(1),
                     } :
                     {
                       pos:
@@ -286,9 +286,11 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
-  | {pos: {x, y}, state: Corn({stage, isWatered})} when stage > 1 =>
+  | {pos: {x, y}, action, state: Corn(2 as stage)}
+  | {pos: {x, y}, action, state: Corn(3 as stage)}
+  | {pos: {x, y}, action, state: Corn(4 as stage)} =>
     maybeHighlight(state, g, focusedObject, env);
-    if (isWatered) {
+    if (action == NoAction) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -298,16 +300,12 @@ let renderObject = (g, focusedObject, state, env) => {
       );
     };
     let assetName =
-      if (stage === 2) {
-        "stage_two_korn.png";
-      } else if (stage === 3) {
-        "stage_three_middle_aged_corn.png";
-      } else if (stage === 4) {
-        "stage_four_almost_corn.png";
-      } else if (stage === 5) {
-        "stage_five_le_ble_d_inde.png";
-      } else {
-        failwith("There is no other stage you fuck.");
+      switch (stage) {
+      | 2 => "stage_two_korn.png"
+      | 3 => "stage_three_middle_aged_corn.png"
+      | 4 => "stage_four_almost_corn.png"
+      | 5 => "stage_five_le_ble_d_inde.png"
+      | _ => failwith("There is no other stage.")
       };
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -332,8 +330,10 @@ let renderAction = (state, focusedObject, env) => {
     | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
     | (None, Some({action: PickUp(Milk)})) => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
+    | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
-    | (Some(Seed), Some({action: PickUp(Seed)})) => "Drop seed"
+    | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
+    | (Some(Seed), Some({action: PlantSeed})) => "Plant seed"
     | (Some(Water), Some({action: WaterCorn})) => "Water corn"
     | (Some(Water), Some({action: WaterAnimals})) => "Water animals"
     | (Some(Corn), Some({action: FeedAnimals})) => "Feed animals"
@@ -355,7 +355,11 @@ let checkPickUp = (state, focusedObject, env) =>
         {
           ...state,
           currentItem: Some(Corn),
-          gameobjects: List.filter(g => g !== go, state.gameobjects),
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, action: PlantSeed, state: Corn(-1)} : g,
+              state.gameobjects,
+            )
         },
         None,
       )
@@ -439,7 +443,7 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None,
       )
-    | (Some(Water), Some({action: WaterCorn, state: Corn({stage})} as go)) => (
+    | (Some(Seed), Some({action: PlantSeed, state: Corn(_)} as go)) => (
         {
           ...state,
           currentItem: None,
@@ -449,11 +453,24 @@ let checkPickUp = (state, focusedObject, env) =>
                 if (g !== go) {
                   g;
                 } else {
-                  {
-                    ...g,
-                    action: NoAction,
-                    state: Corn({stage, isWatered: true}),
-                  };
+                  {...g, action: WaterCorn, state: Corn(0)};
+                },
+              state.gameobjects,
+            ),
+        },
+        None,
+      )
+    | (Some(Water), Some({action: WaterCorn, state: Corn(stage)} as go)) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g =>
+                if (g !== go) {
+                  g;
+                } else {
+                  {...g, action: NoAction, state: Corn(stage)};
                 },
               state.gameobjects,
             ),

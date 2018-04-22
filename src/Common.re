@@ -44,18 +44,13 @@ type actionT =
   | Sell(carryableT)
   | NoAction;
 
-type cornStateT = {
-  stage: int,
-  isWatered: bool
-};
-
 type tankStateT =
   | HalfFull
   | Full
   | Empty;
 
 type gameobjectStateT =
-  | Corn(cornStateT)
+  | Corn(int)
   | Cow(float, float)
   | WaterTank(tankStateT)
   | FoodTank(tankStateT)

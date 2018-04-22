@@ -93,7 +93,7 @@ let renderPlayer = (state, env) => {
     drawAssetf(
       state.playerPos.x,
       state.playerPos.y -. holdOffset,
-      "corn_seed.png",
+      "seed.png",
       state,
       env,
     )
@@ -105,7 +105,14 @@ let renderPlayer = (state, env) => {
       state,
       env,
     )
-  | Some(Milk) => print_endline("Can't draw milk")
+  | Some(Milk) =>
+    drawAssetf(
+      state.playerPos.x,
+      state.playerPos.y -. holdOffset,
+      "bucket_with_milk.png",
+      state,
+      env,
+    )
   | Some(Wood) => print_endline("Can't draw wood")
   };
 };
