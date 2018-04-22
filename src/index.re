@@ -3,20 +3,20 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
-33333333333333333333330
-33333333333333333333330
-38344444300000000003330
+00000000000000000000000
+33333333xxxxxxxxxxxxxxx
+38344444300000000009999
+34444444300000000009999
 34444444300011111005550
 34444444300011111005550
 34444444300011111005550
 34444444300000000005550
-34444444300000000005550
-33344433322222002222000
-20000000000000000062000
-20000000000000000002000
-20000000000000000002000
-20000000000000000072000
-22222222222222222222000
+333444333xxxxx00xxxe000
+a000000000000000006d000
+a000000000000000000d000
+a000000000000000000d000
+a000000000000000007d000
+zxxxxxxxxxxxxxxxxxxc000
 00000000000000000000000
 00000000000000000000000
 00000000000000000000000
@@ -36,13 +36,20 @@ let createGrid = s => {
             switch (c) {
             | '0' => Grass(Utils.random(~min=0, ~max=10))
             | '1' => Dirt
-            | '2' => Fence
+            | 'q' as c
+            | 'a' as c
+            | 'z' as c
+            | 'x' as c
+            | 'c' as c
+            | 'e' as c
+            | 'd' as c => Fence(c)
             | '3' => Blocked
             | '4' => Floor
             | '5' => Water
             | '6' => WaterTrough
             | '7' => FoodTrough
             | '8' => SeedBin
+            | '9' => Truck
             | _ => Blocked
             }
           ),
@@ -57,17 +64,43 @@ let renderPlayer = (state, env) => {
   let imgName =
     switch (
       state.playerFacing,
-      anyKey([Up, Down, Right, Left, W, A, S, D], env),
+      anyKey([Up, Down, Right, Left, W, A, S, D], env) ?
+        int_of_float(state.time /. 0.2) mod 4 : 0,
       state.currentItem == None,
     ) {
-    | (RightD, _, true) => "old_macdonald_right_face.png"
-    | (UpD, _, true) => "old_macdonald_back_face.png"
-    | (DownD, _, true) => "old_macdonald_front_face.png"
-    | (LeftD, _, true) => "old_macdonald_left_face.png"
-    | (RightD, _, false) => "old_macdonald_right_face_hands_up.png"
-    | (UpD, _, false) => "old_macdonald_back_face_hands_up.png"
-    | (DownD, _, false) => "everybody_put_your_hands_up.png"
-    | (LeftD, _, false) => "old_macdonald_left_face_hands_up.png"
+    | (RightD, 0, true)
+    | (RightD, 2, true) => "old_macdonald_right_face.png"
+    | (RightD, 1, true) => "old_macdonald_right_face_walk_one.png"
+    | (RightD, 3, true) => "old_macdonald_right_face_walk_two.png"
+    | (UpD, 0, true)
+    | (UpD, 2, true) => "old_macdonald_back_face.png"
+    | (UpD, 1, true) => "old_macdonald_back_face_walk_one.png"
+    | (UpD, 3, true) => "old_macdonald_back_face_walk_two.png"
+    | (DownD, 0, true)
+    | (DownD, 2, true) => "old_macdonald_front_face.png"
+    | (DownD, 1, true) => "old_macdonald_front_face_walk_one.png"
+    | (DownD, 3, true) => "old_macdonald_front_face_walk_two.png"
+    | (LeftD, 0, true)
+    | (LeftD, 2, true) => "old_macdonald_left_face.png"
+    | (LeftD, 1, true) => "old_macdonald_left_face_walk_one.png"
+    | (LeftD, 3, true) => "old_macdonald_left_face_walk_two.png"
+    | (RightD, 0, false)
+    | (RightD, 2, false) => "old_macdonald_right_face_hands_up.png"
+    | (RightD, 1, false) => "old_macdonald_right_face_hands_up_walk_one.png"
+    | (RightD, 3, false) => "old_macdonald_right_face_hands_up_walk_two.png"
+    | (UpD, 0, false)
+    | (UpD, 2, false) => "old_macdonald_back_face_hands_up.png"
+    | (UpD, 1, false) => "old_macdonald_back_face_hands_up_walk_one.png"
+    | (UpD, 3, false) => "old_macdonald_back_face_hands_up_walk_two.png"
+    | (DownD, 0, false)
+    | (DownD, 2, false) => "everybody_put_your_hands_up.png"
+    | (DownD, 1, false) => "everybody_put_your_hands_up_walk_one.png"
+    | (DownD, 3, false) => "everybody_put_your_hands_up_walk_two.png"
+    | (LeftD, 0, false)
+    | (LeftD, 2, false) => "old_macdonald_left_face_hands_up.png"
+    | (LeftD, 1, false) => "old_macdonald_left_face_hands_up_walk_one.png"
+    | (LeftD, 3, false) => "old_macdonald_left_face_hands_up_walk_two.png"
+    | _ => failwith("Impossible walk state")
     };
   drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env);
   let holdOffset = tileSizef -. 4.;
@@ -134,12 +167,15 @@ let setup = (assets, env) => {
     gameobjects: GameObject.init(grid),
     currentItem: None,
     journal: Journal.init(env),
+    dollarAnimation: (-1.),
+    time: 0.,
   };
 };
 
 let draw = (state, env) => {
   Draw.background(Utils.color(~r=199, ~g=217, ~b=229, ~a=255), env);
   let dt = Env.deltaTime(env);
+  let state = {...state, time: state.time +. dt};
   let playerSpeedDt = playerSpeed *. dt;
   let offset = {x: 0., y: 0.};
   let offset =
@@ -200,7 +236,7 @@ let draw = (state, env) => {
   let facing = Env.key(Down, env) || Env.key(S, env) ? DownD : facing;
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
-  /*let state = GameObject.update(state, env);*/
+  let state = GameObject.update(state, env);
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -261,14 +297,6 @@ let draw = (state, env) => {
               state,
               env,
             );
-          | Water =>
-            Draw.fill(Utils.color(~r=50, ~g=50, ~b=255, ~a=255), env);
-            Draw.rect(
-              ~pos=(x * tileSize, y * tileSize),
-              ~width=tileSize,
-              ~height=tileSize,
-              env,
-            );
           | Grass(0) =>
             drawAsset(
               x * tileSize,
@@ -296,21 +324,37 @@ let draw = (state, env) => {
             )
           | Grass(_) =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
-          | Fence =>
+          | Fence(c) =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
-            drawAsset(
-              x * tileSize,
-              y * tileSize,
-              "keep_the_dogs_out.png",
-              state,
-              env,
-            );
+            let px = x * tileSize;
+            let py = y * tileSize;
+            switch (c) {
+            | 'x' => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
+            | 'c' => drawAsset(px, py, "corner_fence.png", state, env)
+            | 'd' => drawAsset(px, py, "vertical_fence.png", state, env)
+            | 'z' =>
+            Draw.pushMatrix(env);
+            Draw.scale(~x=(-1.), ~y=(1.), env);
+            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
+            drawAsset(0, 0, "corner_fence.png", state, env);
+            Draw.popMatrix(env);
+            | 'a' =>
+            Draw.pushMatrix(env);
+            Draw.scale(~x=(-1.), ~y=(1.), env);
+            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
+            drawAsset(0, 0, "vertical_fence.png", state, env);
+            Draw.popMatrix(env);
+            | _ => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
+            };
+          | Water
           | SeedBin
           | Floor
           | Blocked
           | FoodTrough
           | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
+          | Truck =>
+            drawAsset(x * tileSize, y * tileSize, "truck.png", state, env)
           },
         row,
       ),
@@ -330,6 +374,14 @@ let draw = (state, env) => {
     );
   /** Draw large game objects */
   drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
+  drawAsset(19 * tileSize, 4 * tileSize, "pond.png", state, env);
+  drawAssetf(
+    11.6 *. tileSizef,
+    (-2.5) *. tileSizef,
+    "im_coming_home.png",
+    state,
+    env,
+  );
   /* Render `isWatered` first because they're part of the terrain. */
   List.iter(
     g => GameObject.renderBefore(g, focusedObject, state, env),
@@ -383,6 +435,48 @@ let draw = (state, env) => {
   if (lastGameObject.pos.y < state.playerPos.y +. tileSizef /. 2.) {
     renderPlayer(state, env);
   };
+  /* @Todo we need to update this each time we update the map */
+  let state =
+    if (state.dollarAnimation >= 0.) {
+      let totalTimeSec = 1.5;
+      Draw.pushStyle(env);
+      Draw.tint(
+        Utils.color(
+          ~r=255,
+          ~g=255,
+          ~b=255,
+          ~a=
+            int_of_float(
+              Utils.remapf(state.dollarAnimation, 0., totalTimeSec, 255., 0.),
+            ),
+        ),
+        env,
+      );
+      Draw.text(
+        ~body="$",
+        ~pos=(
+          20 * tileSize,
+          int_of_float(
+            Utils.remapf(
+              state.dollarAnimation,
+              0.,
+              totalTimeSec,
+              2.5 *. tileSizef,
+              1. *. tileSizef,
+            ),
+          ),
+        ),
+        env,
+      );
+      Draw.popStyle(env);
+      if (state.dollarAnimation > totalTimeSec) {
+        {...state, dollarAnimation: (-1.)};
+      } else {
+        {...state, dollarAnimation: state.dollarAnimation +. dt};
+      };
+    } else {
+      state;
+    };
   Draw.popMatrix(env);
   GameObject.renderAction(state, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);

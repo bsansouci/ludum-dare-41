@@ -5,13 +5,14 @@ type plantT = int;
 type tileT =
   | Dirt
   | Grass(int)
-  | Fence
+  | Fence(char)
   | Floor
   | Water
   | Blocked
   | SeedBin
   | WaterTrough
-  | FoodTrough;
+  | FoodTrough
+  | Truck;
 
 type directionT =
   | UpD
@@ -41,7 +42,7 @@ type actionT =
   | PlantSeed
   | PutBackWater
   | PutBackSeed
-  | Sell(carryableT)
+  | Sell
   | NoAction;
 
 type tankStateT =
@@ -99,7 +100,9 @@ type stateT = {
   assets: StringMap.t(assetT),
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
-  journal: journalT
+  journal: journalT,
+  dollarAnimation: float,
+  time: float
 };
 
 let screenSize = 600.;
@@ -179,9 +182,10 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
           switch grid[tx][ty] {
           | Blocked
           | Water
-          | Fence
+          | Fence(_)
           | SeedBin
           | WaterTrough
+          | Truck
           | FoodTrough =>
             Reprocessing.Utils.intersectRectRect(
               ~rect1Pos=(
