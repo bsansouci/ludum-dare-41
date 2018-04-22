@@ -275,20 +275,7 @@ let renderTransition = (state, deltaTime, env) =>
       ),
       env,
     );
-    switch (StringMap.find("journal_page.png", state.assets)) {
-    | exception Not_found => print_endline("Journal asset not found")
-    | asset =>
-      Reprocessing.Draw.subImagef(
-        state.spritesheet,
-        ~pos=(10., 10.),
-        ~width=asset.size.x *. 2.,
-        ~height=asset.size.y *. 2.,
-        ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
-        ~texWidth=int_of_float(asset.size.x),
-        ~texHeight=int_of_float(asset.size.y),
-        env,
-      )
-    };
+    drawAssetFullscreen("journal_page.png", state, env);
     Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(55, 40), env);
     ignore @@
     Array.fold_left(
