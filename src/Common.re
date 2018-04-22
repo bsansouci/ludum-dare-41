@@ -102,7 +102,6 @@ type journalT = {
   journalEntries: array(array(journalEntryT)),
   dayTransition: dayTransitionT,
   animationTime: float,
-  backgroundImage: Reprocessing.imageT,
 };
 
 type stateT = {

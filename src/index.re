@@ -353,11 +353,10 @@ let draw = (state, env) => {
           | SeedBin
           | Floor
           | Blocked
+          | Truck
           | FoodTrough
           | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
-          | Truck =>
-            drawAsset(x * tileSize, y * tileSize, "truck.png", state, env)
           },
         row,
       ),
@@ -378,6 +377,7 @@ let draw = (state, env) => {
   /** Draw large game objects */
   drawAsset(5 * tileSize, 3 * tileSize, "barn_inside.png", state, env);
   drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
+  drawAsset(24 * tileSize, 5 * tileSize, "truck.png", state, env);
   drawAssetf(
     16.6 *. tileSizef,
     0.2 *. tileSizef,

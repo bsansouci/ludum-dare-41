@@ -8,20 +8,18 @@ let init = env => {
   dayIndex: 1,
   journalEntries: [|
     [|
-      "I was happy today. I woke up to the",
-      "early morning crow of the Rooster today.",
-      "I had lots to do. I cleaned up the cow's",
-      "manure, used it to fertilize the soil, ",
-      "planted seeds in the last patches of ",
-      "dirt available, watered the beautiful ",
-      "growing corn and gave water to my ",
-      "domestic companions.",
+      "I was happy today. I woke up to",
+      "the early cry of the rooster.",
+      "I had lots to do. I cleaned up",
+      "the cow's manure, planted some",
+      "more seeds, watered the ",
+      "beautiful growing corn and gave",
+      "water to my domestic",
+      "companions."
     |],
   |],
   dayTransition: NoTransition,
   animationTime: 0.,
-  backgroundImage:
-    Draw.loadImage(~filename="journal_background.png", ~isPixel=false, env),
 };
 
 let updateDay = (state, env) =>
@@ -213,7 +211,6 @@ let renderTransition = (state, deltaTime, env) =>
       journal: {
         dayTransition: JournalOut as dayTransition,
         dayIndex,
-        backgroundImage,
         animationTime,
       },
     }
@@ -221,7 +218,6 @@ let renderTransition = (state, deltaTime, env) =>
       journal: {
         dayTransition: JournalIn as dayTransition,
         dayIndex,
-        backgroundImage,
         animationTime,
       },
     } =>
@@ -246,29 +242,36 @@ let renderTransition = (state, deltaTime, env) =>
         ~b=255,
         ~a=
           int_of_float(
-            Utils.remapf(
-              ~value=animationTime,
-              ~low1=0.,
-              ~high1=fadeTimeSec,
-              ~low2=minAlpha,
-              ~high2=maxAlpha,
-            ),
+            Utils.constrain(
+              ~amt=Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha),
+              ~low=0.,
+              ~high=255.)
           ),
       ),
       env,
     );
-    Draw.image(
-      backgroundImage,
-      ~pos=(0, 0),
-      ~width=Env.width(env),
-      ~height=Env.height(env),
-      env,
-    );
-    Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(16, 40), env);
+    switch (StringMap.find("journal_page.png", state.assets)) {
+    | exception Not_found =>
+      print_endline(
+        "Journal asset not found"
+      )
+    | asset =>
+      Reprocessing.Draw.subImagef(
+        state.spritesheet,
+        ~pos=(10., 10.),
+        ~width=asset.size.x *. 2.,
+        ~height=asset.size.y *. 2.,
+        ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+        ~texWidth=int_of_float(asset.size.x),
+        ~texHeight=int_of_float(asset.size.y),
+        env,
+      )
+    };
+    Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(55, 40), env);
     ignore @@
     Array.fold_left(
       (y, line) => {
-        Draw.text(~body=line, ~pos=(16, y), env);
+        Draw.text(~body=line, ~pos=(55, y), env);
         y + 32;
       },
       100,
