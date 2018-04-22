@@ -384,18 +384,6 @@ let draw = (state, env) => {
   if (lastGameObject.pos.y < state.playerPos.y +. tileSizef /. 2.) {
     renderPlayer(state, env);
   };
-  if (debug) {
-    Draw.fill(Utils.color(~r=10, ~g=10, ~b=10, ~a=255), env);
-    Draw.rectf(
-      ~pos=(
-        state.playerPos.x +. facingOffset.x *. tileSizef +. tileSizef /. 2.,
-        state.playerPos.y +. facingOffset.y *. tileSizef +. tileSizef /. 2.,
-      ),
-      ~width=5.,
-      ~height=5.,
-      env,
-    );
-  };
   Draw.popMatrix(env);
   GameObject.renderAction(state, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
