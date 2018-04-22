@@ -4,12 +4,12 @@ open Common;
 
 let mapString = {|
 33333333333333333333330
-33333333333333333333330
+33333333222222222222222
 38344444300000000009999
-34444444300011111009999
+34444444300000000009999
 34444444300011111005550
 34444444300011111005550
-34444444300000000005550
+34444444300011111005550
 34444444300000000005550
 33344433322222002222000
 20000000000000000062000
@@ -292,14 +292,6 @@ let draw = (state, env) => {
               state,
               env,
             );
-          | Water =>
-            Draw.fill(Utils.color(~r=50, ~g=50, ~b=255, ~a=255), env);
-            Draw.rect(
-              ~pos=(x * tileSize, y * tileSize),
-              ~width=tileSize,
-              ~height=tileSize,
-              env,
-            );
           | Grass(0) =>
             drawAsset(
               x * tileSize,
@@ -336,6 +328,7 @@ let draw = (state, env) => {
               state,
               env,
             );
+          | Water
           | SeedBin
           | Floor
           | Blocked
@@ -363,6 +356,8 @@ let draw = (state, env) => {
     );
   /** Draw large game objects */
   drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
+  drawAsset(19 * tileSize, 4 * tileSize, "pond.png", state, env);
+  drawAssetf(11.6 *. tileSizef, -2.5 *. tileSizef, "im_coming_home.png", state, env);
   /* Render `isWatered` first because they're part of the terrain. */
   List.iter(
     g => GameObject.renderBefore(g, focusedObject, state, env),
