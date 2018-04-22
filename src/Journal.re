@@ -15,7 +15,7 @@ let init = env => {
       "more seeds, watered the ",
       "beautiful growing corn and gave",
       "water to my domestic",
-      "companions."
+      "companions.",
     |],
   |],
   dayTransition: NoTransition,
@@ -123,7 +123,7 @@ let updateDay = (state, env) =>
               y: tileSizef *. 5.,
             },
             action: NoAction,
-            state: Boss({hunger: 4}),
+            state: Boss({hunger: 4, eatingTime: 0., killed: []}),
           },
           ...gameobjects,
         ];
@@ -260,18 +260,23 @@ let renderTransition = (state, deltaTime, env) =>
         ~a=
           int_of_float(
             Utils.constrain(
-              ~amt=Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha),
+              ~amt=
+                Utils.remapf(
+                  animationTime,
+                  0.,
+                  fadeTimeSec,
+                  minAlpha,
+                  maxAlpha,
+                ),
               ~low=0.,
-              ~high=255.)
+              ~high=255.,
+            ),
           ),
       ),
       env,
     );
     switch (StringMap.find("journal_page.png", state.assets)) {
-    | exception Not_found =>
-      print_endline(
-        "Journal asset not found"
-      )
+    | exception Not_found => print_endline("Journal asset not found")
     | asset =>
       Reprocessing.Draw.subImagef(
         state.spritesheet,

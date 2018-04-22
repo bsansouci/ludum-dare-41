@@ -61,9 +61,12 @@ type chickenStateT = {
   health: int,
 };
 
-type bossStateT = {hunger: int};
-
-type gameobjectStateT =
+type bossStateT = {
+  hunger: int,
+  eatingTime: float,
+  killed: list(gameobjectT),
+}
+and gameobjectStateT =
   | Corn(int)
   | Cow(cowStateT)
   | WaterTank(tankStateT)
@@ -72,9 +75,8 @@ type gameobjectStateT =
   | Boss(bossStateT)
   | Chick(chickenStateT)
   | IsASeedBin
-  | NoState;
-
-type gameobjectT = {
+  | NoState
+and gameobjectT = {
   pos: vec2,
   action: actionT,
   state: gameobjectStateT,

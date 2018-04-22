@@ -151,7 +151,7 @@ let renderPlayer = (state, env) => {
     )
   | Some(Wood) => print_endline("Can't draw wood")
   | Some(Knife) => ()
-  | _ => print_endline("You piece of shit ben");
+  | _ => print_endline("You piece of shit ben")
   };
 };
 
@@ -242,6 +242,55 @@ let draw = (state, env) => {
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
   let state = GameObject.update(state, env);
+  /* Kill off the animals that have been eaten by the monster. */
+  let state =
+    switch (
+      List.filter(
+        g =>
+          switch (g) {
+          | {state: Boss(_)} => true
+          | _ => false
+          },
+        state.gameobjects,
+      )
+    ) {
+    | [] => state
+    | [{state: Boss(boss)}] =>
+      let gameobjects =
+        List.map(
+          go =>
+            switch (List.exists(k => k === go, boss.killed)) {
+            | false => go
+            | true =>
+              switch (go) {
+              | {state: Cow(cowState)} => {
+                  ...go,
+                  state: Cow({...cowState, health: (-1)}),
+                }
+              | {state: Chicken(cowState)} => {
+                  ...go,
+                  state: Chicken({...cowState, health: (-1)}),
+                }
+              | {state: Chick(cowState)} => {
+                  ...go,
+                  state: Chick({...cowState, health: (-1)}),
+                }
+              | _ => go
+              }
+            },
+          state.gameobjects,
+        );
+      /* This is another piece of code to remove the animals from the gameobjects if we want to */
+      /*let (gameobjects, _) = List.fold_left(((newGameobjects, killed), go) => {
+          switch (List.exists(k => k === go, killed)) {
+          | false => ([go, ...newGameobjects], killed)
+          | true => (newGameobjects, List.filter(k => k !== go, killed))
+          }
+        }, ([], boss.killed), state.gameobjects);*/
+      {...state, gameobjects};
+    | _ =>
+      failwith("Well we certainly didn't think this could happen�\132�")
+    };
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {

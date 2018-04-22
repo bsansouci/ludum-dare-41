@@ -255,54 +255,92 @@ let update = (state, env) => {
                                  y,
                                },
                              })};
-        | {pos: {x: bx, y: by} as pos, state: Boss(_)} =>
-          let allNextTargets =
-            List.filter(
-              g =>
-                switch (g) {
-                | {state: Chicken({health: 0})}
-                | {state: Cow({health: 0})}
-                | {state: Chick({health: 0})} => true
-                | _ => false
+        | {
+            pos: {x: bx, y: by} as pos,
+            state: Boss({hunger, eatingTime} as bossState),
+          } =>
+          if (eatingTime <= 0.) {
+            let allNextTargets =
+              List.filter(
+                g =>
+                  switch (g) {
+                  | {state: Chicken({health: 0})}
+                  | {state: Cow({health: 0})}
+                  | {state: Chick({health: 0})} => true
+                  | _ => false
+                  },
+                state.gameobjects,
+              );
+            let allNextTargets =
+              List.sort(
+                (
+                  {pos: {x: x1, y: y1}}: gameobjectT,
+                  {pos: {x: x2, y: y2}}: gameobjectT,
+                ) => {
+                  let dx1 = x1 -. bx;
+                  let dy1 = y1 -. by;
+                  let dx2 = x2 -. bx;
+                  let dy2 = y2 -. by;
+                  int_of_float(dx1 +. dy1 -. dx2 -. dy2);
                 },
-              state.gameobjects,
-            );
-          let allNextTargets =
-            List.sort(
-              (
-                {pos: {x: x1, y: y1}}: gameobjectT,
-                {pos: {x: x2, y: y2}}: gameobjectT,
-              ) => {
-                let dx1 = x1 -. bx;
-                let dy1 = y1 -. by;
-                let dx2 = x2 -. bx;
-                let dy2 = y2 -. by;
-                int_of_float(dx1 +. dy1 -. dx2 -. dy2);
-              },
-              allNextTargets,
-            );
-          let nextTarget =
-            switch (allNextTargets) {
-            | [] => state.playerPos
-            | [first, ...rest] => first.pos
-            };
-          let moveBoss = ({x: bx, y: by} as pos, nextTarget, grid) => {
-            let bossSpeed = 100.;
-            let bossSpeedDt = Reprocessing.Env.deltaTime(env) *. bossSpeed;
+                allNextTargets,
+              );
+            let (nextTarget, isPlayer) =
+              switch (allNextTargets) {
+              | [] => (state.playerPos, true)
+              | [first, ...rest] => (first.pos, false)
+              };
             let dx = nextTarget.x -. bx;
             let dy = nextTarget.y -. by;
             let mag = Utils.magf((dx, dy));
-            if (mag > 0.) {
-              let dx = dx /. mag *. bossSpeedDt;
-              let dy = dy /. mag *. bossSpeedDt;
-              let offset =
-                handleCollision({x: 0., y: 0.}, {x: dx, y: dy}, pos, grid);
-              {x: bx +. offset.x, y: by +. offset.y};
-            } else {
-              pos;
+            let isTargetCloseEnough = mag < 32.;
+            if (isPlayer && isTargetCloseEnough) {
+              print_endline("You should be dead by now");
             };
-          };
-          {...g, pos: moveBoss(pos, nextTarget, state.grid)};
+            let moveBoss = ({x: bx, y: by} as pos, nextTarget, grid) => {
+              let bossSpeed = 100.;
+              let bossSpeedDt = Env.deltaTime(env) *. bossSpeed;
+              let dx = nextTarget.x -. bx;
+              let dy = nextTarget.y -. by;
+              let mag = Utils.magf((dx, dy));
+              if (mag > 0.) {
+                let dx = dx /. mag *. bossSpeedDt;
+                let dy = dy /. mag *. bossSpeedDt;
+                let offset =
+                  handleCollision(
+                    {x: 0., y: 0.},
+                    {x: dx, y: dy},
+                    pos,
+                    grid,
+                  );
+                {x: bx +. offset.x, y: by +. offset.y};
+              } else {
+                pos;
+              };
+            };
+            {
+              ...g,
+              pos: moveBoss(pos, nextTarget, state.grid),
+              state:
+                Boss({
+                  ...bossState,
+                  killed:
+                    isTargetCloseEnough && ! isPlayer ?
+                      [List.hd(allNextTargets), ...bossState.killed] :
+                      bossState.killed,
+                  eatingTime: isTargetCloseEnough ? 3. : 0.,
+                }),
+            };
+          } else {
+            {
+              ...g,
+              state:
+                Boss({
+                  ...bossState,
+                  eatingTime: eatingTime -. Env.deltaTime(env),
+                }),
+            };
+          }
         /*{
             ...g,
             pos:
@@ -385,11 +423,14 @@ let renderObject = (g, focusedObject, state, env) =>
     )
   | {pos: {x, y}, action: NoAction, state: Cow({health})}
   | {pos: {x, y}, action: PickUp(Milk), state: Cow({health})} =>
-    if (health === 0) {
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
-        "pile_of_bacon.png",
+        "dead_cown.png",
         state,
         env,
       );
@@ -403,11 +444,14 @@ let renderObject = (g, focusedObject, state, env) =>
       );
     }
   | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
-    if (health === 0) {
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
-        "bet_he_would_make_some_nice_fried_chicken.png",
+        "dead_chicken.png",
         state,
         env,
       );
@@ -421,11 +465,14 @@ let renderObject = (g, focusedObject, state, env) =>
       );
     }
   | {pos: {x, y}, action: NoAction, state: Chick({health})} =>
-    if (health === 0) {
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
-        "chick.png",
+        "dead_chick.png",
         state,
         env,
       );
@@ -520,7 +567,8 @@ let renderAction = (state, focusedObject, env) => {
     | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
     | (None, Some({action: PickUp(Water)})) => "Pickup water"
     | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
-    | (None, Some({action: PickUp(Milk)})) => "Milk cow"
+    | (None, Some({action: PickUp(Milk), state: Cow({health})}))
+        when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
     | (None, Some({action: PickUp(Knife)})) => "Pickup ... the knife?"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
@@ -608,7 +656,8 @@ let checkPickUp = (state, focusedObject, env) =>
         {...state, currentItem: None},
         focusedObject,
       )
-    | (None, Some({action: PickUp(Milk)} as cow)) => (
+    | (None, Some({action: PickUp(Milk), state: Cow({health})} as cow))
+        when health > 0 => (
         {
           ...state,
           currentItem: Some(Milk),
