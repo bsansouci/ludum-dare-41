@@ -5,7 +5,7 @@ type plantT = int;
 type tileT =
   | Dirt
   | Grass(int)
-  | Fence
+  | Fence(char)
   | Floor
   | Water
   | Blocked
@@ -182,7 +182,7 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
           switch grid[tx][ty] {
           | Blocked
           | Water
-          | Fence
+          | Fence(_)
           | SeedBin
           | WaterTrough
           | Truck

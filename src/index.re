@@ -3,20 +3,20 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
-33333333333333333333330
-33333333222222222222222
+00000000000000000000000
+33333333xxxxxxxxxxxxxxx
 38344444300000000009999
 34444444300000000009999
 34444444300011111005550
 34444444300011111005550
 34444444300011111005550
 34444444300000000005550
-33344433322222002222000
-20000000000000000062000
-20000000000000000002000
-20000000000000000002000
-20000000000000000072000
-22222222222222222222000
+333444333xxxxx00xxxe000
+a000000000000000006d000
+a000000000000000000d000
+a000000000000000000d000
+a000000000000000007d000
+zxxxxxxxxxxxxxxxxxxc000
 00000000000000000000000
 00000000000000000000000
 00000000000000000000000
@@ -36,7 +36,13 @@ let createGrid = s => {
             switch (c) {
             | '0' => Grass(Utils.random(~min=0, ~max=10))
             | '1' => Dirt
-            | '2' => Fence
+            | 'q' as c
+            | 'a' as c
+            | 'z' as c
+            | 'x' as c
+            | 'c' as c
+            | 'e' as c
+            | 'd' as c => Fence(c)
             | '3' => Blocked
             | '4' => Floor
             | '5' => Water
@@ -94,7 +100,7 @@ let renderPlayer = (state, env) => {
     | (LeftD, 2, false) => "old_macdonald_left_face_hands_up.png"
     | (LeftD, 1, false) => "old_macdonald_left_face_hands_up_walk_one.png"
     | (LeftD, 3, false) => "old_macdonald_left_face_hands_up_walk_two.png"
-    | _ => failwith("Impossible walk state");
+    | _ => failwith("Impossible walk state")
     };
   drawAssetf(state.playerPos.x, state.playerPos.y, imgName, state, env);
   let holdOffset = tileSizef -. 4.;
@@ -162,7 +168,7 @@ let setup = (assets, env) => {
     currentItem: None,
     journal: Journal.init(env),
     dollarAnimation: (-1.),
-    time: 0.
+    time: 0.,
   };
 };
 
@@ -318,15 +324,28 @@ let draw = (state, env) => {
             )
           | Grass(_) =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)
-          | Fence =>
+          | Fence(c) =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
-            drawAsset(
-              x * tileSize,
-              y * tileSize,
-              "keep_the_dogs_out.png",
-              state,
-              env,
-            );
+            let px = x * tileSize;
+            let py = y * tileSize;
+            switch (c) {
+            | 'x' => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
+            | 'c' => drawAsset(px, py, "corner_fence.png", state, env)
+            | 'd' => drawAsset(px, py, "vertical_fence.png", state, env)
+            | 'z' =>
+            Draw.pushMatrix(env);
+            Draw.scale(~x=(-1.), ~y=(1.), env);
+            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
+            drawAsset(0, 0, "corner_fence.png", state, env);
+            Draw.popMatrix(env);
+            | 'a' =>
+            Draw.pushMatrix(env);
+            Draw.scale(~x=(-1.), ~y=(1.), env);
+            Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env);
+            drawAsset(0, 0, "vertical_fence.png", state, env);
+            Draw.popMatrix(env);
+            | _ => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
+            };
           | Water
           | SeedBin
           | Floor
@@ -356,7 +375,13 @@ let draw = (state, env) => {
   /** Draw large game objects */
   drawAsset(0 * tileSize, 0 * tileSize, "barn_inside.png", state, env);
   drawAsset(19 * tileSize, 4 * tileSize, "pond.png", state, env);
-  drawAssetf(11.6 *. tileSizef, -2.5 *. tileSizef, "im_coming_home.png", state, env);
+  drawAssetf(
+    11.6 *. tileSizef,
+    (-2.5) *. tileSizef,
+    "im_coming_home.png",
+    state,
+    env,
+  );
   /* Render `isWatered` first because they're part of the terrain. */
   List.iter(
     g => GameObject.renderBefore(g, focusedObject, state, env),
