@@ -59,9 +59,9 @@ type waterTankStateT =
 
 type gameobjectStateT =
   | Corn(cornStateT)
-  | Cow(cowStateT)
+  | Cow(float, float, cowStateT)
   | WaterTank(waterTankStateT)
-  | Chicken
+  | Chicken(float, float)
   | NoState;
 
 type gameobjectT = {
@@ -159,3 +159,49 @@ let facingToOffset = (dir) =>
   | RightD => {x: 1., y: 0.}
   | LeftD => {x: (-1.), y: 0.}
   };
+
+
+let handleCollision = (prevOffset, offset, pos, grid) => {
+  let l = [
+    (0, 0),
+    (1, 1),
+    ((-1), (-1)),
+    ((-1), 1),
+    ((-1), 0),
+    (0, (-1)),
+    (1, (-1)),
+    (1, 0),
+    (0, 1)
+  ];
+  let collided =
+    List.exists(
+      ((dx, dy)) => {
+        let padding = 8.;
+        let tx = dx + int_of_float((offset.x +. pos.x) /. tileSizef);
+        let ty = dy + int_of_float((offset.y +. pos.y) /. tileSizef);
+        if (tx >= Array.length(grid) || tx < 0 || ty > Array.length(grid[0]) || ty < 0) {
+          true
+        } else {
+          switch grid[tx][ty] {
+          | Blocked
+          | Water
+          | Fence =>
+            Reprocessing.Utils.intersectRectRect(
+              ~rect1Pos=(
+                pos.x +. offset.x +. padding,
+                pos.y +. offset.y +. padding
+              ),
+              ~rect1W=tileSizef -. padding -. padding,
+              ~rect1H=tileSizef -. padding -. padding,
+              ~rect2Pos=(float_of_int(tx * tileSize), float_of_int(ty * tileSize)),
+              ~rect2W=tileSizef,
+              ~rect2H=tileSizef
+            )
+          | _ => false
+          }
+        }
+      },
+      l
+    );
+  if (collided) {prevOffset} else {offset}
+};

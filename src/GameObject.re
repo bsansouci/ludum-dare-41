@@ -10,7 +10,7 @@ let init = grid => {
           Array.fold_left(
             ((y, gameobjects), tile) =>
               switch (tile) {
-                | Dirt => (
+              | Dirt => (
                   y + 1,
                   [
                     x != 13 ?
@@ -32,17 +32,25 @@ let init = grid => {
                         action: PickUp(Corn),
                         state: NoState,
                       },
-                    ...gameobjects
-                  ]
+                    ...gameobjects,
+                  ],
                 )
-                | Water =>
-                  (y + 1, [{
-                    pos: posMake(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2),
-                    action: PickUp(Water),
-                    state: NoState
-                  }, ...gameobjects])
-                | Trough =>
-                  (
+              | Water => (
+                  y + 1,
+                  [
+                    {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: PickUp(Water),
+                      state: NoState,
+                    },
+                    ...gameobjects,
+                  ],
+                )
+              | Trough => (
                   y + 1,
                   [
                     {
@@ -56,8 +64,8 @@ let init = grid => {
                     },
                     ...gameobjects,
                   ],
-                );
-                | _ => (y + 1, gameobjects)
+                )
+              | _ => (y + 1, gameobjects)
               },
             (0, gameobjects),
             col,
@@ -68,9 +76,23 @@ let init = grid => {
       grid,
     );
   let gameobjects = [
-    {pos: {x: 4. *. tileSizef, y: 12. *. tileSizef}, action: MilkCow, state: Cow(HasMilk)},
-    {pos: {x: 8. *. tileSizef, y: 13. *. tileSizef}, action: NoAction, state: Chicken},
-    ...gameobjects
+    {
+      pos: {
+        x: 4. *. tileSizef,
+        y: 12. *. tileSizef,
+      },
+      action: MilkCow,
+      state: Cow(0., 0., HasMilk),
+    },
+    {
+      pos: {
+        x: 8. *. tileSizef,
+        y: 13. *. tileSizef,
+      },
+      action: NoAction,
+      state: Chicken(0., 0.),
+    },
+    ...gameobjects,
   ];
   gameobjects;
 };
@@ -93,9 +115,42 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   | _ => ()
   };
 
-let update = (state, env) =>
-  {...state, gameobjects: List.map(
-      (g: gameobjectT) => g, state.gameobjects)};
+let moveAnimal = (mx, my, speed, pos, grid, env) => {
+  let mx =
+    Utils.constrain(
+      ~amt=mx +. Random.float(2.) -. 1.,
+      ~low=(-5.) *. speed,
+      ~high=5. *. speed,
+    );
+  let my =
+    Utils.constrain(
+      ~amt=my +. Random.float(2.) -. 1.,
+      ~low=(-5.) *. speed,
+      ~high=5. *. speed,
+    );
+  let dt = Reprocessing.Env.deltaTime(env);
+  let offset =
+    handleCollision({x: 0., y: 0.}, {x: dt *. mx, y: dt *. my}, pos, grid);
+  ({x: pos.x +. offset.x, y: pos.y +. offset.y}, mx, my);
+};
+
+let update = (state, env) => {
+  ...state,
+  gameobjects:
+    List.map(
+      (g: gameobjectT) =>
+        switch (g) {
+        | {pos, state: Cow(mx, my, x)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 1., pos, state.grid, env);
+          {...g, pos, state: Cow(mx, my, x)};
+        | {pos, state: Chicken(mx, my)} =>
+          let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
+          {...g, pos, state: Chicken(mx, my)};
+        | _ => g
+        },
+      state.gameobjects,
+    ),
+};
 
 let render = (state, focusedObject, env) =>
   List.iter(
@@ -113,23 +168,23 @@ let render = (state, focusedObject, env) =>
           env,
         );
         Draw.popStyle(env);
-      | {pos: {x, y}, action: MilkCow, state: Cow(NoMilk)}
-      | {pos: {x, y}, action: MilkCow, state: Cow(HasMilk)} =>
+      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, NoMilk)}
+      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, HasMilk)} =>
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           "pile_of_bacon.png",
           state,
-          env
-        );
-      | {pos: {x, y}, action: NoAction, state: Chicken} =>
+          env,
+        )
+      | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           "bet_he_would_make_some_nice_fried_chicken.png",
           state,
-          env
-        );
+          env,
+        )
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
         Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);

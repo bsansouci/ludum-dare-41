@@ -51,51 +51,6 @@ let createGrid = (s) => {
   m
 };
 
-let handleCollision = (prevOffset, offset, state) => {
-  let l = [
-    (0, 0),
-    (1, 1),
-    ((-1), (-1)),
-    ((-1), 1),
-    ((-1), 0),
-    (0, (-1)),
-    (1, (-1)),
-    (1, 0),
-    (0, 1)
-  ];
-  let collided =
-    List.exists(
-      ((dx, dy)) => {
-        let padding = 8.;
-        let tx = dx + int_of_float((offset.x +. state.playerPos.x) /. tileSizef);
-        let ty = dy + int_of_float((offset.y +. state.playerPos.y) /. tileSizef);
-        if (tx >= Array.length(state.grid) || tx < 0 || ty > Array.length(state.grid[0]) || ty < 0) {
-          true
-        } else {
-          switch state.grid[tx][ty] {
-          | Blocked
-          | Water
-          | Fence =>
-            Utils.intersectRectRect(
-              ~rect1Pos=(
-                state.playerPos.x +. offset.x +. padding,
-                state.playerPos.y +. offset.y +. padding
-              ),
-              ~rect1W=tileSizef -. padding -. padding,
-              ~rect1H=tileSizef -. padding -. padding,
-              ~rect2Pos=(float_of_int(tx * tileSize), float_of_int(ty * tileSize)),
-              ~rect2W=tileSizef,
-              ~rect2H=tileSizef
-            )
-          | _ => false
-          }
-        }
-      },
-      l
-    );
-  if (collided) {prevOffset} else {offset}
-};
-
 let setup = (assets, env) => {
   Env.size(~width=600, ~height=600, env);
   let grid = createGrid(mapString);
@@ -119,16 +74,16 @@ let draw = (state, env) => {
   let offset = {x: 0., y: 0.};
   let offset =
     Env.key(Left, env) || Env.key(A, env) ?
-      handleCollision(offset, {...offset, x: -. playerSpeedDt}, state) : offset;
+      handleCollision(offset, {...offset, x: -. playerSpeedDt}, state.playerPos, state.grid) : offset;
   let offset =
     Env.key(Right, env) || Env.key(D, env) ?
-      handleCollision(offset, {...offset, x: playerSpeedDt}, state) : offset;
+      handleCollision(offset, {...offset, x: playerSpeedDt}, state.playerPos, state.grid) : offset;
   let offset =
     Env.key(Up, env) || Env.key(W, env) ?
-      handleCollision(offset, {...offset, y: -. playerSpeedDt}, state) : offset;
+      handleCollision(offset, {...offset, y: -. playerSpeedDt}, state.playerPos, state.grid) : offset;
   let offset =
     Env.key(Down, env) || Env.key(S, env) ?
-      handleCollision(offset, {...offset, y: playerSpeedDt}, state) : offset;
+      handleCollision(offset, {...offset, y: playerSpeedDt}, state.playerPos, state.grid) : offset;
   let mag = Utils.magf((offset.x, offset.y));
   let state =
     if (mag > 0.) {
@@ -145,6 +100,8 @@ let draw = (state, env) => {
   let facing = Env.key(Down, env) || Env.key(S, env) ? DownD : facing;
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
+
+  let state = GameObject.update(state, env);
 
   let focusedObject =
     List.fold_left(
@@ -176,10 +133,10 @@ let draw = (state, env) => {
     GameObject.checkPickUp(state, focusedObject, env);
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
-  Draw.scale(2., 2., env);
+  Draw.scale(~x=2., ~y=2., env);
   Draw.translate(
-    -. state.playerPos.x +. screenSize /. 4.,
-    -. state.playerPos.y +. screenSize /. 4.,
+    ~x=-. state.playerPos.x +. screenSize /. 4.,
+    ~y=-. state.playerPos.y +. screenSize /. 4.,
     env
   );
   /* Nighttime tint */
