@@ -80,7 +80,8 @@ type journalEntryT = string;
 
 type dayTransitionT =
   | NoTransition
-  | Journal
+  | JournalIn
+  | JournalOut
   | FadeOut
   | FadeIn;
 

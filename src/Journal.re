@@ -20,7 +20,7 @@ let init = (env) => {
   |],
   dayTransition: NoTransition,
   animationTime: 0.,
-  backgroundImage: Draw.loadImage(~filename="assets/journal_background.png", ~isPixel=false, env)
+  backgroundImage: Draw.loadImage(~filename="journal_background.png", ~isPixel=false, env)
 };
 
 let updateDay = (state, env) =>
@@ -50,6 +50,10 @@ let updateDay = (state, env) =>
     } else {
       state
     }
+  | {journal: {dayTransition: JournalOut, animationTime}} when animationTime > fadeTimeSec => {
+      ...state,
+      journal: {...state.journal, dayTransition: FadeIn, animationTime: 0.}
+    }
   | {journal: {dayTransition: FadeOut, animationTime, dayIndex}} when animationTime > fadeTimeSec =>
     /* @Todo Generate new day here */
     let gameobjects =
@@ -74,7 +78,7 @@ let updateDay = (state, env) =>
       ...state,
       journal: {
         ...state.journal,
-        dayTransition: Journal,
+        dayTransition: JournalIn,
         animationTime: 0.,
         dayIndex: dayIndex + 1
       },
@@ -102,13 +106,43 @@ let renderTransition = (state, deltaTime, env) =>
     Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
     {...state, journal: {...state.journal, animationTime: animationTime +. deltaTime}}
   | {journal: {dayTransition: FadeIn, animationTime, dayIndex, backgroundImage}} =>
+    Draw.fill(
+      Utils.color(
+        ~r=0,
+        ~g=0,
+        ~b=0,
+        ~a=int_of_float(Utils.remapf(animationTime, 0., fadeTimeSec, 255., 0.))
+      ),
+      env
+    );
+    Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
+    {...state, journal: {...state.journal, animationTime: animationTime +. deltaTime}}
+  | {
+      journal: {
+        dayTransition: JournalOut as dayTransition,
+        dayIndex,
+        backgroundImage,
+        animationTime
+      }
+    }
+  | {
+      journal: {dayTransition: JournalIn as dayTransition, dayIndex, backgroundImage, animationTime}
+    } =>
+    Draw.fill(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
+    Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
     Draw.pushStyle(env);
+    let (minAlpha, maxAlpha) =
+      if (dayTransition === JournalIn) {
+        (0., 255.)
+      } else {
+        (255., 0.)
+      };
     Draw.tint(
       Utils.color(
         ~r=255,
         ~g=255,
         ~b=255,
-        ~a=int_of_float(Utils.remapf(animationTime, 0., fadeTimeSec, 255., 0.))
+        ~a=int_of_float(Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha))
       ),
       env
     );
@@ -124,34 +158,10 @@ let renderTransition = (state, deltaTime, env) =>
       state.journal.journalEntries[0]
     );
     Draw.popStyle(env);
-    /*Draw.fill(
-        Utils.color(
-          ~r=0,
-          ~g=0,
-          ~b=0,
-          ~a=int_of_float(Utils.remapf(animationTime, 0., fadeTimeSec, 255., 0.))
-        ),
-        env
-      );
-      Draw.rect(~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);*/
-    {...state, journal: {...state.journal, animationTime: animationTime +. deltaTime}}
-  | {journal: {dayTransition: Journal, dayIndex, backgroundImage}} =>
-    Draw.image(backgroundImage, ~pos=(0, 0), ~width=Env.width(env), ~height=Env.height(env), env);
-    Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(16, 40), env);
-    ignore @@
-    Array.fold_left(
-      (y, line) => {
-        Draw.text(~body=line, ~pos=(16, y), env);
-        y + 32
-      },
-      100,
-      state.journal.journalEntries[0]
-    );
     if (Env.keyPressed(Space, env)) {
-      {...state, journal: {...state.journal, dayTransition: FadeIn, animationTime: 0.}}
+      {...state, journal: {...state.journal, dayTransition: JournalOut, animationTime: 0.}}
     } else {
-      state
+      {...state, journal: {...state.journal, animationTime: animationTime +. deltaTime}}
     }
-  /*{...state, journal: {...state.journal}}*/
   | _ => state
   };
