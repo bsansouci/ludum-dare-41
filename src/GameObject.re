@@ -81,8 +81,8 @@ let init = grid => {
         x: 4. *. tileSizef,
         y: 12. *. tileSizef,
       },
-      action: MilkCow,
-      state: Cow(0., 0., HasMilk),
+      action: PickUp(Milk),
+      state: Cow(0., 0.),
     },
     {
       pos: {
@@ -108,6 +108,7 @@ let maybeHighlight = (state, g, focusedObject, env) =>
     | (None, PickUp(Egg))
     | (None, PickUp(Seed))
     | (None, PickUp(Water))
+    | (None, PickUp(Milk))
     | (None, Cleanup) =>
       Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)
     | _ => ()
@@ -140,9 +141,9 @@ let update = (state, env) => {
     List.map(
       (g: gameobjectT) =>
         switch (g) {
-        | {pos, state: Cow(mx, my, x)} =>
+        | {pos, state: Cow(mx, my)} =>
           let (pos, mx, my) = moveAnimal(mx, my, 1., pos, state.grid, env);
-          {...g, pos, state: Cow(mx, my, x)};
+          {...g, pos, state: Cow(mx, my)};
         | {pos, state: Chicken(mx, my)} =>
           let (pos, mx, my) = moveAnimal(mx, my, 2., pos, state.grid, env);
           {...g, pos, state: Chicken(mx, my)};
@@ -154,11 +155,11 @@ let update = (state, env) => {
 
 let render = (state, focusedObject, env) =>
   List.iter(
-    (g: gameobjectT) =>
+    (g: gameobjectT) => {
+      Draw.pushStyle(env);
       switch (g) {
       | {pos: {x, y}, action: PickUp(Corn)} =>
         /* Don't highlight when there's no action */
-        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         drawAssetf(
           x -. tileSizef /. 2.,
@@ -167,16 +168,16 @@ let render = (state, focusedObject, env) =>
           state,
           env,
         );
-        Draw.popStyle(env);
-      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, NoMilk)}
-      | {pos: {x, y}, action: MilkCow, state: Cow(_, _, HasMilk)} =>
+      | {pos: {x, y}, action: NoAction, state: Cow(_, _)}
+      | {pos: {x, y}, action: PickUp(Milk), state: Cow(_, _)} =>
+        maybeHighlight(state, g, focusedObject, env);
         drawAssetf(
           x -. tileSizef /. 2.,
           y -. tileSizef /. 2.,
           "pile_of_bacon.png",
           state,
           env,
-        )
+        );
       | {pos: {x, y}, action: NoAction, state: Chicken(_, _)} =>
         drawAssetf(
           x -. tileSizef /. 2.,
@@ -186,7 +187,6 @@ let render = (state, focusedObject, env) =>
           env,
         )
       | {pos: {x, y}, action, state: Corn({stage, isWatered})} =>
-        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         if (isWatered) {
           Draw.fill(Utils.color(~r=190, ~g=190, ~b=60, ~a=255), env);
@@ -220,9 +220,7 @@ let render = (state, focusedObject, env) =>
           state,
           env,
         );
-        Draw.popStyle(env);
       | {pos: {x, y}, action: PickUp(Water)} =>
-        Draw.pushStyle(env);
         maybeHighlight(state, g, focusedObject, env);
         Draw.fill(Utils.color(~r=0, ~g=10, ~b=250, ~a=255), env);
         Draw.rectf(
@@ -231,9 +229,10 @@ let render = (state, focusedObject, env) =>
           ~height=tileSizef,
           env,
         );
-        Draw.popStyle(env);
       | _ => ()
-      },
+      };
+      Draw.popStyle(env);
+    },
     state.gameobjects,
   );
 
@@ -281,6 +280,18 @@ let checkPickUp = (state, focusedObject, env) =>
     | (Some(_), Some({action: PickUp(Water)})) => (
         {...state, currentItem: None},
         focusedObject,
+      )
+    | (None, Some({action: PickUp(Milk)} as cow)) => (
+        {
+          ...state,
+          currentItem: Some(Milk),
+          gameobjects:
+            List.map(
+              go => go === cow ? {...cow, action: NoAction} : go,
+              state.gameobjects,
+            ),
+        },
+        Some({...cow, action: NoAction}),
       )
     | (
         Some(Water),

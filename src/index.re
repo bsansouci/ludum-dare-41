@@ -207,7 +207,7 @@ let draw = (state, env) => {
       | Some(Water) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "water_bucket.png", state, env)
       | Some(Seed) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "corn_seed.png", state, env)
       | Some(Egg) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "egg.png", state, env)
-      | Some(Milk) => print_endline("Can't draw milk")
+      | Some(Milk) => drawAssetf(state.playerPos.x, state.playerPos.y -. holdOffset, "bucket_with_milk.png", state, env)
       | Some(Wood) => print_endline("Can't draw wood")
     }
   };

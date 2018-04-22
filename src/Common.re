@@ -33,7 +33,6 @@ type carryableT =
 type actionT =
   | PickUp(carryableT)
   | Cleanup
-  | MilkCow
   | WaterCorn
   | WaterAnimals
   | PlantSeed
@@ -48,10 +47,6 @@ type cornStateT = {
   isWatered: bool
 };
 
-type cowStateT =
-  | HasMilk
-  | NoMilk;
-
 type waterTankStateT =
   | HalfFull
   | Full
@@ -59,7 +54,7 @@ type waterTankStateT =
 
 type gameobjectStateT =
   | Corn(cornStateT)
-  | Cow(float, float, cowStateT)
+  | Cow(float, float)
   | WaterTank(waterTankStateT)
   | Chicken(float, float)
   | NoState;

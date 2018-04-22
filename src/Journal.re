@@ -38,7 +38,7 @@ let updateDay = (state, env) =>
             | {action: PickUp(Corn)}
             | {state: WaterTank(HalfFull)}
             | {state: WaterTank(Empty)}
-            | {state: Cow(_, _, HasMilk)}
+            | {action: PickUp(Milk), state: Cow(_, _)}
             | {state: Corn({isWatered: false})} => false
             | _ => true
             },
