@@ -14,8 +14,8 @@ let mapString = {|
 3444444430000000000555
 3334443332222200222200
 2000000000000000000200
-2000000000000000000200
-2000000000000000000200
+2000000000000000006200
+2000000000000000006200
 2000000000000000000200
 2222222222222222222200
 0000000000000000000000
@@ -40,6 +40,7 @@ let createGrid = (s) => {
             | '3' => Blocked
             | '4' => Floor
             | '5' => Water
+            | '6' => Trough
             | _ => Blocked
             }
           ),
@@ -213,6 +214,9 @@ let draw = (state, env) => {
             drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
           | Blocked =>
             Draw.fill(Utils.color(~r=255, ~g=10, ~b=10, ~a=255), env);
+            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
+          | Trough =>
+            Draw.fill(Utils.color(~r=140, ~g=140, ~b=140, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           },
         row

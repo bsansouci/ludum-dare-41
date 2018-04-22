@@ -8,7 +8,8 @@ type tileT =
   | Fence
   | Floor
   | Water
-  | Blocked;
+  | Blocked
+  | Trough;
 
 type directionT =
   | UpD
@@ -34,6 +35,7 @@ type actionT =
   | Cleanup
   | MilkCow
   | WaterCorn
+  | WaterAnimals
   | PlantSeed
   | Harvest
   | PutBackWater
