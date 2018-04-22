@@ -12,10 +12,10 @@ let mapString = {|
 34444444300000000005550
 34444444300000000005550
 33344433322222002222000
-20000000000000000002000
-20000000000000000062000
 20000000000000000062000
 20000000000000000002000
+20000000000000000002000
+20000000000000000072000
 22222222222222222222000
 00000000000000000000000
 00000000000000000000000
@@ -40,7 +40,8 @@ let createGrid = (s) => {
             | '3' => Blocked
             | '4' => Floor
             | '5' => Water
-            | '6' => Trough
+            | '6' => WaterTrough
+            | '7' => FoodTrough
             | _ => Blocked
             }
           ),
@@ -115,7 +116,7 @@ let draw = (state, env) => {
             )
           );
         switch foundobject {
-        | None when d < tileSizef /. 1.5 => Some((d, gameobject))
+        | None when d < tileSizef => Some((d, gameobject))
         | Some((d2, _)) when d2 < d => foundobject
         | Some(_) => Some((d, gameobject))
         | None => None
@@ -148,7 +149,7 @@ let draw = (state, env) => {
           switch tile {
           | Dirt =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
-            drawAsset(x * tileSize, y * tileSize, "dry_mud.png", state, env);
+            drawAsset(x * tileSize, y * tileSize, "drier_dirt.png", state, env);
           | Water =>
             Draw.fill(Utils.color(~r=50, ~g=50, ~b=255, ~a=255), env);
             Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
@@ -161,17 +162,14 @@ let draw = (state, env) => {
             drawAsset(x * tileSize, y * tileSize, "more_grass.png", state, env);
           | Grass(_) =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
-          | Floor =>
-            Draw.fill(Utils.color(~r=200, ~g=180, ~b=200, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           | Fence =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
             drawAsset(x * tileSize, y * tileSize, "keep_the_dogs_out.png", state, env)
-          | Blocked =>
+          | Floor
+          | Blocked
+          | FoodTrough
+          | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env);
-          | Trough =>
-            Draw.fill(Utils.color(~r=140, ~g=140, ~b=140, ~a=255), env);
-            Draw.rect(~pos=(x * tileSize, y * tileSize), ~width=tileSize, ~height=tileSize, env)
           },
         row
       ),
