@@ -322,8 +322,16 @@ let renderObject = (g, focusedObject, state, env) => {
       state,
       env,
     );
-  | {pos: {x, y}, action: PickUp(Water)} =>
-    maybeHighlight(state, g, focusedObject, env)
+  | {action: PickUp(Water)} => maybeHighlight(state, g, focusedObject, env)
+  | {pos: {x, y}, action: PickUp(Egg)} =>
+    maybeHighlight(state, g, focusedObject, env);
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "egg.png",
+      state,
+      env,
+    );
   /*TODO Draw highlighted pond*/
   | _ => ()
   };
@@ -396,6 +404,14 @@ let checkPickUp = (state, focusedObject, env) =>
             ),
         },
         Some({...cow, action: NoAction}),
+      )
+    | (None, Some({action: PickUp(Egg)} as egg)) => (
+        {
+          ...state,
+          currentItem: Some(Egg),
+          gameobjects: List.filter(go => go !== egg, state.gameobjects),
+        },
+        None,
       )
     | (
         Some(Water),

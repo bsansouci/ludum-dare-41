@@ -140,6 +140,7 @@ let setup = (assets, env) => {
 };
 
 let draw = (state, env) => {
+  Utils.randomSeed(0);
   Draw.background(Utils.color(~r=199, ~g=217, ~b=229, ~a=255), env);
   let dt = Env.deltaTime(env);
   let playerSpeedDt = playerSpeed *. dt;
