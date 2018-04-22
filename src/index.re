@@ -90,12 +90,12 @@ let renderPlayer = (state, env) => {
     | (RightD, 3, false) => "old_macdonald_right_face_hands_up_walk_two.png"
     | (UpD, 0, false)
     | (UpD, 2, false) => "old_macdonald_back_face_hands_up.png"
-    | (UpD, 1, false) => "old_macdonald_back_face_hands_up_walk_one.png"
+    | (UpD, 1, false) => "old_macdonald_back_face_hands_walk_one.png"
     | (UpD, 3, false) => "old_macdonald_back_face_hands_up_walk_two.png"
     | (DownD, 0, false)
-    | (DownD, 2, false) => "everybody_put_your_hands_up.png"
-    | (DownD, 1, false) => "everybody_put_your_hands_up_walk_one.png"
-    | (DownD, 3, false) => "everybody_put_your_hands_up_walk_two.png"
+    | (DownD, 2, false) => "old_macdonald_front_face_hands_up.png"
+    | (DownD, 1, false) => "old_macdonald_front_face_hands_up_walk_one.png"
+    | (DownD, 3, false) => "old_macdonald_front_face_hands_up_walk_two.png"
     | (LeftD, 0, false)
     | (LeftD, 2, false) => "old_macdonald_left_face_hands_up.png"
     | (LeftD, 1, false) => "old_macdonald_left_face_hands_up_walk_one.png"
