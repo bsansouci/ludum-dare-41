@@ -83,7 +83,7 @@ let updateDay = (state, env) =>
             | _ => go.state
             };
           let action =
-            switch (go.state) {
+            switch (state) {
             | Corn(5) => PickUp(Corn)
             | Corn((-1)) => PlantSeed
             | WaterTank(_) => WaterAnimals
