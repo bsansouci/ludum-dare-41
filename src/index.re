@@ -150,6 +150,8 @@ let renderPlayer = (state, env) => {
       env,
     )
   | Some(Wood) => print_endline("Can't draw wood")
+  | Some(Knife) => ()
+  | _ => print_endline("You piece of shit ben");
   };
 };
 

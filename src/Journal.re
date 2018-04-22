@@ -113,6 +113,23 @@ let updateDay = (state, env) =>
       },
       ...gameobjects,
     ];
+    let shouldAddBoss = dayIndex + 1 === 2;
+    let gameobjects =
+      if (shouldAddBoss) {
+        [
+          {
+            pos: {
+              x: tileSizef *. 17.8,
+              y: tileSizef *. 5.,
+            },
+            action: NoAction,
+            state: Boss({hunger: 4}),
+          },
+          ...gameobjects,
+        ];
+      } else {
+        gameobjects;
+      };
     {
       ...state,
       journal: {

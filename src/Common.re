@@ -31,7 +31,8 @@ type carryableT =
   | Milk
   | Egg
   | Corn
-  | Wood;
+  | Wood
+  | Knife;
 
 type actionT =
   | PickUp(carryableT)
