@@ -69,7 +69,7 @@ let updateDay = (state, env) => {
       let gameobjects = [
         {
           pos: {
-            x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+            x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
             y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
           },
           action: PickUp(Egg),
@@ -77,7 +77,7 @@ let updateDay = (state, env) => {
         },
         {
           pos: {
-            x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+            x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
             y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
           },
           action: Cleanup,

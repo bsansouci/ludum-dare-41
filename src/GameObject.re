@@ -107,7 +107,7 @@ let init = grid => {
   let addChick = gos => [
     {
       pos: {
-        x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+        x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
         y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
       },
       action: NoAction,
@@ -210,15 +210,12 @@ let maybeHighlight = (state, g, focusedObject, env) =>
     | (Some(Corn), FeedAnimals)
     | (Some(Seed), PlantSeed) =>
       Draw.fill(Utils.color(~r=150, ~g=150, ~b=40, ~a=100), env);
-      /*Draw.strokeWeight(6, env);*/
-      /*Draw.stroke(Utils.color(150, 150, 40, 255), env);*/
       Draw.rectf(
         ~pos=(g.pos.x -. tileSizef /. 2., g.pos.y -. tileSizef /. 2.),
         ~width=tileSizef,
         ~height=tileSizef,
         env,
       );
-    /*Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env)*/
     | _ => ()
     }
   | _ => ()
@@ -489,10 +486,26 @@ let renderBefore = (g, focusedObject, state, env) => {
       state,
       env,
     )
+  | {pos: {x, y}, action: NoAction, state: Cow({health})}
+  | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
+    if (health === (-1)) {
+      drawAssetf(
+        x -. (tileSizef /. 2.),
+        y -. (tileSizef /. 2.),
+        "blood_puddle.png",
+        state,
+        env,
+      );
+    }
   | {pos: {x, y}, action: NoAction, state: Chick({health})} =>
     if (health === (-1)) {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "blood_puddle.png",
+        state,
+        env,
+      );
     } else if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -526,9 +539,6 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
       env,
     )
   | {pos: {x, y}, action: DoBarnDoor} when ! playerInBarn =>
-    /*Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x,
-        y), ~width=tileSizef, ~height=tileSizef, env);*/
     drawAssetf(
       x -. tileSizef /. 2. +. 3.,
       y -. 2. *. tileSizef -. tileSizef /. 2.,
@@ -536,8 +546,6 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
       state,
       env,
     )
-  /*Draw.fill(Utils.color(255, 0, 255, 255), env);
-    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);*/
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -548,10 +556,7 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
     )
   | {pos: {x, y}, action: NoAction, state: Cow({health})}
   | {pos: {x, y}, action: PickUp(Milk), state: Cow({health})} =>
-    if (health === (-1)) {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
-    } else if (health === 0) {
+    if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -559,7 +564,7 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
         state,
         env,
       );
-    } else {
+    } else if (health > 0){
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -569,10 +574,7 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
       );
     }
   | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
-    if (health === (-1)) {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
-    } else if (health === 0) {
+    if (health === 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -580,7 +582,7 @@ let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env
         state,
         env,
       );
-    } else {
+    } else if (health > 0){
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
