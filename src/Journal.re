@@ -107,6 +107,23 @@ let updateDay = (state, env) => {
         } else {
           gameobjects;
         };
+      let shouldAddFlowers = dayIndex + 1 === 1;
+      let gameobjects =
+        if (shouldAddFlowers) {
+          [
+            {
+              pos: {
+                x: tileSizef *. 17.,
+                y: tileSizef *. 15.,
+              },
+              action: PickUp(Flower),
+              state: NoState,
+            },
+            ...gameobjects,
+          ];
+        } else {
+          gameobjects;
+        };
       {
         ...state,
         journal: {

@@ -33,7 +33,8 @@ type carryableT =
   | Egg
   | Corn
   | Wood
-  | Knife;
+  | Knife
+  | Flower;
 
 type actionT =
   | PickUp(carryableT)
@@ -89,7 +90,7 @@ and gameobjectStateT =
   | HayBale
   | NoState
   | BarnDoor(barnDoorT)
-  | Tombstone
+  | Tombstone(bool)
 and gameobjectT = {
   pos: vec2,
   action: actionT,

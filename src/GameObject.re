@@ -191,7 +191,7 @@ let init = grid => {
                     y: 5. *. tileSizef,
                   },
                   action: NoAction,
-                  state: Tombstone,
+                  state: Tombstone(false),
                 },
                 {
                   pos: {
@@ -642,14 +642,32 @@ let renderBefore = (g, focusedObject, state, env) => {
 let renderObject =
     (g, playerInBarn, playerBehindBarn, focusedObject, state, env) =>
   switch (g) {
-  | {pos: {x, y}, state: Tombstone} when playerBehindBarn =>
+  | {pos: {x, y}, action: PickUp(Flower)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
-      "tombstone.png",
+      "bouquet_of_flowers.png",
       state,
       env,
     )
+  | {pos: {x, y}, state: Tombstone(hasFlowers)} when playerBehindBarn =>
+    if (hasFlowers) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "tombstone_with_flowers.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "tombstone.png",
+        state,
+        env,
+      );
+    }
   | {pos: {x, y}, action: DoBarnDoor, state: BarnDoor(barnState)}
       when ! playerInBarn =>
     if (barnState == Broken) {
@@ -865,6 +883,8 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
         when ! playerInBarn => "Close barn door"
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)}))
         when ! playerInBarn => "Open barn door"
+    | (None, Some({action: PickUp(Flower)})) => "Pickup flowers"
+    | (None, Some({state: Tombstone(_)})) => "Maria - July 17th"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
@@ -875,6 +895,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (Some(Egg), Some({action: Sell})) => "Sell egg"
     | (Some(Milk), Some({action: Sell})) => "Sell milk"
     | (Some(Water), Some({action: Cleanup})) => "Cleanup mess"
+    | (Some(Flower), Some({state: Tombstone(_)})) => "Leave flowers"
     | (_, Some({action: GoToBed})) when finishedAllTasks => "Go to bed"
     | (_, Some({action: GoToBed})) when ! finishedAllTasks => "Open Journal"
     | _ => ""
@@ -895,6 +916,18 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
   if (state.journal.dayTransition == NoTransition
       && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
     switch (state.currentItem, focusedObject) {
+    | (Some(Flower), Some({state: Tombstone(_)} as go)) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Tombstone(true)} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
     | (_, Some({action: GoToBed})) when finishedAllTasks => (
         {
           ...state,
@@ -916,6 +949,14 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
           },
         },
         focusedObject,
+      )
+    | (None, Some({action: PickUp(Flower)} as go)) => (
+        {
+          ...state,
+          currentItem: Some(Flower),
+          gameobjects: List.filter(g => g !== go, state.gameobjects),
+        },
+        None,
       )
     | (
         None,

@@ -164,6 +164,14 @@ let renderPlayer = (state, env) => {
       env,
     )
   | Some(Wood) => print_endline("Can't draw wood")
+  | Some(Flower) =>
+    drawAssetf(
+      state.playerPos.x,
+      state.playerPos.y -. holdOffset,
+      "bouquet_of_flowers.png",
+      state,
+      env,
+    )
   | _ => print_endline("You piece of shit ben")
   };
 };
