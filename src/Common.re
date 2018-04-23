@@ -44,6 +44,7 @@ type actionT =
   | PutBackWater
   | PutBackSeed
   | Sell
+  | DoBarnDoor
   | NoAction;
 
 type tankStateT =
@@ -61,6 +62,8 @@ type chickenStateT = {
   health: int,
 };
 
+type barnDoorT = Broken | Opened | Closed;
+
 type bossStateT = {
   hunger: int,
   eatingTime: float,
@@ -77,6 +80,7 @@ and gameobjectStateT =
   | Chick(chickenStateT)
   | IsASeedBin
   | NoState
+  | BarnDoor(barnDoorT)
 and gameobjectT = {
   pos: vec2,
   action: actionT,
@@ -107,6 +111,7 @@ type journalT = {
   dayTransition: dayTransitionT,
   animationTime: float,
 };
+
 
 type stateT = {
   grid: array(array(tileT)),
