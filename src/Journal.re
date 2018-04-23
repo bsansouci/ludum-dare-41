@@ -78,6 +78,7 @@ let updateDay = (state, env) => {
               | (Chicken({willDie: true} as chickenState), _)
                   when dayIndex === 3 =>
                 Chicken({...chickenState, health: 0})
+              | (BarnDoor(_), _) when dayIndex >= 6 => BarnDoor(Broken)
               | _ => go.state
               };
             let action =
@@ -91,7 +92,7 @@ let updateDay = (state, env) => {
               | BarnDoor(Broken) when dayIndex === 2 => DoBarnDoor
               | AxeStanding when dayIndex === 7 =>
                 print_endline("PICKUP AXES YOU DUMB SHIT");
-              PickUp(Axe)
+                PickUp(Axe);
               | _ => go.action
               };
             {...go, state, action};
@@ -220,31 +221,33 @@ let updateDay = (state, env) => {
           gameobjects;
         };
       let shouldAddBoss = dayIndex === 7;
-      let gameobjects = if (shouldAddBoss) {
-        /* Directly on the tombstone, so you don't see the monster but if you don't hurry he'll
-           catch you. */
-        let bPos = {x: tileSizef *. 9., y: tileSizef *. 5.};
-        [
-          {
-            pos: bPos,
-            action: NoAction,
-            state:
-              Boss({
-                movePair: (bPos, bPos),
-                movingTime: 0.,
-                hunger: 6,
-                eatingTime: 0.,
-                killed: [],
-                eating: false,
-              }),
-          },
-          ...gameobjects,
-        ];
-      } else {
-        gameobjects
-      };
+      let gameobjects =
+        if (shouldAddBoss) {
+          /* Directly on the tombstone, so you don't see the monster but if you don't hurry he'll
+             catch you. */
+          let bPos = {x: tileSizef *. 9., y: tileSizef *. 5.};
+          [
+            {
+              pos: bPos,
+              action: NoAction,
+              state:
+                Boss({
+                  movePair: (bPos, bPos),
+                  movingTime: 0.,
+                  hunger: 6,
+                  eatingTime: 0.,
+                  killed: [],
+                  eating: false,
+                }),
+            },
+            ...gameobjects,
+          ];
+        } else {
+          gameobjects;
+        };
       {
         ...state,
+        playerDead: false,
         night: dayIndex === 5 ? true : false,
         journal: {
           dayTransition: JournalIn,
@@ -253,7 +256,7 @@ let updateDay = (state, env) => {
           pageNumber: 0,
         },
         playerPos: {
-          x: tileSizef *. 17.8,
+          x: tileSizef *. 15.8,
           y: tileSizef *. 10.,
         },
         playerFacing: DownD,
@@ -550,9 +553,9 @@ let day8Stats = state =>
   List.fold_left(
     (acc, o: gameobjectT) =>
       switch (o) {
-        | {state: Boss({hunger})} when hunger > 0 => [|1|]
-        | _ => acc
-        },
+      | {state: Boss({hunger})} when hunger > 0 => [|1|]
+      | _ => acc
+      },
     [|0|],
     state.gameobjects,
   );
@@ -564,13 +567,14 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   Draw.pushStyle(env);
   Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
   let date = dayIndex + 14;
-  let th = if (date === 21) {
-    "st"
-  } else if (date === 22) {
-    "nd"
-  } else {
-    "th"
-  };
+  let th =
+    if (date === 21) {
+      "st";
+    } else if (date === 22) {
+      "nd";
+    } else {
+      "th";
+    };
   Draw.text(
     ~body="July " ++ string_of_int(date) ++ th,
     ~font=state.mainFont,
@@ -705,7 +709,7 @@ let renderTransition = (state, env) =>
   | {journal: {dayTransition: FadeOut, animationTime}} =>
     Draw.fill(
       Utils.color(
-        ~r=0,
+        ~r=state.playerDead ? 255 : 0,
         ~g=0,
         ~b=0,
         ~a=
@@ -977,9 +981,9 @@ let checkTasks = (state, _env) =>
     };
   } else if (state.journal.dayIndex === 7) {
     switch (day8Stats(state)) {
-          | [| bossWithHunger |] => bossWithHunger === 0
-          | _ => failwith("gosh darn ben")
-          }
+    | [|bossWithHunger|] => bossWithHunger === 0
+    | _ => failwith("gosh darn ben")
+    };
   } else {
     false;
   };

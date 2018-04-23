@@ -212,7 +212,7 @@ let init = grid => {
                 },
                 {
                   pos: {
-                    x: 12. *. tileSizef,
+                    x: 13. *. tileSizef,
                     y: 8. *. tileSizef,
                   },
                   action: NoAction,
@@ -323,8 +323,8 @@ let moveAnimal = (state, mx, my, speed, pos, grid, env) => {
 };
 
 let update = (state, env) => {
-  ...state,
-  gameobjects:
+  let hackRefPlayerDead = ref(false);
+  let gameobjects =
     List.map(
       (g: gameobjectT) =>
         switch (g) {
@@ -374,7 +374,7 @@ let update = (state, env) => {
                 } as bossState,
               ),
           } =>
-          let timeToMove = 0.3;
+          let timeToMove = 0.35;
           if (movingTime > 0.) {
             {
               ...g,
@@ -404,6 +404,7 @@ let update = (state, env) => {
             };
           } else if (state.day6CameraAnimation > 0.
                      || state.journal.dayTransition === CheckJournal
+                     || state.journal.dayTransition === JournalIn
                      || hunger === 0) {
             g;
           } else if (eatingTime <= 0.) {
@@ -443,9 +444,6 @@ let update = (state, env) => {
             let isTargetCloseEnough = mag < 32.;
             if (isTargetCloseEnough) {
               print_endline("CLOSE");
-            };
-            if (isPlayer && isTargetCloseEnough) {
-              print_endline("You should be dead by now");
             };
             let (_, {x: bx, y: by}) = bossState.movePair;
             let bossTile = (
@@ -554,6 +552,7 @@ let update = (state, env) => {
                   )
                 };
               };
+            hackRefPlayerDead := isPlayer && isTargetCloseEnough;
             {
               ...g,
               state:
@@ -586,7 +585,22 @@ let update = (state, env) => {
         | _ => g
         },
       state.gameobjects,
-    ),
+    );
+  if (hackRefPlayerDead^) {
+    {
+      ...state,
+      playerDead: true,
+      journal: {
+        ...state.journal,
+        dayIndex: state.journal.dayIndex - 1,
+        dayTransition: FadeOut,
+        animationTime: 0.,
+      },
+      gameobjects,
+    };
+  } else {
+    {...state, gameobjects};
+  };
 };
 
 let renderBefore = (g, focusedObject, state, env) => {
@@ -961,16 +975,17 @@ let renderObject =
       drawAssetf(x, y -. tileSizef, img, state, env);
     };
   | {pos: {x, y}, state: AxeStanding} =>
-    drawAssetf(x, y, "axe_standing.png", state, env)
+    drawAssetf(x -. tileSizef, y, "axe_standing.png", state, env)
   | _ => ()
   };
 
 let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) => {
-  let tutorial = if (!state.hasPressedTheActionKeyOnce) {
-    " (Press X or SPACE)"
-  } else {
-    ""
-  };
+  let tutorial =
+    if (! state.hasPressedTheActionKeyOnce) {
+      " (Press X or SPACE)";
+    } else {
+      "";
+    };
   let body =
     switch (state.currentItem, focusedObject) {
     | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
@@ -990,9 +1005,9 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({state: Tombstone(_), action: NoAction})) => "Maria - October 7th"
     | (None, Some({state: Tombstone(_), action: InspectTombstone})) => "Inspect grave"
     | (None, Some({state: Chicken({health: 0})})) => "There's not much to do now..."
-    | (Some(Axe), Some({state: Chicken({health}) }))
-    | (Some(Axe), Some({state: Chick({health}) }))
-    | (Some(Axe), Some({state: Cow({health}) })) when health > 0 => "Slay"
+    | (Some(Axe), Some({state: Chicken({health})}))
+    | (Some(Axe), Some({state: Chick({health})}))
+    | (Some(Axe), Some({state: Cow({health})})) when health > 0 => "Slay"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"
     /* Can't drop corn in water, it'd lock the game up */
     | (Some(Corn), Some({action: PickUp(Water)})) => ""
@@ -1019,7 +1034,12 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     let width = Draw.textWidth(~body, ~font=state.mainFont, env);
     Draw.rect(~pos=(0, 0), ~width=width + padding * 2, ~height=70, env);
     Draw.fill(Utils.color(~r=220, ~g=194, ~b=154, ~a=255), env);
-    Draw.rect(~pos=(padding / 2, 6), ~width=width + padding, ~height=58, env);
+    Draw.rect(
+      ~pos=(padding / 2, 6),
+      ~width=width + padding,
+      ~height=58,
+      env,
+    );
     Draw.tint(Utils.color(0, 0, 0, 255), env);
     Draw.text(~body, ~font=state.mainFont, ~pos=(padding, 45), env);
     Draw.popStyle(env);

@@ -149,7 +149,8 @@ type stateT = {
   day6CameraAnimation: float,
   shortDestroyedBarnAsset: Reprocessing.imageT,
   sleepingMonsterAsset: Reprocessing.imageT,
-  hasPressedTheActionKeyOnce: bool
+  hasPressedTheActionKeyOnce: bool,
+  playerDead: bool
 };
 
 let screenSize = 600.;

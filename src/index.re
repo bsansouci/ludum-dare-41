@@ -183,7 +183,7 @@ let setup = (assets, env) => {
     grid,
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {
-      x: tileSizef *. 17.8,
+      x: tileSizef *. 15.8,
       y: tileSizef *. 10.,
     },
     playerFacing: DownD,
@@ -217,6 +217,7 @@ let setup = (assets, env) => {
     sleepingMonsterAsset:
       Draw.loadImage(~isPixel=true, ~filename="sleeping_monster.png", env),
     hasPressedTheActionKeyOnce: false,
+    playerDead: false
   };
 };
 
@@ -614,7 +615,7 @@ let draw = (state, env) => {
   (
     if (playerBehindBarn) {
       /* @Hack */
-      if (state.journal.dayIndex === 6) {
+      if (state.journal.dayIndex >= 6) {
         Draw.image(
           state.shortDestroyedBarnAsset,
           ~pos=(5 * tileSize, 7 * tileSize),
@@ -631,7 +632,7 @@ let draw = (state, env) => {
           env,
         );
       };
-    } else if (state.journal.dayIndex === 6) {
+    } else if (state.journal.dayIndex >= 6) {
       drawAsset(5 * tileSize, 4 * tileSize, "destroyed_barn.png", state, env);
     } else {
       drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
@@ -681,7 +682,7 @@ let draw = (state, env) => {
             -. collisionPadding
             && curGameObject.pos.y >= barnBottom
             -. collisionPadding) {
-          if (state.journal.dayIndex === 6 && playerBehindBarn) {
+          if (state.journal.dayIndex >= 6 && playerBehindBarn) {
             Draw.image(
               state.shortDestroyedBarnAsset,
               ~pos=(5 * tileSize, 7 * tileSize),
