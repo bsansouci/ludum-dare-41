@@ -622,7 +622,7 @@ let draw = (state, env) => {
     focusedObject,
     env,
   );
-  let state = Journal.renderTransition(state, dt, env);
+  let state = Journal.renderTransition(state, env);
   state;
 };
 

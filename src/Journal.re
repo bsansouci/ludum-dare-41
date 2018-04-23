@@ -5,8 +5,7 @@ open Common;
 let fadeTimeSec = 1.5;
 
 let init = env => {
-  dayIndex: 1,
-  journalEntries: Story.journalEntries,
+  dayIndex: 0,
   dayTransition: NoTransition,
   animationTime: 0.,
   pageNumber: 0,
@@ -27,7 +26,7 @@ let updateDay = (state, env) => {
         };
       } else {
         state;
-      };
+      }
     | {journal: {dayTransition: JournalOut, animationTime}}
         when animationTime > fadeTimeSec => {
         ...state,
@@ -85,7 +84,7 @@ let updateDay = (state, env) => {
         },
         ...gameobjects,
       ];
-      let shouldAddBoss = dayIndex + 1 === 2;
+      let shouldAddBoss = dayIndex + 1 === 1;
       let gameobjects =
         if (shouldAddBoss) {
           let bPos = {x: tileSizef *. 17., y: tileSizef *. 15.};
@@ -135,16 +134,33 @@ let updateDay = (state, env) => {
       }
     | _ => state
     };
-  {
-    ...state,
-    journal: {
-      ...state.journal,
-      journalEntries: Story.journalEntries,
-    },
-  };
+  state;
 };
 
-let renderTransition = (state, deltaTime, env) =>
+let renderJournal = ({journal: {dayIndex}} as state, env) => {
+  drawAssetFullscreen("journal_page.png", state, env);
+  Draw.pushStyle(env);
+  Draw.tint(Utils.color(0, 0, 0, 255), env);
+  Draw.text(
+    ~body="Day " ++ string_of_int(dayIndex + 1),
+    ~font=state.mainFont,
+    ~pos=(55, 60),
+    env,
+  );
+  let currentEntry = Story.entries[dayIndex];
+  ignore @@
+  Array.fold_left(
+    (y, line) => {
+      Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
+      y + 32;
+    },
+    110,
+    currentEntry[state.journal.pageNumber],
+  );
+  Draw.popStyle(env);
+};
+
+let renderTransition = (state, env) =>
   switch (state) {
   | {journal: {dayTransition: FadeOut, animationTime}} =>
     Draw.fill(
@@ -175,7 +191,7 @@ let renderTransition = (state, deltaTime, env) =>
       ...state,
       journal: {
         ...state.journal,
-        animationTime: animationTime +. deltaTime,
+        animationTime: animationTime +. Env.deltaTime(env),
       },
     };
   | {journal: {dayTransition: FadeIn, animationTime}} =>
@@ -207,23 +223,31 @@ let renderTransition = (state, deltaTime, env) =>
       ...state,
       journal: {
         ...state.journal,
-        animationTime: animationTime +. deltaTime,
+        animationTime: animationTime +. Env.deltaTime(env),
       },
     };
-  | {
-      journal: {
-        dayTransition: JournalOut as dayTransition,
-        dayIndex,
-        animationTime,
-      },
-    }
-  | {
-      journal: {
-        dayTransition: JournalIn as dayTransition,
-        dayIndex,
-        animationTime,
-      },
-    } =>
+  | {journal: {dayTransition: CheckJournal, animationTime}} =>
+    renderJournal(state, env);
+    if (animationTime > 0.
+        && (Env.keyPressed(Space, env) || Env.keyPressed(X, env))) {
+      {
+        ...state,
+        journal: {
+          ...state.journal,
+          dayTransition: NoTransition,
+        },
+      };
+    } else {
+      {
+        ...state,
+        journal: {
+          ...state.journal,
+          animationTime: 1.,
+        },
+      };
+    };
+  | {journal: {dayTransition: JournalOut as dayTransition, animationTime}}
+  | {journal: {dayTransition: JournalIn as dayTransition, animationTime}} =>
     Draw.fill(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
     Draw.rect(
       ~pos=(0, 0),
@@ -248,11 +272,11 @@ let renderTransition = (state, deltaTime, env) =>
             Utils.constrain(
               ~amt=
                 Utils.remapf(
-                  animationTime,
-                  0.,
-                  fadeTimeSec,
-                  minAlpha,
-                  maxAlpha,
+                  ~value=animationTime,
+                  ~low1=0.,
+                  ~high1=fadeTimeSec,
+                  ~low2=minAlpha,
+                  ~high2=maxAlpha,
                 ),
               ~low=0.,
               ~high=255.,
@@ -261,27 +285,9 @@ let renderTransition = (state, deltaTime, env) =>
       ),
       env,
     );
-    drawAssetFullscreen("journal_page.png", state, env);
-    /*Draw.pushStyle(env);*/
-    Draw.tint(Utils.color(0, 0, 0, 255), env);
-    Draw.text(
-      ~body="Day " ++ string_of_int(dayIndex),
-      ~font=state.mainFont,
-      ~pos=(55, 60),
-      env,
-    );
-    let currentEntry = state.journal.journalEntries[dayIndex - 1];
-    ignore @@
-    Array.fold_left(
-      (y, line) => {
-        Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
-        y + 32;
-      },
-      110,
-      currentEntry[state.journal.pageNumber],
-    );
+    renderJournal(state, env);
     Draw.popStyle(env);
-    if (animationTime > fadeTimeSec && dayTransition == FadeOut ) {
+    if (animationTime > fadeTimeSec && dayTransition == FadeOut) {
       {
         ...state,
         journal: {
@@ -290,7 +296,8 @@ let renderTransition = (state, deltaTime, env) =>
           animationTime: 0.,
         },
       };
-    } else if (dayTransition == JournalIn && Env.keyPressed(Space, env)) {
+    } else if (dayTransition == JournalIn
+               && (Env.keyPressed(Space, env) || Env.keyPressed(X, env))) {
       {
         ...state,
         journal: {
@@ -304,7 +311,7 @@ let renderTransition = (state, deltaTime, env) =>
         ...state,
         journal: {
           ...state.journal,
-          animationTime: animationTime +. deltaTime,
+          animationTime: animationTime +. Env.deltaTime(env),
         },
       };
     };
@@ -312,26 +319,31 @@ let renderTransition = (state, deltaTime, env) =>
   };
 
 let checkTasks = (state, _env) =>
-  if (state.journal.dayIndex === 1) {
-    false
-    /*List.for_all(
-      (o: gameobjectT) =>
-        /* Check for everything that needs to be done for the next day to happen. */
-        switch (o) {
-        /*     "Water corn",
-               "Plant seeds",
-               "Sell eggs",
-               "Sell milk"*/
-        | {action: PickUp(Egg)}
-        | {action: PickUp(Corn)}
-        | {state: WaterTank(HalfFull)}
-        | {state: WaterTank(Empty)}
-        | {action: PickUp(Milk), state: Cow(_)}
-        | {action: WaterCorn} => false
-        | _ => true
-        },
-      state.gameobjects,
-    );*/
+  if (state.journal.dayIndex === 0) {
+    let (acc, count) =
+      List.fold_left(
+        ((acc, count), o: gameobjectT) =>
+          /* Check for everything that needs to be done for the next day to happen. */
+          switch (acc, o) {
+          /*     "Water corn",
+                 "Plant seeds",
+                 "Sell eggs",
+                 "Sell milk"*/
+          | (true, {action: PickUp(Egg)})
+          | (true, {state: WaterTank(Empty)})
+          | (true, {action: PickUp(Milk), state: Cow(_)}) => (false, count)
+          | (true, {state: Corn(_), action: NoAction}) => (true, count + 1)
+          | (false, _) => (false, count)
+          | _ => (true, count)
+          },
+        (true, 0),
+        state.gameobjects,
+      );
+    if (acc && count >= 2) {
+      true;
+    } else {
+      acc;
+    };
   } else {
     false;
   };

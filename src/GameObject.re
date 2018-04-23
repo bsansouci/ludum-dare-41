@@ -12,8 +12,53 @@ let init = grid => {
               y + 1,
               switch (tile) {
               | Dirt => [
-                  x != 21 ?
-                    {
+                  switch (x) {
+                  | 17 => {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterCorn,
+                      state: Corn(0),
+                    }
+                  | 18 => {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterCorn,
+                      state: Corn(1),
+                    }
+                  | 19 => {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterCorn,
+                      state: Corn(2),
+                    }
+                  | 20 => {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterCorn,
+                      state: Corn(3),
+                    }
+                  | 21 => {
+                      pos:
+                        posMake(
+                          x * tileSize + tileSize / 2,
+                          y * tileSize + tileSize / 2,
+                        ),
+                      action: WaterCorn,
+                      state: Corn(4),
+                    }
+                  | _ => {
                       pos:
                         posMake(
                           x * tileSize + tileSize / 2,
@@ -21,16 +66,8 @@ let init = grid => {
                         ),
                       action: PlantSeed,
                       state: Corn(-1),
-                    } :
-                    {
-                      pos:
-                        posMake(
-                          x * tileSize + tileSize / 2,
-                          y * tileSize + tileSize / 2,
-                        ),
-                      action: PickUp(Corn),
-                      state: Corn(5),
-                    },
+                    }
+                  },
                   ...gameobjects,
                 ]
               | Water => [
@@ -130,7 +167,7 @@ let init = grid => {
               addChick([
                 {
                   pos: {
-                    x: tileSizef *. 17.8,
+                    x: tileSizef *. 16.8,
                     y: tileSizef *. 10.,
                   },
                   action: GoToBed,
@@ -797,6 +834,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (Some(Milk), Some({action: Sell})) => "Sell milk"
     | (Some(Water), Some({action: Cleanup})) => "Cleanup mess"
     | (_, Some({action: GoToBed})) when finishedAllTasks => "Go to bed"
+    | (_, Some({action: GoToBed})) when ! finishedAllTasks => "Open Journal"
     | _ => ""
     };
   if (body != "") {
@@ -821,6 +859,17 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
           journal: {
             ...state.journal,
             dayTransition: FadeOut,
+            animationTime: 0.,
+          },
+        },
+        focusedObject,
+      )
+    | (_, Some({action: GoToBed})) when ! finishedAllTasks => (
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            dayTransition: CheckJournal,
             animationTime: 0.,
           },
         },
@@ -1034,7 +1083,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
                   {
                     ...g,
                     action: s == Empty ? WaterAnimals : NoAction,
-                    state: WaterTank(s == Empty ? HalfFull : Full),
+                    state: WaterTank(Full),
                   };
                 },
               state.gameobjects,
