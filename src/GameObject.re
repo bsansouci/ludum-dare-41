@@ -712,17 +712,57 @@ let renderObject =
       state,
       env,
     )
-  | {pos: {x, y}, state: Boss(_)} =>
-    Draw.pushStyle(env);
-    Draw.tint(Utils.color(0, 0, 0, 255), env);
-    drawAssetf(
-      x -. tileSizef /. 2.,
-      y -. tileSizef /. 2.,
-      "egg.png",
-      state,
-      env,
-    );
-    Draw.popStyle(env);
+  | {
+      pos: {x, y},
+      state:
+        Boss({
+          movingTime,
+          eatingTime,
+          movePair: ({x: x1, y: y1}, {x: x2, y: y2}),
+        }),
+    } =>
+    let facing =
+      if (x1 > x2) {
+        LeftD;
+      } else if (x1 < x2) {
+        RightD;
+      } else if (y1 < y2) {
+        DownD;
+      } else {
+        UpD;
+      };
+    let img =
+      switch (
+        facing,
+        x1 == x2 && y1 == y2,
+        eatingTime > 0.,
+        int_of_float(state.time /. 0.2) mod 4,
+      ) {
+      | (_, _, true, 0)
+      | (_, _, true, 2) => "monster_gory_eating.png"
+      | (_, _, true, 1)
+      | (_, _, true, 3) => "monster_gory_eating_two.png"
+      | (_, true, _, _) => "monster_front_face_blood.png"
+      | (DownD, false, _, 0)
+      | (DownD, false, _, 2) => "monster_front_face_blood.png"
+      | (DownD, false, _, 1) => "monster_front_face_walk_one.png"
+      | (DownD, false, _, 3) => "monster_front_face_walk_two.png"
+      | (RightD, false, _, 0)
+      | (RightD, false, _, 2) => "monster_right_face.png"
+      | (RightD, false, _, 1) => "monster_right_face_walk_one.png"
+      | (RightD, false, _, 3) => "monster_right_face_walk_two.png"
+      | (LeftD, false, _, 0)
+      | (LeftD, false, _, 2) => "monster_left_face.png"
+      | (LeftD, false, _, 1) => "monster_left_face_walk_one.png"
+      | (LeftD, false, _, 3) => "monster_left_face_walk_two.png"
+      | (UpD, false, _, 0)
+      | (UpD, false, _, 2) => "monster_back_face.png"
+      | (UpD, false, _, 1) => "monster_back_face_walk_one.png"
+      | (UpD, false, _, 3) => "monster_back_face_walk_two.png"
+      | _ => "egg.png"
+      };
+    drawAssetf(x, y -. tileSizef, img, state, env);
+    Draw.rectf(~pos=(x, y), ~width=10., ~height=10., env);
   | {pos: {x, y}, action: PickUp(Knife)} =>
     Draw.fill(Utils.color(0, 0, 0, 255), env);
     Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
