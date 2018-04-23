@@ -19,7 +19,7 @@ let mapString = {|
 0000034444444300011111005550
 0000034444444300011111005550
 0000034444444300000000005550
-0000qx3344433xxxxxx0xxxxe000
+0000qx3334333xxxxxx0xxxxe000
 0000a0000000000000000006d000
 0000a0000000000000000000d000
 0000a0000000000000000000d000
@@ -211,6 +211,7 @@ let draw = (state, env) => {
       let offset =
         Env.key(Left, env) || Env.key(A, env) ?
           handleCollision(
+            state,
             offset,
             {...offset, x: -. playerSpeedDt},
             state.playerPos,
@@ -220,6 +221,7 @@ let draw = (state, env) => {
       let offset =
         Env.key(Right, env) || Env.key(D, env) ?
           handleCollision(
+            state,
             offset,
             {...offset, x: playerSpeedDt},
             state.playerPos,
@@ -229,6 +231,7 @@ let draw = (state, env) => {
       let offset =
         Env.key(Up, env) || Env.key(W, env) ?
           handleCollision(
+            state,
             offset,
             {...offset, y: -. playerSpeedDt},
             state.playerPos,
@@ -237,6 +240,7 @@ let draw = (state, env) => {
           offset;
       Env.key(Down, env) || Env.key(S, env) ?
         handleCollision(
+          state,
           offset,
           {...offset, y: playerSpeedDt},
           state.playerPos,
@@ -247,6 +251,7 @@ let draw = (state, env) => {
       offset;
     };
   let mag = Utils.magf((offset.x, offset.y));
+  /*print_endline("posx, posy:" ++ string_of_float(state.playerPos.x) ++ " " ++ string_of_float(state.playerPos.y));*/
   let state =
     if (mag > 0.) {
       let dx = offset.x /. mag *. playerSpeedDt;
@@ -352,8 +357,20 @@ let draw = (state, env) => {
     | None => None
     | Some((_, fgo)) => Some(fgo)
     };
+  let playerInBarn =
+    Utils.intersectRectRect(
+      ~rect1Pos=(
+        state.playerPos.x +. tileSizef /. 2.,
+        state.playerPos.y +. tileSizef /. 2.,
+      ),
+      ~rect1W=tileSizef /. 2.,
+      ~rect1H=tileSizef /. 2.,
+      ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
+      ~rect2W=256.,
+      ~rect2H=256.,
+    );
   let (state, focusedObject) =
-    GameObject.checkPickUp(state, focusedObject, env);
+    GameObject.applyAction(state, playerInBarn, focusedObject, env);
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
@@ -436,20 +453,20 @@ let draw = (state, env) => {
       ),
     state.grid,
   );
-  let playerInBarn =
-    Utils.intersectRectRect(
-      ~rect1Pos=(
-        state.playerPos.x +. tileSizef /. 2.,
-        state.playerPos.y +. tileSizef /. 2.,
-      ),
-      ~rect1W=tileSizef /. 2.,
-      ~rect1H=tileSizef /. 2.,
-      ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
-      ~rect2W=256.,
-      ~rect2H=256.,
-    );
   let playerBehindBarn =
-    playerInBarn ? false : Common.playerInsideTheBarn(state, env);
+    playerInBarn ?
+      false :
+      Reprocessing.Utils.intersectRectRect(
+        ~rect1Pos=(
+          state.playerPos.x +. tileSizef /. 2.,
+          state.playerPos.y +. tileSizef /. 2.,
+        ),
+        ~rect1W=tileSizef /. 2.,
+        ~rect1H=tileSizef /. 2.,
+        ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
+        ~rect2W=320.,
+        ~rect2H=32. *. 4.,
+      );
   /** Draw large game objects */
   (
     if (playerBehindBarn) {
@@ -483,7 +500,13 @@ let draw = (state, env) => {
   if (firstGameObject.pos.y >= state.playerPos.y +. tileSizef /. 2.) {
     renderPlayer(state, env);
   };
-  GameObject.renderObject(firstGameObject, focusedObject, state, env);
+  GameObject.renderObject(
+    firstGameObject,
+    playerInBarn,
+    focusedObject,
+    state,
+    env,
+  );
   /* @Hack We assume sortedGameObjects always contains at least one element here so we have prev and cur */
   let lastGameObject =
     List.fold_left(
@@ -491,14 +514,14 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 416.
+            /. 2. < 256.
             +. tileSizef
-            *. 3.
+            *. 9.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 416.
+            /. 2. >= 256.
             +. tileSizef
-            *. 3.) {
+            *. 9.) {
           if (playerBehindBarn) {
             ();
           } else {
@@ -519,7 +542,13 @@ let draw = (state, env) => {
             /. 2.) {
           renderPlayer(state, env);
         };
-        GameObject.renderObject(curGameObject, focusedObject, state, env);
+        GameObject.renderObject(
+          curGameObject,
+          playerInBarn,
+          focusedObject,
+          state,
+          env,
+        );
         curGameObject;
       },
       firstGameObject,
@@ -578,7 +607,7 @@ let draw = (state, env) => {
   if (state.night) {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
   };
-  GameObject.renderAction(state, focusedObject, env);
+  GameObject.renderAction(state, playerInBarn, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
   state;
 };

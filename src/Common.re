@@ -244,7 +244,7 @@ let facingToOffset = dir =>
   | LeftD => {x: (-0.5), y: 0.}
   };
 
-let handleCollision = (prevOffset, offset, pos, grid) => {
+let handleCollision = (state, prevOffset, offset, pos, grid) => {
   let l = [
     (0, 0),
     (1, 1),
@@ -256,10 +256,10 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
     (1, 0),
     (0, 1),
   ];
+  let padding = 8.;
   let collided =
     List.exists(
       ((dx, dy)) => {
-        let padding = 8.;
         let tx = dx + int_of_float((offset.x +. pos.x) /. tileSizef);
         let ty = dy + int_of_float((offset.y +. pos.y) /. tileSizef);
         if (tx >= Array.length(grid)
@@ -296,18 +296,36 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
       },
       l,
     );
+  /*.Check if anything collides with the barn door */
+  let collided =
+    if (! collided) {
+      /* barn door pos = {
+           x: tileSizef *. 10.,
+           y: tileSizef *. 16.,
+         } */
+      let collided =
+        Reprocessing.Utils.intersectRectRect(
+          ~rect1Pos=(pos.x +. offset.x, pos.y +. offset.y),
+          ~rect1W=tileSizef,
+          ~rect1H=tileSizef,
+          ~rect2Pos=(256., 512.),
+          ~rect2W=tileSizef *. 3.,
+          ~rect2H=tileSizef -. 8. /* Small offset because otherwise you can kinda get stuck inside the barn door.. .*/
+        );
+      if (collided) {
+        List.exists(
+          g =>
+            switch (g) {
+            | {state: BarnDoor(Closed)} => true
+            | _ => false
+            },
+          state.gameobjects,
+        );
+      } else {
+        false;
+      };
+    } else {
+      true;
+    };
   if (collided) {prevOffset} else {offset};
 };
-
-let playerInsideTheBarn = (state, env) =>
-  Reprocessing.Utils.intersectRectRect(
-    ~rect1Pos=(
-      state.playerPos.x +. tileSizef /. 2.,
-      state.playerPos.y +. tileSizef /. 2.,
-    ),
-    ~rect1W=tileSizef /. 2.,
-    ~rect1H=tileSizef /. 2.,
-    ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
-    ~rect2W=320.,
-    ~rect2H=32. *. 4.,
-  );
