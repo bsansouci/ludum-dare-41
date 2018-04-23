@@ -39,6 +39,7 @@ type carryableT =
 type actionT =
   | PickUp(carryableT)
   | Cleanup
+  | CleanupBlood
   | WaterCorn
   | WaterAnimals
   | FeedAnimals
@@ -138,6 +139,9 @@ type stateT = {
   time: float,
   night: bool,
   mainFont: Reprocessing.fontT,
+  monsterWasLockedIn: bool,
+  mousePressed: bool,
+  mousePressedHack: bool,
 };
 
 let screenSize = 600.;

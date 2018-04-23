@@ -11,10 +11,35 @@ let init = env => {
   pageNumber: 0,
 };
 
+let getForwardButton = ({mainFont, journal: {dayIndex, pageNumber}}, env) => {
+  let currentEntry = Story.entries[dayIndex];
+  let (body, x) =
+    if (pageNumber === Array.length(currentEntry) - 1) {
+      ("continue", 445);
+    } else {
+      (
+        string_of_int(pageNumber + 1)
+        ++ " / "
+        ++ string_of_int(Array.length(currentEntry)),
+        468,
+      );
+    };
+  let w1 = Draw.textWidth(~body, ~font=mainFont, env);
+  let (x1, y1, w1, h1) = (x, 550, w1 + 24, 40);
+  (body, x1, y1, w1, h1);
+};
+
+let getBackButton = ({mainFont}, env) => {
+  let body = " < ";
+  let w1 = Draw.textWidth(~body, ~font=mainFont, env);
+  let (x1, y1, w1, h1) = (60, 550, w1 + 24, 40);
+  (body, x1, y1, w1, h1);
+};
+
 let updateDay = (state, env) => {
   let state =
     switch (state) {
-    | {gameobjects, journal: {dayTransition: NoTransition}} =>
+    | {journal: {dayTransition: NoTransition}} =>
       if (debug && Env.keyPressed(P, env)) {
         {
           ...state,
@@ -107,7 +132,7 @@ let updateDay = (state, env) => {
         } else {
           gameobjects;
         };
-      let shouldAddFlowers = dayIndex + 1 === 1;
+      let shouldAddFlowers = dayIndex + 1 === 4;
       let gameobjects =
         if (shouldAddFlowers) {
           [
@@ -149,12 +174,57 @@ let updateDay = (state, env) => {
           animationTime: 0.,
         },
       }
+    | {journal: {dayTransition: JournalIn, dayIndex, pageNumber}} =>
+      let (mx, my) = Env.mouse(env);
+      let didClickOnForward =
+        state.mousePressed
+        && {
+          let (_, x1, y1, w1, h1) = getForwardButton(state, env);
+          mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1;
+        };
+      let didClickOnBack =
+        state.mousePressed
+        && {
+          let (_, x1, y1, w1, h1) = getBackButton(state, env);
+          mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1;
+        };
+      if ((Env.keyPressed(Right, env) || didClickOnForward)
+          && pageNumber < Array.length(Story.entries[dayIndex])
+          - 1) {
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            pageNumber: pageNumber + 1,
+          },
+        };
+      } else if ((Env.keyPressed(Left, env) || didClickOnBack)
+                 && pageNumber > 0) {
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            pageNumber: pageNumber - 1,
+          },
+        };
+      } else if ((Env.keyPressed(Right, env) || didClickOnForward)
+                 && pageNumber === Array.length(Story.entries[dayIndex]) - 1) {
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            dayTransition: JournalOut,
+          },
+        };
+      } else {
+        state;
+      };
     | _ => state
     };
   state;
 };
 
-let renderJournal = ({journal: {dayIndex}} as state, env) => {
+let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   drawAssetFullscreen("journal_page.png", state, env);
   Draw.pushStyle(env);
   Draw.tint(Utils.color(0, 0, 0, 255), env);
@@ -165,6 +235,36 @@ let renderJournal = ({journal: {dayIndex}} as state, env) => {
     env,
   );
   let currentEntry = Story.entries[dayIndex];
+  {
+    let (body, x1, y1, w1, h1) = getForwardButton(state, env);
+    let (mx, my) = Env.mouse(env);
+    if (mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1) {
+      Draw.fill(Utils.color(170, 138, 107, 255), env);
+      Draw.rect(~pos=(x1, y1), ~width=w1, ~height=h1, env);
+    };
+    Draw.text(~body, ~font=state.mainFont, ~pos=(x1 + 12, y1 + 30), env);
+  };
+  {
+    let (body, x1, y1, w1, h1) = getBackButton(state, env);
+    let (mx, my) = Env.mouse(env);
+    if (mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1) {
+      Draw.fill(Utils.color(170, 138, 107, 255), env);
+      Draw.rect(~pos=(x1, y1), ~width=w1, ~height=h1, env);
+    };
+    Draw.text(~body, ~font=state.mainFont, ~pos=(x1 + 12, y1 + 30), env);
+  };
+  /*{
+      let w = Draw.textWith(~body="Day " ++ string_of_int(dayIndex + 1),
+        ~font=state.mainFont, env);
+      let (x2, y2, w2, h2) = (480, 580, w, 50);
+      Draw.rect()
+      Draw.text(
+        ~body,
+        ~font=state.mainFont,
+        ~pos=(x2, y2),
+        env,
+      );
+    };*/
   ignore @@
   Array.fold_left(
     (y, line) => {
@@ -172,7 +272,7 @@ let renderJournal = ({journal: {dayIndex}} as state, env) => {
       y + 32;
     },
     110,
-    currentEntry[state.journal.pageNumber],
+    currentEntry[pageNumber],
   );
   Draw.popStyle(env);
 };
@@ -361,6 +461,82 @@ let checkTasks = (state, _env) =>
     } else {
       acc;
     };
+  } else if (state.journal.dayIndex === 1) {
+    /*"Water animals",
+      "Harvest corn", ----> because you're told to throw it out
+      "Feed animals",
+      "Clean poop"
+      */
+    List.for_all(
+      (o: gameobjectT) =>
+        switch (o) {
+        | {state: WaterTank(Empty)}
+        | {state: FoodTank(Empty)}
+        | {action: PickUp(Corn)}
+        | {action: Cleanup} => false
+        | _ => true
+        },
+      state.gameobjects,
+    );
+  } else if (state.journal.dayIndex === 2) {
+    !
+      List.exists(
+        o =>
+          switch (o) {
+          | {state: BarnDoor(Broken)} => true
+          | _ => false
+          },
+        state.gameobjects,
+      );
+      /*    "Tasks",
+            "",
+            "Fix the barn",
+            "Make sure you can open and close the barn door"
+            */
+  } else if (state.journal.dayIndex === 3) {
+    !
+      List.exists(
+        o =>
+          switch (o) {
+          | {action: CleanupBlood} => false
+          | _ => true
+          },
+        state.gameobjects,
+      );
+      /*"Tasks",
+        "",
+        "There was some noise in the barn last night.",
+        "Investigate the barn",
+        "Clean up any mess that's in the barn"*/
+  } else if (state.journal.dayIndex === 4) {
+    /*    "Tasks",
+          "",
+          "Find Maria's grave",
+          "Mourn"
+          */
+    List.exists(
+      o =>
+        switch (o) {
+        | {state: Tombstone(true)} => true
+        | _ => false
+        },
+      state.gameobjects,
+    );
+  } else if (state.journal.dayIndex === 5) {
+    /*
+         "Tasks",
+     "",
+     "There was some noise in the barn.",
+     "Investigate the barn",
+     "Clean up any mess that's in the barn"
+
+     second task becomes
+
+     "Lock monster in barn"
+
+          */
+    state.
+      monsterWasLockedIn;
   } else {
     false;
   };

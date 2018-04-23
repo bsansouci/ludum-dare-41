@@ -597,6 +597,14 @@ let renderBefore = (g, focusedObject, state, env) => {
       state,
       env,
     )
+  | {pos: {x, y}, action: CleanupBlood} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "blood_splatter.png",
+      state,
+      env,
+    )
   | {pos: {x, y}, action: NoAction, state: Cow({health})}
   | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
     if (health === (-1)) {
@@ -895,6 +903,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (Some(Egg), Some({action: Sell})) => "Sell egg"
     | (Some(Milk), Some({action: Sell})) => "Sell milk"
     | (Some(Water), Some({action: Cleanup})) => "Cleanup mess"
+    | (Some(Water), Some({action: CleanupBlood})) => "Cleanup blood"
     | (Some(Flower), Some({state: Tombstone(_)})) => "Leave flowers"
     | (_, Some({action: GoToBed})) when finishedAllTasks => "Go to bed"
     | (_, Some({action: GoToBed})) when ! finishedAllTasks => "Open Journal"
@@ -1143,6 +1152,16 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
       drop();
       ({...state, currentItem: None, dollarAnimation: 0.}, None);
     | (Some(Water), Some({action: Cleanup} as go)) =>
+      drop();
+      (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects: List.filter(g => g !== go, state.gameobjects),
+        },
+        None,
+      );
+    | (Some(Water), Some({action: CleanupBlood} as go)) =>
       drop();
       (
         {

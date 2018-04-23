@@ -198,7 +198,14 @@ let setup = (assets, env) => {
     time: 0.,
     night: false,
     mainFont:
-      Draw.loadFont(~filename="whatever it takes bold_2x.fnt", ~isPixel=false, env),
+      Draw.loadFont(
+        ~filename="whatever it takes bold_2x.fnt",
+        ~isPixel=false,
+        env,
+      ),
+    monsterWasLockedIn: false,
+    mousePressed: false,
+    mousePressedHack: false,
   };
 };
 
@@ -222,7 +229,8 @@ let draw = (state, env) => {
   };
   let offset = {x: 0., y: 0.};
   let offset =
-    if (state.journal.dayTransition == NoTransition || state.journal.dayTransition == FadeIn) {
+    if (state.journal.dayTransition == NoTransition
+        || state.journal.dayTransition == FadeIn) {
       let offset =
         Env.key(Left, env) || Env.key(A, env) ?
           handleCollision(
@@ -264,6 +272,16 @@ let draw = (state, env) => {
         offset;
     } else {
       offset;
+    };
+  let state =
+    if (! Env.mousePressed(env)) {
+      {...state, mousePressed: false, mousePressedHack: false};
+    } else if (! state.mousePressedHack && Env.mousePressed(env)) {
+      {...state, mousePressed: true, mousePressedHack: true};
+    } else if (state.mousePressed && state.mousePressedHack) {
+      {...state, mousePressed: false};
+    } else {
+      state;
     };
   let mag = Utils.magf((offset.x, offset.y));
   /*print_endline("posx, posy:" ++ string_of_float(state.playerPos.x) ++ " " ++ string_of_float(state.playerPos.y));*/
@@ -492,7 +510,13 @@ let draw = (state, env) => {
   /** Draw large game objects */
   (
     if (playerBehindBarn) {
-      drawAsset(5 * tileSize, 4 * tileSize, "short_barn_inside.png", state, env);
+      drawAsset(
+        5 * tileSize,
+        4 * tileSize,
+        "short_barn_inside.png",
+        state,
+        env,
+      );
     } else {
       drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
     }
