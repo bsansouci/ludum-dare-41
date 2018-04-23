@@ -966,6 +966,11 @@ let renderObject =
   };
 
 let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) => {
+  let tutorial = if (!state.hasPressedTheActionKeyOnce) {
+    " (Press X or SPACE)"
+  } else {
+    ""
+  };
   let body =
     switch (state.currentItem, focusedObject) {
     | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
@@ -1007,11 +1012,14 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | _ => ""
     };
   if (body != "") {
+    let body = body ++ tutorial;
     Draw.pushStyle(env);
-    Draw.fill(Utils.color(~r=255, ~g=255, ~b=255, ~a=255), env);
-    let padding = 16;
+    Draw.fill(Utils.color(~r=101, ~g=56, ~b=27, ~a=255), env);
+    let padding = 12;
     let width = Draw.textWidth(~body, ~font=state.mainFont, env);
     Draw.rect(~pos=(0, 0), ~width=width + padding * 2, ~height=70, env);
+    Draw.fill(Utils.color(~r=220, ~g=194, ~b=154, ~a=255), env);
+    Draw.rect(~pos=(padding / 2, 6), ~width=width + padding, ~height=58, env);
     Draw.tint(Utils.color(0, 0, 0, 255), env);
     Draw.text(~body, ~font=state.mainFont, ~pos=(padding, 45), env);
     Draw.popStyle(env);

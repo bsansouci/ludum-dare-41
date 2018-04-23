@@ -216,6 +216,7 @@ let setup = (assets, env) => {
       ),
     sleepingMonsterAsset:
       Draw.loadImage(~isPixel=true, ~filename="sleeping_monster.png", env),
+    hasPressedTheActionKeyOnce: false,
   };
 };
 
@@ -282,6 +283,13 @@ let draw = (state, env) => {
         offset;
     } else {
       offset;
+    };
+  let state =
+    if (! state.hasPressedTheActionKeyOnce
+        && (Env.key(X, env) || Env.key(Space, env))) {
+      {...state, hasPressedTheActionKeyOnce: true};
+    } else {
+      state;
     };
   let state =
     if (! Env.mousePressed(env)) {
