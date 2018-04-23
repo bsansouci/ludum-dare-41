@@ -650,14 +650,25 @@ let renderObject =
       state,
       env,
     )
-  | {pos: {x, y}, action: DoBarnDoor} when ! playerInBarn =>
-    drawAssetf(
-      x -. tileSizef /. 2. +. 3.,
-      y -. 2. *. tileSizef -. tileSizef /. 2.,
-      "barn_door.png",
-      state,
-      env,
-    )
+  | {pos: {x, y}, action: DoBarnDoor, state: BarnDoor(barnState)}
+      when ! playerInBarn =>
+    if (barnState == Broken) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. 2. *. tileSizef -. tileSizef /. 2.,
+        "barn_door_broken.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. 2. *. tileSizef -. tileSizef /. 2.,
+        "barn_door.png",
+        state,
+        env,
+      );
+    }
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -914,8 +925,8 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
       let (nextBarnState, pos) =
         switch (barnState) {
         | Broken => (Opened, pos)
-        | Opened => (Closed, {x: pos.x -. tileSizef, y: pos.y})
-        | Closed => (Opened, {x: pos.x +. tileSizef, y: pos.y})
+        | Opened => (Closed, {x: pos.x -. tileSizef +. 3., y: pos.y})
+        | Closed => (Opened, {x: pos.x +. tileSizef -. 3., y: pos.y})
         };
       (
         {

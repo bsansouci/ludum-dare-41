@@ -37,6 +37,15 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "barn_door_broken.png",
+	"frame": {"x":512,"y":208,"w":64,"h":80},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":80},
+	"sourceSize": {"w":64,"h":80},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "barn_inside.png",
 	"frame": {"x":0,"y":704,"w":288,"h":416},
 	"rotated": false,
