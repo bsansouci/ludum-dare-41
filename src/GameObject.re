@@ -620,7 +620,7 @@ let renderAction = (state, focusedObject, env) => {
 };
 
 let checkPickUp = (state, focusedObject, env) =>
-  if (Env.keyPressed(X, env) || Env.keyPressed(Space, env)) {
+  if (state.journal.dayTransition == NoTransition && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
     switch (state.currentItem, focusedObject) {
     | (None, Some({action: DoBarnDoor, state: BarnDoor(barnState)} as go)) =>
       let nextBarnState =

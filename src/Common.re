@@ -107,9 +107,10 @@ type dayTransitionT =
 
 type journalT = {
   dayIndex: int,
-  journalEntries: array(array(journalEntryT)),
+  journalEntries: array(array(array(journalEntryT))),
   dayTransition: dayTransitionT,
   animationTime: float,
+  pageNumber: int
 };
 
 
