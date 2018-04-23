@@ -182,7 +182,7 @@ let setup = (assets, env) => {
     time: 0.,
     night: false,
     mainFont:
-      Draw.loadFont(~filename="GamestationCond_2x.fnt", ~isPixel=false, env),
+      Draw.loadFont(~filename="whatever it takes bold_2x.fnt", ~isPixel=false, env),
   };
 };
 
@@ -207,7 +207,7 @@ let draw = (state, env) => {
   };
   let offset = {x: 0., y: 0.};
   let offset =
-    if (state.journal.dayTransition == NoTransition) {
+    if (state.journal.dayTransition == NoTransition || state.journal.dayTransition == FadeIn) {
       let offset =
         Env.key(Left, env) || Env.key(A, env) ?
           handleCollision(
@@ -320,8 +320,7 @@ let draw = (state, env) => {
           }
         }, ([], boss.killed), state.gameobjects);*/
       {...state, gameobjects};
-    | _ =>
-      failwith("Well we certainly didn't think this could happen")
+    | _ => failwith("Well we certainly didn't think this could happen")
     };
   let finishedAllTasks = Journal.checkTasks(state, env);
   let focusedObject =
@@ -371,7 +370,13 @@ let draw = (state, env) => {
       ~rect2H=256.,
     );
   let (state, focusedObject) =
-    GameObject.applyAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
+    GameObject.applyAction(
+      state,
+      playerInBarn,
+      finishedAllTasks,
+      focusedObject,
+      env,
+    );
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
@@ -504,6 +509,7 @@ let draw = (state, env) => {
   GameObject.renderObject(
     firstGameObject,
     playerInBarn,
+    playerBehindBarn,
     focusedObject,
     state,
     env,
@@ -546,6 +552,7 @@ let draw = (state, env) => {
         GameObject.renderObject(
           curGameObject,
           playerInBarn,
+          playerBehindBarn,
           focusedObject,
           state,
           env,
@@ -608,7 +615,13 @@ let draw = (state, env) => {
   if (state.night) {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
   };
-  GameObject.renderAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
+  GameObject.renderAction(
+    state,
+    playerInBarn,
+    finishedAllTasks,
+    focusedObject,
+    env,
+  );
   let state = Journal.renderTransition(state, dt, env);
   state;
 };

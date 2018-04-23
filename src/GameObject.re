@@ -515,9 +515,9 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.popStyle(env);
 };
 
-let renderObject = (g, playerInBarn, focusedObject, state, env) =>
+let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env) =>
   switch (g) {
-  | {pos: {x, y}, state: Tombstone} when playerInBarn =>
+  | {pos: {x, y}, state: Tombstone} when playerBehindBarn =>
     drawAssetf(
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
