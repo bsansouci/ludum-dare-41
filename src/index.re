@@ -174,6 +174,7 @@ let setup = (assets, env) => {
     journal: Journal.init(env),
     dollarAnimation: (-1.),
     time: 0.,
+    night: false,
   };
 };
 
@@ -182,6 +183,11 @@ let draw = (state, env) => {
   let dt = Env.deltaTime(env);
   let state = {...state, time: state.time +. dt};
   let playerSpeedDt = playerSpeed *. dt;
+  /*TODO: remove this */
+  let state = {
+    ...state,
+    night: Env.keyPressed(N, env) ? ! state.night : state.night,
+  };
   let offset = {x: 0., y: 0.};
   let offset =
     Env.key(Left, env) || Env.key(A, env) ?
@@ -331,12 +337,14 @@ let draw = (state, env) => {
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
   Draw.translate(
-    ~x=-. state.playerPos.x +. screenSize /. 4.,
-    ~y=-. state.playerPos.y +. screenSize /. 4.,
+    ~x=-. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.,
+    ~y=-. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.,
     env,
   );
-  /* Nighttime tint */
-  /* Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env); */
+  Draw.pushStyle(env);
+  if (state.night) {
+    Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env);
+  };
   Array.iteri(
     (x, row) =>
       Array.iteri(
@@ -392,12 +400,6 @@ let draw = (state, env) => {
             | 'q' =>
               drawAsset(px, py, "fence_top_left_corner.png", state, env)
             | 'z' => drawAsset(px, py, "fence_bottom_left.png", state, env)
-            /* | 'z' => */
-            /* Draw.pushMatrix(env); */
-            /* Draw.scale(~x=(-1.), ~y=(1.), env); */
-            /* Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env); */
-            /* drawAsset(0, 0, "corner_fence.png", state, env); */
-            /* Draw.popMatrix(env); */
             | _ => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
             };
           | Water
@@ -538,7 +540,11 @@ let draw = (state, env) => {
     } else {
       state;
     };
+  Draw.popStyle(env);
   Draw.popMatrix(env);
+  if (state.night) {
+    drawAssetFullscreen("baby_its_dark_outside.png", state, env);
+  };
   GameObject.renderAction(state, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
   state;

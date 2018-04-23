@@ -120,6 +120,7 @@ type stateT = {
   journal: journalT,
   dollarAnimation: float,
   time: float,
+  night: bool,
 };
 
 let screenSize = 600.;
@@ -129,6 +130,25 @@ let playerSpeed = 150.;
 let tileSize = 32;
 
 let tileSizef = float_of_int(tileSize);
+
+let drawAssetFullscreen = (name, state, env) =>
+  switch (StringMap.find(name, state.assets)) {
+  | exception Not_found =>
+    print_endline(
+      "Asset " ++ name ++ " not found. Get your shit together man.",
+    )
+  | asset =>
+    Reprocessing.Draw.subImage(
+      state.spritesheet,
+      ~pos=(0, 0),
+      ~width=Reprocessing.Env.width(env),
+      ~height=Reprocessing.Env.height(env),
+      ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
+      ~texWidth=int_of_float(asset.size.x),
+      ~texHeight=int_of_float(asset.size.y),
+      env,
+    )
+  };
 
 let drawAsset = (x, y, name, state, env) =>
   switch (StringMap.find(name, state.assets)) {
