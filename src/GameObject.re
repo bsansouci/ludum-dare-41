@@ -439,12 +439,12 @@ let update = (state, env) => {
               switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
               | None =>
                 /*print_endline(
-                  "Cant find"
-                  ++ string_of_int(tx)
-                  ++ ","
-                  ++ string_of_int(ty),
-                );*/
-                ({x: bx, y: by}, {x: bx, y: by});
+                    "Cant find"
+                    ++ string_of_int(tx)
+                    ++ ","
+                    ++ string_of_int(ty),
+                  );*/
+                ({x: bx, y: by}, {x: bx, y: by})
               | Some([])
               | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
               | Some([(x1, y1), (x2, y2), ..._]) as p => (
@@ -552,8 +552,8 @@ let renderBefore = (g, focusedObject, state, env) => {
   | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
     if (health === (-1)) {
       drawAssetf(
-        x -. (tileSizef /. 2.),
-        y -. (tileSizef /. 2.),
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
         "blood_puddle.png",
         state,
         env,
@@ -569,8 +569,6 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     } else if (health === 0) {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -579,15 +577,6 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     } else {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
-      Draw.fill(Utils.color(0, 0, 255, 255), env);
-      Draw.rectf(
-        ~pos=(17. *. tileSizef, 16. *. tileSizef),
-        ~width=tileSizef,
-        ~height=tileSizef,
-        env,
-      );
       drawAssetf(
         x -. tileSizef /. 4.,
         y -. tileSizef /. 4.,
@@ -638,7 +627,7 @@ let renderObject =
         state,
         env,
       );
-    } else if (health > 0){
+    } else if (health > 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -656,7 +645,7 @@ let renderObject =
         state,
         env,
       );
-    } else if (health > 0){
+    } else if (health > 0) {
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
