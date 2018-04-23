@@ -62,7 +62,10 @@ type chickenStateT = {
   health: int,
 };
 
-type barnDoorT = Broken | Opened | Closed;
+type barnDoorT =
+  | Broken
+  | Opened
+  | Closed;
 
 type bossStateT = {
   hunger: int,
@@ -81,6 +84,7 @@ and gameobjectStateT =
   | IsASeedBin
   | NoState
   | BarnDoor(barnDoorT)
+  | Tombstone
 and gameobjectT = {
   pos: vec2,
   action: actionT,
@@ -110,9 +114,8 @@ type journalT = {
   journalEntries: array(array(array(journalEntryT))),
   dayTransition: dayTransitionT,
   animationTime: float,
-  pageNumber: int
+  pageNumber: int,
 };
-
 
 type stateT = {
   grid: array(array(tileT)),
@@ -128,7 +131,7 @@ type stateT = {
   dollarAnimation: float,
   time: float,
   night: bool,
-  mainFont: Reprocessing.fontT
+  mainFont: Reprocessing.fontT,
 };
 
 let screenSize = 600.;
@@ -215,8 +218,7 @@ let playSound = (name, state, env) =>
   };
 
 let loadSounds = env => {
-  let loadSoundHelper =
-      (soundMap, (soundName: string, volume)) =>
+  let loadSoundHelper = (soundMap, (soundName: string, volume)) =>
     StringMap.add(
       soundName,
       (
@@ -296,3 +298,16 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
     );
   if (collided) {prevOffset} else {offset};
 };
+
+let playerInsideTheBarn = (state, env) =>
+  Reprocessing.Utils.intersectRectRect(
+    ~rect1Pos=(
+      state.playerPos.x +. tileSizef /. 2.,
+      state.playerPos.y +. tileSizef /. 2.,
+    ),
+    ~rect1W=tileSizef /. 2.,
+    ~rect1H=tileSizef /. 2.,
+    ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
+    ~rect2W=320.,
+    ~rect2H=32. *. 4.,
+  );

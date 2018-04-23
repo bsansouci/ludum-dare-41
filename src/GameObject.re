@@ -130,6 +130,14 @@ let init = grid => {
               addChick([
                 {
                   pos: {
+                    x: 9. *. tileSizef,
+                    y: 6. *. tileSizef,
+                  },
+                  action: NoAction,
+                  state: Tombstone,
+                },
+                {
+                  pos: {
                     x: tileSizef *. 8.,
                     y: tileSizef *. 16.,
                   },
@@ -452,6 +460,15 @@ let renderBefore = (g, focusedObject, state, env) => {
 
 let renderObject = (g, focusedObject, state, env) =>
   switch (g) {
+  | {pos: {x, y}, state: Tombstone}
+      when Common.playerInsideTheBarn(state, env) =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "tombstone.png",
+      state,
+      env,
+    )
   | {pos: {x, y}, action: DoBarnDoor} =>
     Draw.fill(Utils.color(255, 0, 255, 255), env);
     Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
@@ -620,7 +637,8 @@ let renderAction = (state, focusedObject, env) => {
 };
 
 let checkPickUp = (state, focusedObject, env) =>
-  if (state.journal.dayTransition == NoTransition && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
+  if (state.journal.dayTransition == NoTransition
+      && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
     switch (state.currentItem, focusedObject) {
     | (None, Some({action: DoBarnDoor, state: BarnDoor(barnState)} as go)) =>
       let nextBarnState =

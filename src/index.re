@@ -444,12 +444,20 @@ let draw = (state, env) => {
       ),
       ~rect1W=tileSizef /. 2.,
       ~rect1H=tileSizef /. 2.,
-      ~rect2Pos=(5. *. tileSizef, 4. *. tileSizef),
+      ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
       ~rect2W=288.,
       ~rect2H=416.,
     );
+  let playerBehindBarn =
+    playerInBarn ? false : Common.playerInsideTheBarn(state, env);
   /** Draw large game objects */
-  drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
+  (
+    if (playerBehindBarn) {
+      ();
+    } else {
+      drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
+    }
+  );
   drawAsset(24 * tileSize, 12 * tileSize, "pond.png", state, env);
   drawAsset(24 * tileSize, 10 * tileSize, "truck.png", state, env);
   drawAssetf(
@@ -491,13 +499,17 @@ let draw = (state, env) => {
             /. 2. >= 416.
             +. tileSizef
             *. 3.) {
-          drawAsset(
-            5 * tileSize,
-            4 * tileSize,
-            "barn_outside.png",
-            state,
-            env,
-          );
+          if (playerBehindBarn) {
+            ();
+          } else {
+            drawAsset(
+              5 * tileSize,
+              4 * tileSize,
+              "barn_outside.png",
+              state,
+              env,
+            );
+          };
         };
         if (prevGameOjbect.pos.y < state.playerPos.y
             +. tileSizef
