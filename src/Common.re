@@ -69,6 +69,8 @@ type barnDoorT =
   | Closed;
 
 type bossStateT = {
+  movePair: (vec2, vec2),
+  movingTime: float,
   hunger: int,
   eatingTime: float,
   killed: list(gameobjectT),

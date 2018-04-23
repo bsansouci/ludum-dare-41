@@ -15,7 +15,7 @@ let init = env => {
 let updateDay = (state, env) => {
   let state =
     switch (state) {
-    /*| {gameobjects, journal: {dayTransition: NoTransition}} =>
+    | {gameobjects, journal: {dayTransition: NoTransition}} =>
       let allDone =
         if (debug && Env.keyPressed(P, env)) {
           true;
@@ -46,7 +46,7 @@ let updateDay = (state, env) => {
         };
       } else {
         state;
-      };*/
+      };
     | {journal: {dayTransition: JournalOut, animationTime}}
         when animationTime > fadeTimeSec => {
         ...state,
@@ -107,15 +107,20 @@ let updateDay = (state, env) => {
       let shouldAddBoss = dayIndex + 1 === 2;
       let gameobjects =
         if (shouldAddBoss) {
+          let bPos = {x: tileSizef *. 17., y: tileSizef *. 15.};
           [
             {
-              pos: {
-                x: tileSizef *. 17.8,
-                y: tileSizef *. 10.,
-              },
+              pos: bPos,
               action: NoAction,
               state:
-                Boss({hunger: 4, eatingTime: 0., killed: [], eating: false}),
+                Boss({
+                  movePair: (bPos, bPos),
+                  movingTime: 0.,
+                  hunger: 4,
+                  eatingTime: 0.,
+                  killed: [],
+                  eating: false,
+                }),
             },
             ...gameobjects,
           ];

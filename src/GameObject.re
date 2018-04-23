@@ -176,8 +176,8 @@ let init = grid => {
                 },
                 {
                   pos: {
-                    x: 8. *. tileSizef,
-                    y: 16. *. tileSizef,
+                    x: 9. *. tileSizef,
+                    y: 17. *. tileSizef,
                   },
                   action: NoAction,
                   state: Chicken({
@@ -290,9 +290,42 @@ let update = (state, env) => {
                              })};
         | {
             pos: {x: bx, y: by} as pos,
-            state: Boss({hunger, eatingTime, eating} as bossState),
+            state:
+              Boss(
+                {
+                  movePair: (start, dest),
+                  hunger,
+                  movingTime,
+                  eatingTime,
+                  eating,
+                } as bossState,
+              ),
           } =>
-          if (eatingTime <= 0.) {
+          let timeToMove = 0.6;
+          if (movingTime > 0.) {
+            {
+              ...g,
+              state: Boss({...bossState, movingTime: movingTime -. Env.deltaTime(env)}),
+              pos: {
+                x:
+                  Reprocessing.Utils.remapf(
+                    ~value=movingTime,
+                    ~low1=timeToMove,
+                    ~high1=0.,
+                    ~low2=start.x,
+                    ~high2=dest.x,
+                  ),
+                y:
+                  Reprocessing.Utils.remapf(
+                    ~value=movingTime,
+                    ~low1=timeToMove,
+                    ~high1=0.,
+                    ~low2=start.y,
+                    ~high2=dest.y,
+                  ),
+              },
+            };
+          } else if (eatingTime <= 0.) {
             let allNextTargets =
               List.filter(
                 g =>
@@ -310,11 +343,11 @@ let update = (state, env) => {
                   {pos: {x: x1, y: y1}}: gameobjectT,
                   {pos: {x: x2, y: y2}}: gameobjectT,
                 ) => {
-                  let dx1 = x1 -. bx;
-                  let dy1 = y1 -. by;
-                  let dx2 = x2 -. bx;
-                  let dy2 = y2 -. by;
-                  int_of_float(dx1 +. dy1 -. dx2 -. dy2);
+                  let dx1 = abs(int_of_float(x1 -. bx));
+                  let dy1 = abs(int_of_float(y1 -. by));
+                  let dx2 = abs(int_of_float(x2 -. bx));
+                  let dy2 = abs(int_of_float(y2 -. by));
+                  dx1 + dy1 - dx2 - dy2;
                 },
                 allNextTargets,
               );
@@ -339,34 +372,40 @@ let update = (state, env) => {
             if (isPlayer && isTargetCloseEnough) {
               print_endline("You should be dead by now");
             };
-            let moveBoss = ({x: bx, y: by} as pos, nextTarget, grid) => {
-              let bossSpeed = 100.;
-              let bossSpeedDt = Env.deltaTime(env) *. bossSpeed;
-              let dx = nextTarget.x -. bx;
-              let dy = nextTarget.y -. by;
-              let mag = Utils.magf((dx, dy));
-              if (mag > 0.) {
-                let dx = dx /. mag *. bossSpeedDt;
-                let dy = dy /. mag *. bossSpeedDt;
-                let offset =
-                  handleCollision(
-                    state,
-                    {x: 0., y: 0.},
-                    {x: dx, y: dy},
-                    pos,
-                    grid,
-                  );
-                {x: bx +. offset.x, y: by +. offset.y};
-              } else {
-                pos;
-              };
+
+            let (_, {x: bx, y: by}) = bossState.movePair;
+            let bossTile = (
+              int_of_float(bx /. tileSizef),
+              int_of_float(by /. tileSizef),
+            );
+
+            let targetTile = (
+              int_of_float(nextTarget.x /. tileSizef),
+              int_of_float(nextTarget.y /. tileSizef),
+            );
+            let (tx, ty) = targetTile;
+            let movePair = switch(Pathfind.getPath(bossTile, targetTile, state.grid)){
+              | None =>
+              print_endline("Cant find" ++ string_of_int(tx) ++ "," ++ string_of_int(ty));
+              ({x: bx, y: by}, {x: bx, y: by})
+              | Some([])
+              | Some([_]) =>
+              ({x: bx, y: by}, {x: bx, y: by})
+              | Some([(x1, y1), (x2, y2), ..._]) as p =>
+                  (
+                   {x: float_of_int(x1) *. tileSizef,
+                    y: float_of_int(y1) *. tileSizef},
+                   {x: float_of_int(x2) *. tileSizef,
+                    y: float_of_int(y2) *. tileSizef}
+                    )
             };
             {
               ...g,
-              pos: moveBoss(pos, nextTarget, state.grid),
               state:
                 Boss({
                   ...bossState,
+                  movePair: movePair,
+                  movingTime: timeToMove,
                   killed:
                     isTargetCloseEnough && ! isPlayer && eating ?
                       [List.hd(allNextTargets), ...bossState.killed] :
@@ -384,7 +423,7 @@ let update = (state, env) => {
                   eatingTime: eatingTime -. Env.deltaTime(env),
                 }),
             };
-          }
+          };
         /*{
             ...g,
             pos:
@@ -758,7 +797,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         None,
       )
-    | (Some(Knife), Some({state: Chick(s)} as go)) => (
+    | (Some(Knife), Some({state: Chick(s)} as go)) when s.health > 0 => (
         {
           ...state,
           gameobjects:
@@ -769,7 +808,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       )
-    | (Some(Knife), Some({state: Chicken(s)} as go)) => (
+    | (Some(Knife), Some({state: Chicken(s)} as go)) when s.health > 0 => (
         {
           ...state,
           gameobjects:
@@ -780,7 +819,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       )
-    | (Some(Knife), Some({state: Cow(s)} as go)) => (
+    | (Some(Knife), Some({state: Cow(s)} as go)) when s.health > 0 => (
         {
           ...state,
           gameobjects:
