@@ -12,6 +12,7 @@ type tileT =
   | SeedBin
   | WaterTrough
   | FoodTrough
+  | Hay
   | Truck;
 
 type directionT =
@@ -85,6 +86,7 @@ and gameobjectStateT =
   | Boss(bossStateT)
   | Chick(chickenStateT)
   | IsASeedBin
+  | HayBale
   | NoState
   | BarnDoor(barnDoorT)
   | Tombstone
@@ -255,6 +257,7 @@ let isCollidable = (x, y, grid: array(array(tileT))) =>
   | SeedBin
   | WaterTrough
   | Truck
+  | Hay
   | FoodTrough => true
   | _ => false
   };

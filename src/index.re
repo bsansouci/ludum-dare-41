@@ -14,9 +14,9 @@ let mapString = {|
 0000z333333333030000000000000
 000003834444430xxxxxxxxxxxxxx
 00000344444443000000000099999
-00000344444443000000000099999
-00000344444443000111110055500
-00000344444443000111110055500
+00000344hhh443000000000099999
+00000344hhh443000111110055500
+00000344hhh443000111110055500
 00000344444443000111110055500
 00000344444443000000000055500
 0000qx3334333xxxxxx0xxxxe0000
@@ -58,6 +58,7 @@ let createGrid = s => {
             | '7' => FoodTrough
             | '8' => SeedBin
             | '9' => Truck
+            | 'h' => Hay
             | _ => Blocked
             }
           ),
@@ -154,8 +155,15 @@ let renderPlayer = (state, env) => {
       state,
       env,
     )
+  | Some(Knife) =>
+    drawAssetf(
+      state.playerPos.x,
+      state.playerPos.y -. holdOffset,
+      "axe_pick_up.png",
+      state,
+      env,
+    )
   | Some(Wood) => print_endline("Can't draw wood")
-  | Some(Knife) => ()
   | _ => print_endline("You piece of shit ben")
   };
 };
@@ -196,7 +204,7 @@ let draw = (state, env) => {
     ...state,
     night: Env.keyPressed(N, env) ? ! state.night : state.night,
   };
-  if (Random.float(1.0) < 0.01) {
+  if (Random.float(1.0) < 0.005) {
     if (state.night) {
       let soundNum = Random.int(4) + 1;
       playSound("night" ++ string_of_int(soundNum), state, env);
@@ -451,6 +459,7 @@ let draw = (state, env) => {
           | Floor
           | Blocked
           | Truck
+          | Hay
           | FoodTrough
           | WaterTrough =>
             drawAsset(x * tileSize, y * tileSize, "grass.png", state, env)

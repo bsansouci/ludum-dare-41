@@ -82,6 +82,18 @@ let init = grid => {
                   },
                   ...gameobjects,
                 ]
+              | Hay => [
+                  {
+                    pos:
+                      posMake(
+                        x * tileSize + tileSize / 2,
+                        y * tileSize + tileSize / 2,
+                      ),
+                    action: NoAction,
+                    state: HayBale,
+                  },
+                  ...gameobjects,
+                ]
               | WaterTrough => [
                   {
                     pos:
@@ -191,8 +203,8 @@ let init = grid => {
                 },
                 {
                   pos: {
-                    x: 6. *. tileSizef,
-                    y: 13. *. tileSizef,
+                    x: 12. *. tileSizef,
+                    y: 8. *. tileSizef,
                   },
                   action: PickUp(Knife),
                   state: NoState,
@@ -261,13 +273,13 @@ let maybeHighlight = (state, g, focusedObject, env) =>
 let moveAnimal = (state, mx, my, speed, pos, grid, env) => {
   let mx =
     Utils.constrain(
-      ~amt=mx +. Random.float(2.) -. 1.,
+      ~amt=mx +. Random.float(4.) -. 2.,
       ~low=(-5.) *. speed,
       ~high=5. *. speed,
     );
   let my =
     Utils.constrain(
-      ~amt=my +. Random.float(2.) -. 1.,
+      ~amt=my +. Random.float(4.) -. 2.,
       ~low=(-5.) *. speed,
       ~high=5. *. speed,
     );
@@ -654,6 +666,14 @@ let renderObject =
       state,
       env,
     )
+  | {pos: {x, y}, state: HayBale} =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "hay_bale.png",
+      state,
+      env,
+    )
   | {pos: {x, y}, action: NoAction, state: Cow({health})}
   | {pos: {x, y}, action: PickUp(Milk), state: Cow({health})} =>
     if (health === 0) {
@@ -705,6 +725,13 @@ let renderObject =
       state,
       env,
     );
+    drawAssetf(
+      x +. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "water_trough_sign.png",
+      state,
+      env,
+    );
     maybeHighlight(state, g, focusedObject, env);
   | {pos: {x, y}, state: FoodTank(s)} =>
     let assetName =
@@ -717,6 +744,13 @@ let renderObject =
       x -. tileSizef /. 2.,
       y -. tileSizef /. 2.,
       assetName,
+      state,
+      env,
+    );
+    drawAssetf(
+      x +. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "corn_trough_sign.png",
       state,
       env,
     );
@@ -799,11 +833,8 @@ let renderObject =
       | _ => "egg.png"
       };
     drawAssetf(x, y -. tileSizef, img, state, env);
-    Draw.rectf(~pos=(x, y), ~width=10., ~height=10., env);
   | {pos: {x, y}, action: PickUp(Knife)} =>
-    Draw.fill(Utils.color(0, 0, 0, 255), env);
-    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
-  /*TODO Draw highlighted pond*/
+    drawAssetf(x, y, "axe_standing.png", state, env);
   | _ => ()
   };
 
@@ -816,7 +847,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({action: PickUp(Milk), state: Cow({health})}))
         when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
-    | (None, Some({action: PickUp(Knife)})) => "Pickup ... the knife?"
+    | (None, Some({action: PickUp(Knife)})) => "Pickup axe"
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Broken)}))
         when ! playerInBarn => "Repair barn door"
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Opened)}))
