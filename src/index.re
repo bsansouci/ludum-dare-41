@@ -445,8 +445,8 @@ let draw = (state, env) => {
       ~rect1W=tileSizef /. 2.,
       ~rect1H=tileSizef /. 2.,
       ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
-      ~rect2W=288.,
-      ~rect2H=416.,
+      ~rect2W=256.,
+      ~rect2H=256.,
     );
   let playerBehindBarn =
     playerInBarn ? false : Common.playerInsideTheBarn(state, env);
