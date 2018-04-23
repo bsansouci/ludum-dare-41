@@ -290,7 +290,7 @@ let renderTransition = (state, deltaTime, env) =>
           animationTime: 0.,
         },
       };
-    } else if (Env.keyPressed(Space, env)) {
+    } else if (dayTransition == JournalIn && Env.keyPressed(Space, env)) {
       {
         ...state,
         journal: {
