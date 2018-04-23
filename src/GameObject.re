@@ -608,11 +608,14 @@ let renderAction = (state, focusedObject, env) => {
     | _ => ""
     };
   if (body != "") {
+    Draw.pushStyle(env);
     Draw.fill(Utils.color(~r=255, ~g=255, ~b=255, ~a=255), env);
     let padding = 16;
-    let width = Draw.textWidth(~body, env);
+    let width = Draw.textWidth(~body, ~font=state.mainFont, env);
     Draw.rect(~pos=(0, 0), ~width=width + padding * 2, ~height=70, env);
-    Draw.text(~body, ~pos=(padding, 20), env);
+    Draw.tint(Utils.color(0, 0, 0, 255), env);
+    Draw.text(~body, ~font=state.mainFont, ~pos=(padding, 45), env);
+    Draw.popStyle(env);
   };
 };
 

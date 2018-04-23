@@ -176,6 +176,7 @@ let setup = (assets, env) => {
     dollarAnimation: (-1.),
     time: 0.,
     night: false,
+    mainFont: Draw.loadFont(~filename="GamestationCond_2x.fnt", ~isPixel=false, env)
   };
 };
 
