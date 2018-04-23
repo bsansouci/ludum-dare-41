@@ -4,9 +4,9 @@ open Common;
 
 let fadeTimeSec = 1.5;
 
-let init = env => {
-  dayIndex: 0,
-  dayTransition: NoTransition,
+let init = _env => {
+  dayIndex: 4,
+  dayTransition: FadeOut,
   animationTime: 0.,
   pageNumber: 0,
 };
@@ -14,13 +14,13 @@ let init = env => {
 let getForwardButton = ({mainFont, journal: {dayIndex, pageNumber}}, env) => {
   let currentEntry = Story.entries[dayIndex];
   let (body, x) =
-    if (pageNumber === Array.length(currentEntry) - 1) {
+    if (pageNumber === Array.length(currentEntry.pages)) {
       ("continue", 445);
     } else {
       (
         string_of_int(pageNumber + 1)
         ++ " / "
-        ++ string_of_int(Array.length(currentEntry)),
+        ++ string_of_int(Array.length(currentEntry.pages) + 1),
         468,
       );
     };
@@ -64,16 +64,20 @@ let updateDay = (state, env) => {
     | {journal: {dayTransition: FadeOut, animationTime, dayIndex}}
         when animationTime > fadeTimeSec =>
       /* Generate new day here */
+      let dayIndex = dayIndex + 1;
       let gameobjects =
         List.map(
           (go: gameobjectT) => {
             let state =
-              switch (go.state) {
-              | Corn(5) => Corn(5)
-              | Corn((-1)) => Corn(-1)
-              | Corn(stage) => Corn(stage + 1)
-              | WaterTank(_) => WaterTank(Empty)
-              | FoodTank(s) => FoodTank(s == Full ? HalfFull : Empty)
+              switch (go.state, go.action) {
+              | (Corn(5), _) => Corn(5)
+              | (Corn((-1)), _) => Corn(-1)
+              | (Corn(stage), NoAction) => Corn(stage + 1)
+              | (WaterTank(_), _) => WaterTank(Empty)
+              | (FoodTank(s), _) => FoodTank(s == Full ? HalfFull : Empty)
+              | (Chicken({willDie: true} as chickenState), _)
+                  when dayIndex === 3 =>
+                Chicken({...chickenState, health: 0})
               | _ => go.state
               };
             let action =
@@ -84,55 +88,82 @@ let updateDay = (state, env) => {
               | FoodTank(_) => FeedAnimals
               | Cow(_) => PickUp(Milk)
               | Corn(n) when n >= 0 && n < 5 => WaterCorn
+              | BarnDoor(Broken) when dayIndex === 2 => DoBarnDoor
+              | AxeStanding when dayIndex === 7 => PickUp(Axe)
               | _ => go.action
               };
             {...go, state, action};
           },
           state.gameobjects,
         );
-      let gameobjects = [
-        {
-          pos: {
-            x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
-            y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
-          },
-          action: PickUp(Egg),
-          state: NoState,
-        },
-        {
-          pos: {
-            x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
-            y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
-          },
-          action: Cleanup,
-          state: NoState,
-        },
-        ...gameobjects,
-      ];
-      let shouldAddBoss = dayIndex + 1 === 1;
+      let shouldAddAnotherEgg = dayIndex === 1 || dayIndex === 2;
       let gameobjects =
-        if (shouldAddBoss) {
-          let bPos = {x: tileSizef *. 17., y: tileSizef *. 15.};
+        if (shouldAddAnotherEgg) {
           [
             {
-              pos: bPos,
-              action: NoAction,
-              state:
-                Boss({
-                  movePair: (bPos, bPos),
-                  movingTime: 0.,
-                  hunger: 4,
-                  eatingTime: 0.,
-                  killed: [],
-                  eating: false,
-                }),
+              pos: {
+                x: (dayIndex === 1 ? 15. : 17.) *. tileSizef,
+                y: 19. *. tileSizef,
+              },
+              action: PickUp(Egg),
+              state: NoState,
             },
             ...gameobjects,
           ];
         } else {
           gameobjects;
         };
-      let shouldAddFlowers = dayIndex + 1 === 4;
+      let shouldAddManure = dayIndex === 1;
+      let gameobjects =
+        if (shouldAddManure) {
+          [
+            {
+              pos: {
+                x: 14. *. tileSizef,
+                y: 19. *. tileSizef,
+              },
+              action: Cleanup,
+              state: NoState,
+            },
+            ...gameobjects,
+          ];
+        } else {
+          gameobjects;
+        };
+      let shouldAddCleanupBlood = dayIndex === 3;
+      let gameobjects =
+        if (shouldAddCleanupBlood) {
+          [
+            {
+              pos: {
+                x: 11. *. tileSizef,
+                y: 11. *. tileSizef,
+              },
+              action: CleanupBlood,
+              state: NoState,
+            },
+            {
+              pos: {
+                x: 7. *. tileSizef,
+                y: 12. *. tileSizef,
+              },
+              action: CleanupBlood,
+              state: NoState,
+            },
+            {
+              pos: {
+                x: 8. *. tileSizef,
+                y: 15. *. tileSizef,
+              },
+              action: CleanupBlood,
+              state: NoState,
+            },
+            ...gameobjects,
+          ];
+        } else {
+          gameobjects;
+        };
+      let shouldAddFlowers = dayIndex === 4;
       let gameobjects =
         if (shouldAddFlowers) {
           [
@@ -151,11 +182,12 @@ let updateDay = (state, env) => {
         };
       {
         ...state,
+        night: dayIndex === 5 ? true : false,
         journal: {
-          ...state.journal,
           dayTransition: JournalIn,
           animationTime: 0.,
-          dayIndex: dayIndex + 1,
+          dayIndex,
+          pageNumber: 0,
         },
         playerPos: {
           x: tileSizef *. 17.8,
@@ -174,6 +206,7 @@ let updateDay = (state, env) => {
           animationTime: 0.,
         },
       }
+    | {journal: {dayTransition: CheckJournal, dayIndex, pageNumber}}
     | {journal: {dayTransition: JournalIn, dayIndex, pageNumber}} =>
       let (mx, my) = Env.mouse(env);
       let didClickOnForward =
@@ -189,8 +222,7 @@ let updateDay = (state, env) => {
           mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1;
         };
       if ((Env.keyPressed(Right, env) || didClickOnForward)
-          && pageNumber < Array.length(Story.entries[dayIndex])
-          - 1) {
+          && pageNumber < Array.length(Story.entries[dayIndex].pages)) {
         {
           ...state,
           journal: {
@@ -208,7 +240,7 @@ let updateDay = (state, env) => {
           },
         };
       } else if ((Env.keyPressed(Right, env) || didClickOnForward)
-                 && pageNumber === Array.length(Story.entries[dayIndex]) - 1) {
+                 && pageNumber === Array.length(Story.entries[dayIndex].pages)) {
         {
           ...state,
           journal: {
@@ -224,10 +256,238 @@ let updateDay = (state, env) => {
   state;
 };
 
+/*.Ok the stats are all numbers because arrays have to be heterogeneous. We'll figure it out. */
+let day1Stats = state =>
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (acc) {
+      | [|pickUpEggs, pickUpMilk, emptyWaterTank, cornNoAction, plantSeed|] =>
+        /* Check for everything that needs to be done for the next day to happen. */
+        switch (o) {
+        /*     "Water corn",
+               "Plant seeds",
+               "Sell eggs",
+               "Sell milk"*/
+        | {action: PickUp(Egg)} => [|
+            1,
+            pickUpMilk,
+            emptyWaterTank,
+            cornNoAction,
+            plantSeed,
+          |]
+        | {state: WaterTank(Empty)} => [|
+            pickUpEggs,
+            pickUpMilk,
+            1,
+            cornNoAction,
+            plantSeed,
+          |]
+        | {action: PickUp(Milk), state: Cow(_)} => [|
+            pickUpEggs,
+            1,
+            emptyWaterTank,
+            cornNoAction,
+            plantSeed,
+          |]
+        | {state: Corn(4), action: NoAction} => [|
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            cornNoAction + 1,
+            plantSeed,
+          |]
+        | {state: Corn((-1)), action: NoAction} => [|
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            cornNoAction,
+            plantSeed + 1,
+          |]
+        | _ => acc
+        }
+      | _ => failwith("beeeeen")
+      },
+    [|0, 0, 0, 0, 0|],
+    state.gameobjects,
+  );
+
+let day2Stats = state =>
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (acc) {
+      | [|emptyWaterTank, emptyFoodTank, cleanup|] =>
+        switch (o) {
+        | {state: WaterTank(Empty)} => [|1, emptyFoodTank, cleanup|]
+        | {state: FoodTank(Empty)} => [|emptyWaterTank, 1, cleanup|]
+        | {action: Cleanup} => [|emptyWaterTank, emptyFoodTank, 1|]
+        | _ => acc
+        }
+      | _ => failwith("beeeeen")
+      },
+    [|0, 0, 0|],
+    state.gameobjects,
+  );
+
+let day3Stats = state =>
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (o) {
+      | {state: BarnDoor(Broken)} => [|1|]
+      | _ => acc
+      },
+    [|0|],
+    state.gameobjects,
+  );
+
+/* returns twice the same thing because the story contains two tasks which are basically gonna be
+   the same */
+let day4Stats = state =>
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (o) {
+      | {action: CleanupBlood} => [|1, 1|]
+      | _ => acc
+      },
+    [|0, 0|],
+    state.gameobjects,
+  );
+
+let day5Stats = state =>
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (acc) {
+      | [|_, flowerTombstone|] =>
+        switch (o) {
+        | {state: Tombstone(false)} => [|1, 1|]
+        | {action: InspectTombstone} => [|1, flowerTombstone|]
+        | _ => acc
+        }
+      | _ => failwith("beeeeen")
+      },
+    [|0, 0|],
+    state.gameobjects,
+  );
+
+let day6Stats = state => {
+  /* Check if monster is in barn and barn door is closed */
+  let (isMonsterInBarn, isBarnDoorClosed) =
+    List.fold_left(
+      ((isMonsterInBarn, isBarnDoorClosed), g) =>
+        switch (g) {
+        | {pos, state: Boss(_)} => (checkIfInBarn(pos), isBarnDoorClosed)
+        | {state: BarnDoor(Closed)} => (isMonsterInBarn, true)
+        | _ => (isMonsterInBarn, isBarnDoorClosed)
+        },
+      (false, false),
+      state.gameobjects,
+    );
+  [|isMonsterInBarn && isBarnDoorClosed ? 1 : 0|];
+};
+
+let day7Stats = state =>
+  /*Count("Water corn", 3),
+    Count("Plant seeds", 1),
+    Bool("Sell eggs"),
+    Bool("Sell milk"),
+    Bool("Fill water trough"),
+    Bool("Feed animals"),
+    Bool("Wash away manure"),*/
+  List.fold_left(
+    (acc, o: gameobjectT) =>
+      switch (acc) {
+      | [|
+          wateredCorn,
+          plantSeed,
+          pickUpEggs,
+          pickUpMilk,
+          emptyWaterTank,
+          emptyFoodTank,
+          cleanup,
+        |] =>
+        /* Check for everything that needs to be done for the next day to happen. */
+        switch (o) {
+        /*     "Water corn",
+               "Plant seeds",
+               "Sell eggs",
+               "Sell milk"*/
+        | {action: PickUp(Egg)} => [|
+            wateredCorn,
+            plantSeed,
+            1,
+            pickUpMilk,
+            emptyWaterTank,
+            emptyFoodTank,
+            cleanup,
+          |]
+        | {state: WaterTank(Empty)} => [|
+            wateredCorn,
+            plantSeed,
+            pickUpEggs,
+            pickUpMilk,
+            1,
+            emptyFoodTank,
+            cleanup,
+          |]
+        | {state: FoodTank(Empty)} => [|
+            wateredCorn,
+            plantSeed,
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            1,
+            cleanup,
+          |]
+        | {action: Cleanup} => [|
+            wateredCorn,
+            plantSeed,
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            emptyFoodTank,
+            1,
+          |]
+        | {action: PickUp(Milk), state: Cow(_)} => [|
+            wateredCorn,
+            plantSeed,
+            pickUpEggs,
+            1,
+            emptyWaterTank,
+            emptyFoodTank,
+            cleanup,
+          |]
+        | {state: Corn((-1)), action: NoAction} => [|
+            wateredCorn,
+            plantSeed + 1,
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            emptyFoodTank,
+            cleanup,
+          |]
+        /* All the other corns */
+        | {state: Corn(_), action: NoAction} => [|
+            wateredCorn + 1,
+            plantSeed,
+            pickUpEggs,
+            pickUpMilk,
+            emptyWaterTank,
+            emptyFoodTank,
+            cleanup,
+          |]
+        | _ => acc
+        }
+      | _ => failwith("beeeeen")
+      },
+    [|0, 0, 0, 0, 0|],
+    state.gameobjects,
+  );
+
+let lineHeight = 32;
+
 let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   drawAssetFullscreen("journal_page.png", state, env);
   Draw.pushStyle(env);
-  Draw.tint(Utils.color(0, 0, 0, 255), env);
+  Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
   Draw.text(
     ~body="Day " ++ string_of_int(dayIndex + 1),
     ~font=state.mainFont,
@@ -239,7 +499,7 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
     let (body, x1, y1, w1, h1) = getForwardButton(state, env);
     let (mx, my) = Env.mouse(env);
     if (mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1) {
-      Draw.fill(Utils.color(170, 138, 107, 255), env);
+      Draw.fill(Utils.color(~r=170, ~g=138, ~b=107, ~a=255), env);
       Draw.rect(~pos=(x1, y1), ~width=w1, ~height=h1, env);
     };
     Draw.text(~body, ~font=state.mainFont, ~pos=(x1 + 12, y1 + 30), env);
@@ -248,32 +508,110 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
     let (body, x1, y1, w1, h1) = getBackButton(state, env);
     let (mx, my) = Env.mouse(env);
     if (mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1) {
-      Draw.fill(Utils.color(170, 138, 107, 255), env);
+      Draw.fill(Utils.color(~r=170, ~g=138, ~b=107, ~a=255), env);
       Draw.rect(~pos=(x1, y1), ~width=w1, ~height=h1, env);
     };
     Draw.text(~body, ~font=state.mainFont, ~pos=(x1 + 12, y1 + 30), env);
   };
-  /*{
-      let w = Draw.textWith(~body="Day " ++ string_of_int(dayIndex + 1),
-        ~font=state.mainFont, env);
-      let (x2, y2, w2, h2) = (480, 580, w, 50);
-      Draw.rect()
-      Draw.text(
-        ~body,
-        ~font=state.mainFont,
-        ~pos=(x2, y2),
-        env,
-      );
-    };*/
-  ignore @@
-  Array.fold_left(
-    (y, line) => {
-      Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
-      y + 32;
-    },
-    110,
-    currentEntry[pageNumber],
-  );
+  if (pageNumber === Array.length(currentEntry.pages)) {
+    Draw.text(
+      ~body="Todo list:",
+      ~font=state.mainFont,
+      ~pos=(55, 60 + lineHeight * 2),
+      env,
+    );
+    let stats =
+      if (dayIndex === 0) {
+        day1Stats(state);
+      } else if (dayIndex === 1) {
+        day2Stats(state);
+      } else if (dayIndex === 2) {
+        day3Stats(state);
+      } else if (dayIndex === 3) {
+        day4Stats(state);
+      } else if (dayIndex === 4) {
+        day5Stats(state);
+      } else if (dayIndex === 5) {
+        day6Stats(state);
+      } else if (dayIndex === 6) {
+        day7Stats(state);
+      } else {
+        failwith(
+          "todo ",
+          /*let stats = day1Stats(state);
+            ignore @@ Array.fold_left(
+              (i, line) => {
+                let y = 110 + i * lineHeight + 2 * lineHeight;
+                Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
+                i + 1;
+              },
+              0,
+              currentEntry.tasks,
+            );*/
+        );
+      };
+    ignore @@
+    Array.fold_left(
+      (i, task) => {
+        let y = 110 + i * lineHeight + 2 * lineHeight;
+        let (checkbox, line) =
+          switch (task) {
+          | Story.Bool(line) =>
+            let stat = stats[i];
+            let checkbox =
+              if (stat === 0) {
+                "[X]";
+              } else {
+                "[ ]";
+              };
+            (checkbox, line);
+          | Story.Count(line, c) =>
+            let stat = stats[i];
+            let checkbox =
+              if (stat >= c) {
+                "[X]";
+              } else {
+                string_of_int(stat) ++ " / " ++ string_of_int(c);
+              };
+            (checkbox, line);
+          | LockMonsterIn =>
+            let stat = stats[i];
+            if (state.day6PlayerWentInBarn) {
+              (stat === 1 ? "[X]" : "[ ]", "Lock monster in barn");
+            } else {
+              (stat === 1 ? "[X]" : "[ ]", "Investigate noise from the barn");
+            };
+          };
+        Draw.text(~body=checkbox, ~font=state.mainFont, ~pos=(55, y), env);
+        Draw.text(~body=line, ~font=state.mainFont, ~pos=(120, y), env);
+        i + 1;
+      },
+      0,
+      currentEntry.tasks,
+    );
+  } else {
+    /*{
+        let w = Draw.textWith(~body="Day " ++ string_of_int(dayIndex + 1),
+          ~font=state.mainFont, env);
+        let (x2, y2, w2, h2) = (480, 580, w, 50);
+        Draw.rect()
+        Draw.text(
+          ~body,
+          ~font=state.mainFont,
+          ~pos=(x2, y2),
+          env,
+        );
+      };*/
+    ignore @@
+    Array.fold_left(
+      (y, line) => {
+        Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
+        y + lineHeight;
+      },
+      110,
+      currentEntry.pages[pageNumber],
+    );
+  };
   Draw.popStyle(env);
 };
 
@@ -437,49 +775,42 @@ let renderTransition = (state, env) =>
 
 let checkTasks = (state, _env) =>
   if (state.journal.dayIndex === 0) {
-    let (acc, count) =
-      List.fold_left(
-        ((acc, count), o: gameobjectT) =>
-          /* Check for everything that needs to be done for the next day to happen. */
-          switch (acc, o) {
-          /*     "Water corn",
-                 "Plant seeds",
-                 "Sell eggs",
-                 "Sell milk"*/
-          | (true, {action: PickUp(Egg)})
-          | (true, {state: WaterTank(Empty)})
-          | (true, {action: PickUp(Milk), state: Cow(_)}) => (false, count)
-          | (true, {state: Corn(_), action: NoAction}) => (true, count + 1)
-          | (false, _) => (false, count)
-          | _ => (true, count)
-          },
-        (true, 0),
-        state.gameobjects,
-      );
-    if (acc && count >= 2) {
-      true;
-    } else {
-      acc;
+    switch (day1Stats(state)) {
+    | [|pickUpEggs, pickUpMilk, emptyWaterTank, cornNoAction, plantSeed|] =>
+      pickUpEggs === 0
+      && pickUpMilk === 0
+      && emptyWaterTank === 0
+      && cornNoAction >= 2
+      && plantSeed >= 1
+    | _ => failwith("beeeen")
     };
   } else if (state.journal.dayIndex === 1) {
+    switch (day2Stats(state)) {
+    | [|emptyWaterTank, emptyFoodTank, cleanup|] =>
+      emptyWaterTank === 0 && emptyFoodTank === 0 && cleanup === 0
+    | _ => failwith("bennn")
     /*"Water animals",
       "Harvest corn", ----> because you're told to throw it out
       "Feed animals",
       "Clean poop"
       */
-    List.for_all(
-      (o: gameobjectT) =>
-        switch (o) {
-        | {state: WaterTank(Empty)}
-        | {state: FoodTank(Empty)}
-        | {action: PickUp(Corn)}
-        | {action: Cleanup} => false
-        | _ => true
-        },
-      state.gameobjects,
-    );
+    /*List.for_all(
+        (o: gameobjectT) =>
+          switch (o) {
+          | {state: WaterTank(Empty)}
+          | {state: FoodTank(Empty)}
+          | {action: PickUp(Corn)}
+          | {action: Cleanup} => false
+          | _ => true
+          },
+        state.gameobjects,
+      );*/
+    };
   } else if (state.journal.dayIndex === 2) {
-    !
+    switch (day3Stats(state)) {
+    | [|brokenBarnDoor|] => brokenBarnDoor === 0
+    | _ => failwith("Bennnnasd")
+    /*!
       List.exists(
         o =>
           switch (o) {
@@ -487,41 +818,34 @@ let checkTasks = (state, _env) =>
           | _ => false
           },
         state.gameobjects,
-      );
-      /*    "Tasks",
-            "",
-            "Fix the barn",
-            "Make sure you can open and close the barn door"
-            */
+      );*/
+    /*    "Tasks",
+          "",
+          "Fix the barn",
+          "Make sure you can open and close the barn door"
+          */
+    };
   } else if (state.journal.dayIndex === 3) {
-    !
-      List.exists(
-        o =>
-          switch (o) {
-          | {action: CleanupBlood} => false
-          | _ => true
-          },
-        state.gameobjects,
-      );
-      /*"Tasks",
-        "",
-        "There was some noise in the barn last night.",
-        "Investigate the barn",
-        "Clean up any mess that's in the barn"*/
+    switch (day4Stats(state)) {
+    | [|_, cleanupBlood|] => cleanupBlood === 0
+    | _ => failwith("NOoooo")
+    /*"Tasks",
+      "",
+      "There was some noise in the barn last night.",
+      "Investigate the barn",
+      "Clean up any mess that's in the barn"*/
+    };
   } else if (state.journal.dayIndex === 4) {
     /*    "Tasks",
           "",
           "Find Maria's grave",
           "Mourn"
           */
-    List.exists(
-      o =>
-        switch (o) {
-        | {state: Tombstone(true)} => true
-        | _ => false
-        },
-      state.gameobjects,
-    );
+    switch (day5Stats(state)) {
+    | [|inspectTombstone, flowerTombstone|] =>
+      inspectTombstone === 0 && flowerTombstone === 0
+    | _ => failwith("Bennknkjj")
+    };
   } else if (state.journal.dayIndex === 5) {
     /*
          "Tasks",
@@ -535,8 +859,37 @@ let checkTasks = (state, _env) =>
      "Lock monster in barn"
 
           */
-    state.
-      monsterWasLockedIn;
+    switch (day6Stats(state)) {
+    | [|areYouDoneOrNot|] => areYouDoneOrNot === 1
+    | _ => failwith("lkjasdkj")
+    };
+  } else if (state.journal.dayIndex === 6) {
+    switch (day7Stats(state)) {
+    /*Count("Water corn", 3),
+      Count("Plant seeds", 1),
+      Bool("Sell eggs"),
+      Bool("Sell milk"),
+      Bool("Fill water trough"),
+      Bool("Feed animals"),
+      Bool("Wash away manure"),*/
+    | [|
+        wateredCorn,
+        plantSeed,
+        pickUpEggs,
+        pickUpMilk,
+        emptyWaterTank,
+        emptyFoodTank,
+        cleanup,
+      |] =>
+      wateredCorn >= 3
+      && plantSeed >= 1
+      && pickUpEggs === 0
+      && pickUpMilk === 0
+      && emptyWaterTank === 0
+      && emptyFoodTank === 0
+      && cleanup === 0
+    | _ => failwith("fuck we're runn ing out of time")
+    };
   } else {
     false;
   };

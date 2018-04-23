@@ -33,7 +33,7 @@ type carryableT =
   | Egg
   | Corn
   | Wood
-  | Knife
+  | Axe
   | Flower;
 
 type actionT =
@@ -49,6 +49,7 @@ type actionT =
   | Sell
   | DoBarnDoor
   | GoToBed
+  | InspectTombstone
   | NoAction;
 
 type tankStateT =
@@ -64,6 +65,7 @@ type cowStateT = {
 type chickenStateT = {
   momentum: vec2,
   health: int,
+  willDie: bool,
 };
 
 type barnDoorT =
@@ -92,6 +94,7 @@ and gameobjectStateT =
   | NoState
   | BarnDoor(barnDoorT)
   | Tombstone(bool)
+  | AxeStanding
 and gameobjectT = {
   pos: vec2,
   action: actionT,
@@ -142,6 +145,8 @@ type stateT = {
   monsterWasLockedIn: bool,
   mousePressed: bool,
   mousePressedHack: bool,
+  day6PlayerWentInBarn: bool,
+  day6CameraAnimation: float
 };
 
 let screenSize = 600.;
@@ -346,3 +351,13 @@ let handleCollision = (state, prevOffset, offset, pos, grid) => {
     };
   if (collided) {prevOffset} else {offset};
 };
+
+let checkIfInBarn = pos =>
+  Reprocessing.Utils.intersectRectRect(
+    ~rect1Pos=(pos.x +. tileSizef /. 2., pos.y +. tileSizef /. 2.),
+    ~rect1W=tileSizef /. 2.,
+    ~rect1H=tileSizef /. 2.,
+    ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
+    ~rect2W=256.,
+    ~rect2H=256.,
+  );

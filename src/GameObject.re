@@ -20,7 +20,7 @@ let init = grid => {
                           y * tileSize + tileSize / 2,
                         ),
                       action: WaterCorn,
-                      state: Corn(0),
+                      state: Corn(-1),
                     }
                   | 18 => {
                       pos:
@@ -166,6 +166,7 @@ let init = grid => {
                  y: 0.,
                },
                health: 1,
+               willDie: false,
              }),
     },
     ...gos,
@@ -179,6 +180,14 @@ let init = grid => {
               addChick([
                 {
                   pos: {
+                    x: 9. *. tileSizef,
+                    y: 18. *. tileSizef,
+                  },
+                  action: PickUp(Egg),
+                  state: NoState,
+                },
+                {
+                  pos: {
                     x: tileSizef *. 16.8,
                     y: tileSizef *. 10.,
                   },
@@ -190,7 +199,7 @@ let init = grid => {
                     x: 9. *. tileSizef,
                     y: 5. *. tileSizef,
                   },
-                  action: NoAction,
+                  action: InspectTombstone,
                   state: Tombstone(false),
                 },
                 {
@@ -206,8 +215,8 @@ let init = grid => {
                     x: 12. *. tileSizef,
                     y: 8. *. tileSizef,
                   },
-                  action: PickUp(Knife),
-                  state: NoState,
+                  action: NoAction,
+                  state: AxeStanding,
                 },
                 {
                   pos: {
@@ -226,16 +235,34 @@ let init = grid => {
                 {
                   pos: {
                     x: 9. *. tileSizef,
-                    y: 17. *. tileSizef,
+                    y: 18. *. tileSizef,
                   },
                   action: NoAction,
-                  state: Chicken({
-                           momentum: {
-                             x: 0.,
-                             y: 0.,
-                           },
-                           health: 1,
-                         }),
+                  state:
+                    Chicken({
+                      momentum: {
+                        x: 0.,
+                        y: 0.,
+                      },
+                      health: 1,
+                      willDie: false,
+                    }),
+                },
+                {
+                  pos: {
+                    x: 9. *. tileSizef,
+                    y: 15. *. tileSizef,
+                  },
+                  action: NoAction,
+                  state:
+                    Chicken({
+                      momentum: {
+                        x: 0.,
+                        y: 0.,
+                      },
+                      health: 1,
+                      willDie: true,
+                    }),
                 },
                 ...gameobjects,
               ]),
@@ -375,6 +402,9 @@ let update = (state, env) => {
                   ),
               },
             };
+          } else if (state.day6CameraAnimation > 0.
+                     || state.journal.dayTransition === CheckJournal) {
+            g;
           } else if (eatingTime <= 0.) {
             let allNextTargets =
               List.filter(
@@ -403,13 +433,7 @@ let update = (state, env) => {
               );
             let (nextTarget, isPlayer) =
               switch (allNextTargets) {
-              | [] => (
-                  {
-                    x: state.playerPos.x +. tileSizef /. 2.,
-                    y: state.playerPos.y +. tileSizef /. 2.,
-                  },
-                  true,
-                )
+              | [] => ({x: state.playerPos.x, y: state.playerPos.y}, true)
               | [first, ..._] => (first.pos, false)
               };
             let dx = nextTarget.x -. bx;
@@ -443,18 +467,22 @@ let update = (state, env) => {
               currentTileX +. tileSizef,
               currentTileY,
             );
+            /*print_endline("w " ++ string_of_float(belowCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowCurrentTileY +. tileSizef -. nextTarget.y));*/
+            /*print_endline("w " ++ string_of_float(belowRightCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowRightCurrentTileY +. tileSizef -. nextTarget.y));*/
             let currentTileArea =
               (currentTileX +. tileSizef -. nextTarget.x)
               *. (currentTileY +. tileSizef -. nextTarget.y);
             let belowCurrentTileArea =
               (belowCurrentTileX +. tileSizef -. nextTarget.x)
-              *. (belowCurrentTileY +. tileSizef -. nextTarget.y);
+              *. (nextTarget.y +. tileSizef -. belowCurrentTileY);
             let belowRightCurrentTileArea =
-              (belowRightCurrentTileX +. tileSizef -. nextTarget.x)
-              *. (belowRightCurrentTileY +. tileSizef -. nextTarget.y);
+              (nextTarget.x +. tileSizef -. belowRightCurrentTileX)
+              *. (nextTarget.y +. tileSizef -. belowRightCurrentTileY);
             let rightCurrentTileArea =
-              (rightCurrentTileX +. tileSizef -. nextTarget.x)
+              (nextTarget.x +. tileSizef -. rightCurrentTileX)
               *. (rightCurrentTileY +. tileSizef -. nextTarget.y);
+            /*print_endline("belowCurrentTileArea: " ++ string_of_float(belowCurrentTileArea));
+              print_endline("belowRightCurrentTileArea: " ++ string_of_float(belowRightCurrentTileArea));*/
             let targetTile =
               if (currentTileArea > belowCurrentTileArea
                   && currentTileArea > belowRightCurrentTileArea
@@ -484,28 +512,46 @@ let update = (state, env) => {
                 );
               };
             let (tx, ty) = targetTile;
+            let barnDoor =
+              List.find(
+                g =>
+                  switch (g) {
+                  | {state: BarnDoor(_)} => true
+                  | _ => false
+                  },
+                state.gameobjects,
+              );
+            let isBarnDoorClosed =
+              switch (barnDoor) {
+              | {state: BarnDoor(Closed)} => true
+              | _ => false
+              };
             let movePair =
-              switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
-              | None =>
-                /*print_endline(
-                    "Cant find"
-                    ++ string_of_int(tx)
-                    ++ ","
-                    ++ string_of_int(ty),
-                  );*/
-                ({x: bx, y: by}, {x: bx, y: by})
-              | Some([])
-              | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
-              | Some([(x1, y1), (x2, y2), ..._]) as p => (
-                  {
-                    x: float_of_int(x1) *. tileSizef,
-                    y: float_of_int(y1) *. tileSizef,
-                  },
-                  {
-                    x: float_of_int(x2) *. tileSizef,
-                    y: float_of_int(y2) *. tileSizef,
-                  },
-                )
+              if (isBarnDoorClosed) {
+                (g.pos, g.pos);
+              } else {
+                switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
+                | None =>
+                  /*print_endline(
+                      "Cant find"
+                      ++ string_of_int(tx)
+                      ++ ","
+                      ++ string_of_int(ty),
+                    );*/
+                  ({x: bx, y: by}, {x: bx, y: by})
+                | Some([])
+                | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
+                | Some([(x1, y1), (x2, y2), ..._]) as p => (
+                    {
+                      x: float_of_int(x1) *. tileSizef,
+                      y: float_of_int(y1) *. tileSizef,
+                    },
+                    {
+                      x: float_of_int(x2) *. tileSizef,
+                      y: float_of_int(y2) *. tileSizef,
+                    },
+                  )
+                };
               };
             {
               ...g,
@@ -676,8 +722,34 @@ let renderObject =
         env,
       );
     }
-  | {pos: {x, y}, action: DoBarnDoor, state: BarnDoor(barnState)}
-      when ! playerInBarn =>
+  | {pos: {x, y}, state: BarnDoor(barnState)} when ! playerInBarn =>
+    let (x, y) =
+      if (state.journal.dayIndex === 5) {
+        let (isMonsterInBarn, isBarnDoorClosed) =
+          List.fold_left(
+            ((isMonsterInBarn, isBarnDoorClosed), g) =>
+              switch (g) {
+              | {pos, state: Boss(_)} => (
+                  checkIfInBarn(pos),
+                  isBarnDoorClosed,
+                )
+              | {state: BarnDoor(Closed)} => (isMonsterInBarn, true)
+              | _ => (isMonsterInBarn, isBarnDoorClosed)
+              },
+            (false, false),
+            state.gameobjects,
+          );
+        if (isMonsterInBarn && isBarnDoorClosed) {
+          (
+            x -. 2. *. Utils.noise(x, 1., state.time *. 10.) +. 1.,
+            y -. 2. *. Utils.noise(x, 2., state.time *. 10.) +. 1.,
+          );
+        } else {
+          (x, y);
+        };
+      } else {
+        (x, y);
+      };
     if (barnState == Broken) {
       drawAssetf(
         x -. tileSizef /. 2.,
@@ -694,7 +766,7 @@ let renderObject =
         state,
         env,
       );
-    }
+    };
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -738,6 +810,8 @@ let renderObject =
         "dead_chicken.png",
         state,
         env,
+        /*Draw.fill(Utils.color(255, 0, 0, 255), env);
+          Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=5., env);*/
       );
     } else if (health > 0) {
       drawAssetf(
@@ -870,7 +944,7 @@ let renderObject =
       | _ => "egg.png"
       };
     drawAssetf(x, y -. tileSizef, img, state, env);
-  | {pos: {x, y}, action: PickUp(Knife)} =>
+  | {pos: {x, y}, state: AxeStanding} =>
     drawAssetf(x, y, "axe_standing.png", state, env)
   | _ => ()
   };
@@ -884,7 +958,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({action: PickUp(Milk), state: Cow({health})}))
         when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
-    | (None, Some({action: PickUp(Knife)})) => "Pickup axe"
+    | (None, Some({action: PickUp(Axe)})) => "Pickup axe"
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Broken)}))
         when ! playerInBarn => "Repair barn door"
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Opened)}))
@@ -892,10 +966,14 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)}))
         when ! playerInBarn => "Open barn door"
     | (None, Some({action: PickUp(Flower)})) => "Pickup flowers"
-    | (None, Some({state: Tombstone(_)})) => "Maria - July 17th"
-    | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
+    | (None, Some({state: Tombstone(_), action: NoAction})) => "Maria - July 17th"
+    | (None, Some({state: Tombstone(_), action: InspectTombstone})) => "Inspect grave"
+    | (None, Some({state: Chicken({health: 0})})) => "There's not much to do now..."
+    | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"
+    /* Can't drop corn in water, it'd lock the game up */
+    | (Some(Corn), Some({action: PickUp(Water)})) => ""
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
-    | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
+    | (Some(Seed), Some({action: PickUp(Seed)})) => "Put seed back"
     | (Some(Seed), Some({action: PlantSeed})) => "Plant seed"
     | (Some(Water), Some({action: WaterCorn})) => "Water corn"
     | (Some(Water), Some({action: WaterAnimals})) => "Water animals"
@@ -942,6 +1020,18 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       );
+    | (None, Some({state: Tombstone(_), action: InspectTombstone} as go)) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, action: NoAction} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
     | (_, Some({action: GoToBed})) when finishedAllTasks => (
         {
           ...state,
@@ -1018,6 +1108,11 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
     | (None, Some({action: PickUp(Seed)})) =>
       pickup();
       ({...state, currentItem: Some(Seed)}, None);
+    /* Can't drop corn in water */
+    | (Some(Corn), Some({action: PickUp(Water)})) => (
+        state,
+        focusedObject,
+      )
     | (Some(_), Some({action: PickUp(Water)})) =>
       drop();
       ({...state, currentItem: None}, focusedObject);
@@ -1046,17 +1141,17 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         None,
       );
-    | (None, Some({action: PickUp(Knife)} as knife)) =>
+    | (None, Some({action: PickUp(Axe)} as knife)) =>
       pickup();
       (
         {
           ...state,
-          currentItem: Some(Knife),
+          currentItem: Some(Axe),
           gameobjects: List.filter(go => go !== knife, state.gameobjects),
         },
         None,
       );
-    | (Some(Knife), Some({state: Chick(s)} as go)) when s.health > 0 =>
+    | (Some(Axe), Some({state: Chick(s)} as go)) when s.health > 0 =>
       kill();
       (
         {
@@ -1069,7 +1164,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       );
-    | (Some(Knife), Some({state: Chicken(s)} as go)) when s.health > 0 =>
+    | (Some(Axe), Some({state: Chicken(s)} as go)) when s.health > 0 =>
       kill();
       (
         {
@@ -1082,7 +1177,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       );
-    | (Some(Knife), Some({state: Cow(s)} as go)) when s.health > 0 =>
+    | (Some(Axe), Some({state: Cow(s)} as go)) when s.health > 0 =>
       kill();
       (
         {
@@ -1097,11 +1192,15 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
       );
     | (
         Some(Corn),
-        Some({action: FeedAnimals, state: FoodTank(Empty as s)} as go),
+        Some({action: FeedAnimals, state: FoodTank(Empty)} as go),
       )
     | (
         Some(Corn),
-        Some({action: FeedAnimals, state: FoodTank(HalfFull as s)} as go),
+        Some({action: FeedAnimals, state: FoodTank(HalfFull)} as go),
+      )
+    | (
+        Some(Corn),
+        Some({action: FeedAnimals, state: FoodTank(Full)} as go),
       ) =>
       drop();
       (
@@ -1114,11 +1213,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
                 if (g !== go) {
                   g;
                 } else {
-                  {
-                    ...g,
-                    action: s == Empty ? FeedAnimals : NoAction,
-                    state: FoodTank(s == Empty ? HalfFull : Full),
-                  };
+                  {...g, action: FeedAnimals, state: FoodTank(Full)};
                 },
               state.gameobjects,
             ),

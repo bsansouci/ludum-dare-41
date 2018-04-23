@@ -155,7 +155,7 @@ let renderPlayer = (state, env) => {
       state,
       env,
     )
-  | Some(Knife) =>
+  | Some(Axe) =>
     drawAssetf(
       state.playerPos.x,
       state.playerPos.y -. holdOffset,
@@ -206,6 +206,8 @@ let setup = (assets, env) => {
     monsterWasLockedIn: false,
     mousePressed: false,
     mousePressedHack: false,
+    day6PlayerWentInBarn: false,
+    day6CameraAnimation: 0.,
   };
 };
 
@@ -217,7 +219,7 @@ let draw = (state, env) => {
   /*TODO: remove this */
   let state = {
     ...state,
-    night: Env.keyPressed(N, env) ? ! state.night : state.night,
+    night: debug && Env.keyPressed(N, env) ? ! state.night : state.night,
   };
   if (Random.float(1.0) < 0.005) {
     let soundNum = Random.int(5) + 1;
@@ -296,6 +298,55 @@ let draw = (state, env) => {
           y: state.playerPos.y +. dy,
         },
       };
+    } else {
+      state;
+    };
+  let playerInBarn = checkIfInBarn(state.playerPos);
+  let state =
+    if (state.journal.dayIndex === 5 && ! state.day6PlayerWentInBarn) {
+      {...state, day6PlayerWentInBarn: playerInBarn};
+    } else {
+      state;
+    };
+  let state =
+    if (state.day6PlayerWentInBarn && ! playerInBarn) {
+      switch (
+        List.find(
+          g =>
+            switch (g) {
+            | {state: Boss(_)} => true
+            | _ => false
+            },
+          state.gameobjects,
+        )
+      ) {
+      | exception Not_found =>
+        let bPos = {x: tileSizef *. 20., y: tileSizef *. 18.};
+        let gameobjects = [
+          {
+            pos: bPos,
+            action: NoAction,
+            state:
+              Boss({
+                movePair: (bPos, bPos),
+                movingTime: 0.,
+                hunger: 4,
+                eatingTime: 0.,
+                killed: [],
+                eating: false,
+              }),
+          },
+          ...state.gameobjects,
+        ];
+        {...state, gameobjects, day6CameraAnimation: 4.};
+      | _ => state
+      };
+    } else {
+      state;
+    };
+  let state =
+    if (state.day6CameraAnimation > 0.) {
+      {...state, day6CameraAnimation: state.day6CameraAnimation -. dt};
     } else {
       state;
     };
@@ -390,18 +441,6 @@ let draw = (state, env) => {
     | None => None
     | Some((_, fgo)) => Some(fgo)
     };
-  let playerInBarn =
-    Utils.intersectRectRect(
-      ~rect1Pos=(
-        state.playerPos.x +. tileSizef /. 2.,
-        state.playerPos.y +. tileSizef /. 2.,
-      ),
-      ~rect1W=tileSizef /. 2.,
-      ~rect1H=tileSizef /. 2.,
-      ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
-      ~rect2W=256.,
-      ~rect2H=256.,
-    );
   let (state, focusedObject) =
     GameObject.applyAction(
       state,
@@ -413,11 +452,46 @@ let draw = (state, env) => {
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
-  Draw.translate(
-    ~x=-. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.,
-    ~y=-. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.,
-    env,
-  );
+  if (state.day6CameraAnimation > 0.) {
+    let startX = -. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.;
+    let startY = -. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.;
+    let boss =
+      List.find(
+        g =>
+          switch (g) {
+          | {state: Boss(_)} => true
+          | _ => false
+          },
+        state.gameobjects,
+      );
+    let endX = -. boss.pos.x  +. screenSize /. 4. -. tileSizef /. 2.;
+    let endY = -. boss.pos.y  +. screenSize /. 4. -. tileSizef /. 2.;
+    Draw.translate(
+      ~x=
+        Utils.remapf(
+          ~value=max(state.day6CameraAnimation, 1.0),
+          ~low1=4.0,
+          ~high1=1.0,
+          ~low2=startX,
+          ~high2=endX,
+        ),
+      ~y=
+        Utils.remapf(
+          ~value=max(state.day6CameraAnimation, 1.0),
+          ~low1=4.0,
+          ~high1=1.0,
+          ~low2=startY,
+          ~high2=endY,
+        ),
+      env,
+    );
+  } else {
+    Draw.translate(
+      ~x=-. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.,
+      ~y=-. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.,
+      env,
+    );
+  };
   Draw.pushStyle(env);
   if (state.night) {
     Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env);
@@ -558,29 +632,21 @@ let draw = (state, env) => {
   let lastGameObject =
     List.fold_left(
       (prevGameOjbect: gameobjectT, curGameObject: gameobjectT) => {
+        let collisionPadding = 8.;
+        let barnBottom = 256. +. tileSizef *. 9.;
         if (! playerInBarn
-            && prevGameOjbect.pos.y
-            +. tileSizef
-            /. 2. < 256.
-            +. tileSizef
-            *. 9.
-            && curGameObject.pos.y
-            +. tileSizef
-            /. 2. >= 256.
-            +. tileSizef
-            *. 9.) {
-          if (playerBehindBarn) {
-            ();
-          } else {
-            drawAsset(
-              5 * tileSize,
-              4 * tileSize,
-              "barn_outside.png",
-              state,
-              env,
-            );
-          };
+            && prevGameOjbect.pos.y < barnBottom
+            -. collisionPadding
+            && curGameObject.pos.y >= barnBottom
+            -. collisionPadding) {
+          let assetName =
+            if (playerBehindBarn) {"short_barn_inside.png"} else {
+              "barn_outside.png"
+            };
+          drawAsset(5 * tileSize, 4 * tileSize, assetName, state, env);
         };
+        /*Draw.fill(Utils.color(255, 0, 0, 255), env);*/
+        /*Draw.rect(~pos=(5 * tileSize, int_of_float(barnBottom-. collisionPadding)), ~width=tileSize, ~height=256, env);*/
         if (prevGameOjbect.pos.y < state.playerPos.y
             +. tileSizef
             /. 2.
@@ -650,6 +716,12 @@ let draw = (state, env) => {
     } else {
       state;
     };
+  /*Draw.fill(Utils.color(255, 0, 0, 255), env);
+  Draw.rect(~pos=(8 * tileSize, 12 * tileSize), ~width=tileSize, ~height=tileSize, env);
+  Draw.fill(Utils.color(0, 255, 0, 255), env);
+  Draw.rectf(~pos=(floor(state.playerPos.x /. tileSizef) *. tileSizef, floor(state.playerPos.y /. tileSizef) *. tileSizef +. tileSizef), ~width=tileSizef, ~height=tileSizef, env);
+  Draw.fill(Utils.color(0, 0, 255, 255), env);
+  Draw.rectf(~pos=(state.playerPos.x, state.playerPos.y), ~width=tileSizef, ~height=tileSizef, env);*/
   Draw.popStyle(env);
   Draw.popMatrix(env);
   if (state.night) {
@@ -700,5 +772,7 @@ let loadAssetsAsync = filename =>
       run(~setup=setup(assets), ~draw, ());
     },
   );
+
+loadAssetsAsync("spritesheet/sheet.json");
 
 loadAssetsAsync("spritesheet/sheet.json");
