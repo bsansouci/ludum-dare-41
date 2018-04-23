@@ -45,6 +45,7 @@ type actionT =
   | PutBackSeed
   | Sell
   | DoBarnDoor
+  | GoToBed
   | NoAction;
 
 type tankStateT =
@@ -62,7 +63,10 @@ type chickenStateT = {
   health: int,
 };
 
-type barnDoorT = Broken | Opened | Closed;
+type barnDoorT =
+  | Broken
+  | Opened
+  | Closed;
 
 type bossStateT = {
   hunger: int,
@@ -81,6 +85,7 @@ and gameobjectStateT =
   | IsASeedBin
   | NoState
   | BarnDoor(barnDoorT)
+  | Tombstone
 and gameobjectT = {
   pos: vec2,
   action: actionT,
@@ -107,11 +112,11 @@ type dayTransitionT =
 
 type journalT = {
   dayIndex: int,
-  journalEntries: array(array(journalEntryT)),
+  journalEntries: array(array(array(journalEntryT))),
   dayTransition: dayTransitionT,
   animationTime: float,
+  pageNumber: int,
 };
-
 
 type stateT = {
   grid: array(array(tileT)),
@@ -127,7 +132,7 @@ type stateT = {
   dollarAnimation: float,
   time: float,
   night: bool,
-  mainFont: Reprocessing.fontT
+  mainFont: Reprocessing.fontT,
 };
 
 let screenSize = 600.;
@@ -214,8 +219,7 @@ let playSound = (name, state, env) =>
   };
 
 let loadSounds = env => {
-  let loadSoundHelper =
-      (soundMap, (soundName: string, volume)) =>
+  let loadSoundHelper = (soundMap, (soundName: string, volume)) =>
     StringMap.add(
       soundName,
       (
@@ -241,7 +245,19 @@ let facingToOffset = dir =>
   | LeftD => {x: (-0.5), y: 0.}
   };
 
-let handleCollision = (prevOffset, offset, pos, grid) => {
+let isCollidable = (x, y, grid: array(array(tileT))) =>
+  switch (grid[x][y]) {
+  | Blocked
+  | Water
+  | Fence(_)
+  | SeedBin
+  | WaterTrough
+  | Truck
+  | FoodTrough => true
+  | _ => false
+  };
+
+let handleCollision = (state, prevOffset, offset, pos, grid) => {
   let l = [
     (0, 0),
     (1, 1),
@@ -253,45 +269,62 @@ let handleCollision = (prevOffset, offset, pos, grid) => {
     (1, 0),
     (0, 1),
   ];
+  let padding = 8.;
   let collided =
     List.exists(
       ((dx, dy)) => {
-        let padding = 8.;
         let tx = dx + int_of_float((offset.x +. pos.x) /. tileSizef);
         let ty = dy + int_of_float((offset.y +. pos.y) /. tileSizef);
-        if (tx >= Array.length(grid)
-            || tx < 0
-            || ty > Array.length(grid[0])
-            || ty < 0) {
-          true;
-        } else {
-          switch (grid[tx][ty]) {
-          | Blocked
-          | Water
-          | Fence(_)
-          | SeedBin
-          | WaterTrough
-          | Truck
-          | FoodTrough =>
-            Reprocessing.Utils.intersectRectRect(
-              ~rect1Pos=(
-                pos.x +. offset.x +. padding,
-                pos.y +. offset.y +. padding,
-              ),
-              ~rect1W=tileSizef -. padding -. padding,
-              ~rect1H=tileSizef -. padding -. padding,
-              ~rect2Pos=(
-                float_of_int(tx * tileSize),
-                float_of_int(ty * tileSize),
-              ),
-              ~rect2W=tileSizef,
-              ~rect2H=tileSizef,
-            )
-          | _ => false
-          };
-        };
+        (
+          tx >= Array.length(grid)
+          || tx < 0
+          || ty >= Array.length(grid[0])
+          || ty < 0
+        )
+        || isCollidable(tx, ty, grid)
+        && Reprocessing.Utils.intersectRectRect(
+             ~rect1Pos=(
+               pos.x +. offset.x +. padding,
+               pos.y +. offset.y +. padding,
+             ),
+             ~rect1W=tileSizef -. padding -. padding,
+             ~rect1H=tileSizef -. padding -. padding,
+             ~rect2Pos=(
+               float_of_int(tx * tileSize),
+               float_of_int(ty * tileSize),
+             ),
+             ~rect2W=tileSizef,
+             ~rect2H=tileSizef,
+           );
       },
       l,
     );
+  /*.Check if anything collides with the barn door */
+  let collided =
+    if (! collided) {
+      let collided =
+        Reprocessing.Utils.intersectRectRect(
+          ~rect1Pos=(pos.x +. offset.x, pos.y +. offset.y),
+          ~rect1W=tileSizef,
+          ~rect1H=tileSizef,
+          ~rect2Pos=(256., 512.),
+          ~rect2W=tileSizef *. 3.,
+          ~rect2H=tileSizef -. 8. /* Small offset because otherwise you can kinda get stuck inside the barn door.. .*/
+        );
+      if (collided) {
+        List.exists(
+          g =>
+            switch (g) {
+            | {state: BarnDoor(Closed)} => true
+            | _ => false
+            },
+          state.gameobjects,
+        );
+      } else {
+        false;
+      };
+    } else {
+      true;
+    };
   if (collided) {prevOffset} else {offset};
 };

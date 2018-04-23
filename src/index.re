@@ -7,14 +7,19 @@ let mapString = {|
 0000000000000000000000000000
 0000000000000000000000000000
 0000000000000000000000000000
-0000033333333xxxxxxxxxxxxxxx
-0000038344444300000000009999
+0000qxxxxxxxxxxe000000000000
+0000a0000000000d000000000000
+0000a00000000003000000000000
+0000a00000000003000000000000
+0000z33333333303000000000000
+000003834444430xxxxxxxxxxxxx
+0000034444444300000000009999
 0000034444444300000000009999
 0000034444444300011111005550
 0000034444444300011111005550
 0000034444444300011111005550
 0000034444444300000000005550
-0000qx3344433xxxxxx0xxxxe000
+0000qx3334333xxxxxx0xxxxe000
 0000a0000000000000000006d000
 0000a0000000000000000000d000
 0000a0000000000000000000d000
@@ -163,7 +168,7 @@ let setup = (assets, env) => {
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {
       x: tileSizef *. 17.8,
-      y: tileSizef *. 5.,
+      y: tileSizef *. 10.,
     },
     playerFacing: DownD,
     spritesheet:
@@ -176,7 +181,8 @@ let setup = (assets, env) => {
     dollarAnimation: (-1.),
     time: 0.,
     night: false,
-    mainFont: Draw.loadFont(~filename="GamestationCond_2x.fnt", ~isPixel=false, env)
+    mainFont:
+      Draw.loadFont(~filename="GamestationCond_2x.fnt", ~isPixel=false, env),
   };
 };
 
@@ -201,42 +207,51 @@ let draw = (state, env) => {
   };
   let offset = {x: 0., y: 0.};
   let offset =
-    Env.key(Left, env) || Env.key(A, env) ?
-      handleCollision(
-        offset,
-        {...offset, x: -. playerSpeedDt},
-        state.playerPos,
-        state.grid,
-      ) :
+    if (state.journal.dayTransition == NoTransition) {
+      let offset =
+        Env.key(Left, env) || Env.key(A, env) ?
+          handleCollision(
+            state,
+            offset,
+            {...offset, x: -. playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
+      let offset =
+        Env.key(Right, env) || Env.key(D, env) ?
+          handleCollision(
+            state,
+            offset,
+            {...offset, x: playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
+      let offset =
+        Env.key(Up, env) || Env.key(W, env) ?
+          handleCollision(
+            state,
+            offset,
+            {...offset, y: -. playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
+      Env.key(Down, env) || Env.key(S, env) ?
+        handleCollision(
+          state,
+          offset,
+          {...offset, y: playerSpeedDt},
+          state.playerPos,
+          state.grid,
+        ) :
+        offset;
+    } else {
       offset;
-  let offset =
-    Env.key(Right, env) || Env.key(D, env) ?
-      handleCollision(
-        offset,
-        {...offset, x: playerSpeedDt},
-        state.playerPos,
-        state.grid,
-      ) :
-      offset;
-  let offset =
-    Env.key(Up, env) || Env.key(W, env) ?
-      handleCollision(
-        offset,
-        {...offset, y: -. playerSpeedDt},
-        state.playerPos,
-        state.grid,
-      ) :
-      offset;
-  let offset =
-    Env.key(Down, env) || Env.key(S, env) ?
-      handleCollision(
-        offset,
-        {...offset, y: playerSpeedDt},
-        state.playerPos,
-        state.grid,
-      ) :
-      offset;
+    };
   let mag = Utils.magf((offset.x, offset.y));
+  /*print_endline("posx, posy:" ++ string_of_float(state.playerPos.x) ++ " " ++ string_of_float(state.playerPos.y));*/
   let state =
     if (mag > 0.) {
       let dx = offset.x /. mag *. playerSpeedDt;
@@ -306,8 +321,9 @@ let draw = (state, env) => {
         }, ([], boss.killed), state.gameobjects);*/
       {...state, gameobjects};
     | _ =>
-      failwith("Well we certainly didn't think this could happen�\132�")
+      failwith("Well we certainly didn't think this could happen")
     };
+  let finishedAllTasks = Journal.checkTasks(state, env);
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -342,8 +358,20 @@ let draw = (state, env) => {
     | None => None
     | Some((_, fgo)) => Some(fgo)
     };
+  let playerInBarn =
+    Utils.intersectRectRect(
+      ~rect1Pos=(
+        state.playerPos.x +. tileSizef /. 2.,
+        state.playerPos.y +. tileSizef /. 2.,
+      ),
+      ~rect1W=tileSizef /. 2.,
+      ~rect1H=tileSizef /. 2.,
+      ~rect2Pos=(5. *. tileSizef, 9. *. tileSizef),
+      ~rect2W=256.,
+      ~rect2H=256.,
+    );
   let (state, focusedObject) =
-    GameObject.checkPickUp(state, focusedObject, env);
+    GameObject.applyAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
@@ -426,25 +454,33 @@ let draw = (state, env) => {
       ),
     state.grid,
   );
-  let playerInBarn =
-    Utils.intersectRectRect(
-      ~rect1Pos=(
-        state.playerPos.x +. tileSizef /. 2.,
-        state.playerPos.y +. tileSizef /. 2.,
-      ),
-      ~rect1W=tileSizef /. 2.,
-      ~rect1H=tileSizef /. 2.,
-      ~rect2Pos=(5. *. tileSizef, 3. *. tileSizef),
-      ~rect2W=288.,
-      ~rect2H=288.,
-    );
+  let playerBehindBarn =
+    playerInBarn ?
+      false :
+      Reprocessing.Utils.intersectRectRect(
+        ~rect1Pos=(
+          state.playerPos.x +. tileSizef /. 2.,
+          state.playerPos.y +. tileSizef /. 2.,
+        ),
+        ~rect1W=tileSizef /. 2.,
+        ~rect1H=tileSizef /. 2.,
+        ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
+        ~rect2W=320.,
+        ~rect2H=32. *. 4.,
+      );
   /** Draw large game objects */
-  drawAsset(5 * tileSize, 3 * tileSize, "barn_inside.png", state, env);
-  drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
-  drawAsset(24 * tileSize, 5 * tileSize, "truck.png", state, env);
+  (
+    if (playerBehindBarn) {
+      ();
+    } else {
+      drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
+    }
+  );
+  drawAsset(24 * tileSize, 12 * tileSize, "pond.png", state, env);
+  drawAsset(24 * tileSize, 10 * tileSize, "truck.png", state, env);
   drawAssetf(
-    16.6 *. tileSizef,
-    0.2 *. tileSizef,
+    14.6 *. tileSizef,
+    5.2 *. tileSizef,
     "im_coming_home.png",
     state,
     env,
@@ -465,7 +501,13 @@ let draw = (state, env) => {
   if (firstGameObject.pos.y >= state.playerPos.y +. tileSizef /. 2.) {
     renderPlayer(state, env);
   };
-  GameObject.renderObject(firstGameObject, focusedObject, state, env);
+  GameObject.renderObject(
+    firstGameObject,
+    playerInBarn,
+    focusedObject,
+    state,
+    env,
+  );
   /* @Hack We assume sortedGameObjects always contains at least one element here so we have prev and cur */
   let lastGameObject =
     List.fold_left(
@@ -473,21 +515,25 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 288.
+            /. 2. < 256.
             +. tileSizef
-            *. 3.
+            *. 9.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 288.
+            /. 2. >= 256.
             +. tileSizef
-            *. 3.) {
-          drawAsset(
-            5 * tileSize,
-            3 * tileSize,
-            "barn_outside.png",
-            state,
-            env,
-          );
+            *. 9.) {
+          if (playerBehindBarn) {
+            ();
+          } else {
+            drawAsset(
+              5 * tileSize,
+              4 * tileSize,
+              "barn_outside.png",
+              state,
+              env,
+            );
+          };
         };
         if (prevGameOjbect.pos.y < state.playerPos.y
             +. tileSizef
@@ -497,7 +543,13 @@ let draw = (state, env) => {
             /. 2.) {
           renderPlayer(state, env);
         };
-        GameObject.renderObject(curGameObject, focusedObject, state, env);
+        GameObject.renderObject(
+          curGameObject,
+          playerInBarn,
+          focusedObject,
+          state,
+          env,
+        );
         curGameObject;
       },
       firstGameObject,
@@ -535,8 +587,8 @@ let draw = (state, env) => {
           ~value=state.dollarAnimation,
           ~low1=0.,
           ~high1=totalTimeSec,
-          ~low2=5. *. tileSizef,
-          ~high2=2. *. tileSizef,
+          ~low2=10. *. tileSizef,
+          ~high2=7. *. tileSizef,
         ),
         "dolla_dolla_bills.png",
         state,
@@ -556,7 +608,7 @@ let draw = (state, env) => {
   if (state.night) {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
   };
-  GameObject.renderAction(state, focusedObject, env);
+  GameObject.renderAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
   state;
 };
