@@ -913,7 +913,9 @@ let renderObject =
       } else {
         UpD;
       };
-    let img =
+    let img = if (state.day6CameraAnimation > 0.2) {
+      "monster_mouth_closed.png"
+    } else {
       switch (
         facing,
         x1 == x2 && y1 == y2,
@@ -943,6 +945,7 @@ let renderObject =
       | (UpD, false, _, 3) => "monster_back_face_walk_two.png"
       | _ => "egg.png"
       };
+    };
     drawAssetf(x, y -. tileSizef, img, state, env);
   | {pos: {x, y}, state: AxeStanding} =>
     drawAssetf(x, y, "axe_standing.png", state, env)
@@ -966,7 +969,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)}))
         when ! playerInBarn => "Open barn door"
     | (None, Some({action: PickUp(Flower)})) => "Pickup flowers"
-    | (None, Some({state: Tombstone(_), action: NoAction})) => "Maria - July 17th"
+    | (None, Some({state: Tombstone(_), action: NoAction})) => "Maria - October 7th"
     | (None, Some({state: Tombstone(_), action: InspectTombstone})) => "Inspect grave"
     | (None, Some({state: Chicken({health: 0})})) => "There's not much to do now..."
     | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"

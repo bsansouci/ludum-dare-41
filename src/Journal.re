@@ -5,7 +5,7 @@ open Common;
 let fadeTimeSec = 1.5;
 
 let init = _env => {
-  dayIndex: 5,
+  dayIndex: 4,
   dayTransition: FadeOut,
   animationTime: 0.,
   pageNumber: 0,
@@ -526,8 +526,16 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   drawAssetFullscreen("journal_page.png", state, env);
   Draw.pushStyle(env);
   Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
+  let date = dayIndex + 14;
+  let th = if (date === 21) {
+    "st"
+  } else if (date === 22) {
+    "nd"
+  } else {
+    "th"
+  };
   Draw.text(
-    ~body="Day " ++ string_of_int(dayIndex + 1),
+    ~body="July " ++ string_of_int(date) ++ th,
     ~font=state.mainFont,
     ~pos=(55, 60),
     env,

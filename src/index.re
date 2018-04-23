@@ -344,7 +344,7 @@ let draw = (state, env) => {
           },
           ...state.gameobjects,
         ];
-        {...state, gameobjects, day6CameraAnimation: 4.};
+        {...state, gameobjects, day6CameraAnimation: 5.};
       | _ => state
       };
     } else {
@@ -475,17 +475,17 @@ let draw = (state, env) => {
     Draw.translate(
       ~x=
         Utils.remapf(
-          ~value=max(state.day6CameraAnimation, 1.0),
-          ~low1=4.0,
-          ~high1=1.0,
+          ~value=max(state.day6CameraAnimation, 2.0),
+          ~low1=5.0,
+          ~high1=2.0,
           ~low2=startX,
           ~high2=endX,
         ),
       ~y=
         Utils.remapf(
-          ~value=max(state.day6CameraAnimation, 1.0),
-          ~low1=4.0,
-          ~high1=1.0,
+          ~value=max(state.day6CameraAnimation, 2.0),
+          ~low1=5.0,
+          ~high1=2.0,
           ~low2=startY,
           ~high2=endY,
         ),
