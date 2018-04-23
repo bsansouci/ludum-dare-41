@@ -148,6 +148,7 @@ type stateT = {
   day6PlayerWentInBarn: bool,
   day6CameraAnimation: float,
   shortDestroyedBarnAsset: Reprocessing.imageT,
+  sleepingMonsterAsset: Reprocessing.imageT,
 };
 
 let screenSize = 600.;

@@ -374,7 +374,7 @@ let update = (state, env) => {
                 } as bossState,
               ),
           } =>
-          let timeToMove = 0.6;
+          let timeToMove = 0.3;
           if (movingTime > 0.) {
             {
               ...g,
@@ -403,7 +403,8 @@ let update = (state, env) => {
               },
             };
           } else if (state.day6CameraAnimation > 0.
-                     || state.journal.dayTransition === CheckJournal) {
+                     || state.journal.dayTransition === CheckJournal
+                     || hunger === 0) {
             g;
           } else if (eatingTime <= 0.) {
             let allNextTargets =
@@ -898,6 +899,7 @@ let renderObject =
       pos: {x, y},
       state:
         Boss({
+          hunger,
           movingTime,
           eatingTime,
           movePair: ({x: x1, y: y1}, {x: x2, y: y2}),
@@ -913,40 +915,51 @@ let renderObject =
       } else {
         UpD;
       };
-    let img = if (state.day6CameraAnimation > 0.2) {
-      "monster_mouth_closed.png"
+    if (hunger === 0) {
+      Draw.image(
+        state.sleepingMonsterAsset,
+        ~pos=(int_of_float(x), int_of_float(y -. tileSizef)),
+        ~width=32,
+        ~height=66,
+        env,
+      );
     } else {
-      switch (
-        facing,
-        x1 == x2 && y1 == y2,
-        eatingTime > 0.,
-        int_of_float(state.time /. 0.2) mod 4,
-      ) {
-      | (_, _, true, 0)
-      | (_, _, true, 2) => "monster_gory_eating.png"
-      | (_, _, true, 1)
-      | (_, _, true, 3) => "monster_gory_eating_two.png"
-      | (_, true, _, _)
-      | (DownD, false, _, 0)
-      | (DownD, false, _, 2) => "monster_mouth_open.png"
-      | (DownD, false, _, 1) => "monster_front_face_walk_one.png"
-      | (DownD, false, _, 3) => "monster_front_face_walk_two.png"
-      | (RightD, false, _, 0)
-      | (RightD, false, _, 2) => "monster_right_face.png"
-      | (RightD, false, _, 1) => "monster_right_face_walk_one.png"
-      | (RightD, false, _, 3) => "monster_right_face_walk_two.png"
-      | (LeftD, false, _, 0)
-      | (LeftD, false, _, 2) => "monster_left_face.png"
-      | (LeftD, false, _, 1) => "monster_left_face_walk_one.png"
-      | (LeftD, false, _, 3) => "monster_left_face_walk_two.png"
-      | (UpD, false, _, 0)
-      | (UpD, false, _, 2) => "monster_back_face.png"
-      | (UpD, false, _, 1) => "monster_back_face_walk_one.png"
-      | (UpD, false, _, 3) => "monster_back_face_walk_two.png"
-      | _ => "egg.png"
-      };
+      let img =
+        if (state.day6CameraAnimation > 0.2) {
+          "monster_mouth_closed.png";
+        } else {
+          switch (
+            facing,
+            x1 == x2 && y1 == y2,
+            eatingTime > 0.,
+            int_of_float(state.time /. 0.2) mod 4,
+          ) {
+          | (_, _, true, 0)
+          | (_, _, true, 2) => "monster_gory_eating.png"
+          | (_, _, true, 1)
+          | (_, _, true, 3) => "monster_gory_eating_two.png"
+          | (_, true, _, _)
+          | (DownD, false, _, 0)
+          | (DownD, false, _, 2) => "monster_mouth_open.png"
+          | (DownD, false, _, 1) => "monster_front_face_walk_one.png"
+          | (DownD, false, _, 3) => "monster_front_face_walk_two.png"
+          | (RightD, false, _, 0)
+          | (RightD, false, _, 2) => "monster_right_face.png"
+          | (RightD, false, _, 1) => "monster_right_face_walk_one.png"
+          | (RightD, false, _, 3) => "monster_right_face_walk_two.png"
+          | (LeftD, false, _, 0)
+          | (LeftD, false, _, 2) => "monster_left_face.png"
+          | (LeftD, false, _, 1) => "monster_left_face_walk_one.png"
+          | (LeftD, false, _, 3) => "monster_left_face_walk_two.png"
+          | (UpD, false, _, 0)
+          | (UpD, false, _, 2) => "monster_back_face.png"
+          | (UpD, false, _, 1) => "monster_back_face_walk_one.png"
+          | (UpD, false, _, 3) => "monster_back_face_walk_two.png"
+          | _ => "egg.png"
+          };
+        };
+      drawAssetf(x, y -. tileSizef, img, state, env);
     };
-    drawAssetf(x, y -. tileSizef, img, state, env);
   | {pos: {x, y}, state: AxeStanding} =>
     drawAssetf(x, y, "axe_standing.png", state, env)
   | _ => ()
@@ -972,6 +985,9 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (None, Some({state: Tombstone(_), action: NoAction})) => "Maria - October 7th"
     | (None, Some({state: Tombstone(_), action: InspectTombstone})) => "Inspect grave"
     | (None, Some({state: Chicken({health: 0})})) => "There's not much to do now..."
+    | (Some(Axe), Some({state: Chicken({health}) }))
+    | (Some(Axe), Some({state: Chick({health}) }))
+    | (Some(Axe), Some({state: Cow({health}) })) when health > 0 => "Slay"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"
     /* Can't drop corn in water, it'd lock the game up */
     | (Some(Corn), Some({action: PickUp(Water)})) => ""

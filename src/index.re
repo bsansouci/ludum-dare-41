@@ -214,6 +214,8 @@ let setup = (assets, env) => {
         ~filename="short_destroyed_barn.png",
         env,
       ),
+    sleepingMonsterAsset:
+      Draw.loadImage(~isPixel=true, ~filename="sleeping_monster.png", env),
   };
 };
 
@@ -336,7 +338,7 @@ let draw = (state, env) => {
               Boss({
                 movePair: (bPos, bPos),
                 movingTime: 0.,
-                hunger: 4,
+                hunger: 6,
                 eatingTime: 0.,
                 killed: [],
                 eating: false,
@@ -366,51 +368,64 @@ let draw = (state, env) => {
   let state = GameObject.update(state, env);
   /* Kill off the animals that have been eaten by the monster. */
   let state =
-    switch (
-      List.filter(
-        g =>
-          switch (g) {
-          | {state: Boss(_)} => true
-          | _ => false
-          },
-        state.gameobjects,
-      )
-    ) {
-    | [] => state
-    | [{state: Boss(boss)}] =>
-      let gameobjects =
-        List.map(
-          go =>
-            switch (List.exists(k => k === go, boss.killed)) {
-            | false => go
-            | true =>
-              switch (go) {
-              | {state: Cow(cowState)} => {
-                  ...go,
-                  state: Cow({...cowState, health: (-1)}),
-                }
-              | {state: Chicken(cowState)} => {
-                  ...go,
-                  state: Chicken({...cowState, health: (-1)}),
-                }
-              | {state: Chick(cowState)} => {
-                  ...go,
-                  state: Chick({...cowState, health: (-1)}),
-                }
-              | _ => go
-              }
+    if (state.journal.dayIndex === 7) {
+      switch (
+        List.find(
+          g =>
+            switch (g) {
+            | {state: Boss(_)} => true
+            | _ => false
             },
           state.gameobjects,
-        );
-      /* This is another piece of code to remove the animals from the gameobjects if we want to */
-      /*let (gameobjects, _) = List.fold_left(((newGameobjects, killed), go) => {
-          switch (List.exists(k => k === go, killed)) {
-          | false => ([go, ...newGameobjects], killed)
-          | true => (newGameobjects, List.filter(k => k !== go, killed))
-          }
-        }, ([], boss.killed), state.gameobjects);*/
-      {...state, gameobjects};
-    | _ => failwith("Well we certainly didn't think this could happen")
+        )
+      ) {
+      | exception Not_found => state
+      | {state: Boss(boss)} =>
+        let gameobjects =
+          List.map(
+            go =>
+              switch (List.exists(k => k === go, boss.killed), go) {
+              | (_, {state: Boss(_)}) => {
+                  ...go,
+                  state:
+                    Boss({
+                      ...boss,
+                      hunger: boss.hunger - List.length(boss.killed),
+                      killed: [],
+                    }),
+                }
+              | (false, _) => go
+              | (true, _) =>
+                switch (go) {
+                | {state: Cow(cowState)} => {
+                    ...go,
+                    state: Cow({...cowState, health: (-1)}),
+                  }
+                | {state: Chicken(cowState)} => {
+                    ...go,
+                    state: Chicken({...cowState, health: (-1)}),
+                  }
+                | {state: Chick(cowState)} => {
+                    ...go,
+                    state: Chick({...cowState, health: (-1)}),
+                  }
+                | _ => go
+                }
+              },
+            state.gameobjects,
+          );
+        /* This is another piece of code to remove the animals from the gameobjects if we want to */
+        /*let (gameobjects, _) = List.fold_left(((newGameobjects, killed), go) => {
+            switch (List.exists(k => k === go, killed)) {
+            | false => ([go, ...newGameobjects], killed)
+            | true => (newGameobjects, List.filter(k => k !== go, killed))
+            }
+          }, ([], boss.killed), state.gameobjects);*/
+        {...state, gameobjects};
+      | _ => failwith("Well we certainly didn't think this could happen")
+      };
+    } else {
+      state;
     };
   let finishedAllTasks = Journal.checkTasks(state, env);
   let focusedObject =

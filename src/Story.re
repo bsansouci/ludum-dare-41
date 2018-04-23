@@ -75,5 +75,5 @@ let entries = [|
     |],
     pages: [|[||]|],
   }, /* Day 7 */
-  {tasks: [||], pages: [|[||]|]} /* Day 8 */
+  {tasks: [| Bool("Feed Maria") |], pages: [|[||]|]} /* Day 8 */
 |];
