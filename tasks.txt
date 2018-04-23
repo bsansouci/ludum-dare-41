@@ -1,0 +1,65 @@
+
+"Tasks",
+"",
+"Water corn",
+"Plant seeds",
+"Sell eggs",
+"Sell milk"
+
+
+"Tasks",
+"",
+"Water animals",
+"Harvest corn",
+"Feed animals",
+"Clean poop"
+
+
+
+"Tasks",
+"",
+"Fix the barn",
+"Make sure you can open and close the barn door"
+
+
+"Tasks",
+"",
+"There was some noise in the barn last night.",
+"Investigate the barn",
+"Clean up any mess that's in the barn"
+
+
+
+"Tasks",
+"",
+"Find Maria's grave",
+"Mourn"
+
+
+"Tasks",
+"",
+"There was some noise in the barn.",
+"Investigate the barn",
+"Clean up any mess that's in the barn"
+
+second task becomes
+
+"Lock monster in barn"
+
+"Tasks",
+"",
+"Water corn",
+"Plant seeds",
+"Sell eggs",
+"Sell milk",
+"Water animals",
+"Harvest corn",
+"Feed animals",
+"Clean poop",
+"Pretend like nothing has happened"
+
+
+"Tasks",
+"",
+"You hear noise outside. It's time",
+"Slay the beast"
