@@ -302,7 +302,11 @@ let update = (state, env) => {
           if (movingTime > 0.) {
             {
               ...g,
-              state: Boss({...bossState, movingTime: movingTime -. Env.deltaTime(env)}),
+              state:
+                Boss({
+                  ...bossState,
+                  movingTime: movingTime -. Env.deltaTime(env),
+                }),
               pos: {
                 x:
                   Reprocessing.Utils.remapf(
@@ -369,39 +373,97 @@ let update = (state, env) => {
             if (isPlayer && isTargetCloseEnough) {
               print_endline("You should be dead by now");
             };
-
             let (_, {x: bx, y: by}) = bossState.movePair;
             let bossTile = (
               int_of_float(bx /. tileSizef),
               int_of_float(by /. tileSizef),
             );
-
-            let targetTile = (
-              int_of_float(nextTarget.x /. tileSizef),
-              int_of_float(nextTarget.y /. tileSizef),
+            let (currentTileX, currentTileY) = (
+              floor(nextTarget.x /. tileSizef) *. tileSizef,
+              floor(nextTarget.y /. tileSizef) *. tileSizef,
             );
+            let (belowCurrentTileX, belowCurrentTileY) = (
+              currentTileX,
+              currentTileY +. tileSizef,
+            );
+            let (belowRightCurrentTileX, belowRightCurrentTileY) = (
+              currentTileX +. tileSizef,
+              currentTileY +. tileSizef,
+            );
+            let (rightCurrentTileX, rightCurrentTileY) = (
+              currentTileX +. tileSizef,
+              currentTileY,
+            );
+            let currentTileArea =
+              (currentTileX +. tileSizef -. nextTarget.x)
+              *. (currentTileY +. tileSizef -. nextTarget.y);
+            let belowCurrentTileArea =
+              (belowCurrentTileX +. tileSizef -. nextTarget.x)
+              *. (belowCurrentTileY +. tileSizef -. nextTarget.y);
+            let belowRightCurrentTileArea =
+              (belowRightCurrentTileX +. tileSizef -. nextTarget.x)
+              *. (belowRightCurrentTileY +. tileSizef -. nextTarget.y);
+            let rightCurrentTileArea =
+              (rightCurrentTileX +. tileSizef -. nextTarget.x)
+              *. (rightCurrentTileY +. tileSizef -. nextTarget.y);
+            let targetTile =
+              if (currentTileArea > belowCurrentTileArea
+                  && currentTileArea > belowRightCurrentTileArea
+                  && currentTileArea > rightCurrentTileArea) {
+                (
+                  int_of_float(currentTileX /. tileSizef),
+                  int_of_float(currentTileY /. tileSizef),
+                );
+              } else if (belowCurrentTileArea > currentTileArea
+                         && belowCurrentTileArea > belowRightCurrentTileArea
+                         && belowCurrentTileArea > rightCurrentTileArea) {
+                (
+                  int_of_float(belowCurrentTileX /. tileSizef),
+                  int_of_float(belowCurrentTileY /. tileSizef),
+                );
+              } else if (belowRightCurrentTileArea > currentTileArea
+                         && belowRightCurrentTileArea > belowCurrentTileArea
+                         && belowRightCurrentTileArea > rightCurrentTileArea) {
+                (
+                  int_of_float(belowRightCurrentTileX /. tileSizef),
+                  int_of_float(belowRightCurrentTileY /. tileSizef),
+                );
+              } else {
+                (
+                  int_of_float(rightCurrentTileX /. tileSizef),
+                  int_of_float(rightCurrentTileY /. tileSizef),
+                );
+              };
             let (tx, ty) = targetTile;
-            let movePair = switch(Pathfind.getPath(bossTile, targetTile, state.grid)){
+            let movePair =
+              switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
               | None =>
-              print_endline("Cant find" ++ string_of_int(tx) ++ "," ++ string_of_int(ty));
-              ({x: bx, y: by}, {x: bx, y: by})
+                /*print_endline(
+                  "Cant find"
+                  ++ string_of_int(tx)
+                  ++ ","
+                  ++ string_of_int(ty),
+                );*/
+                ({x: bx, y: by}, {x: bx, y: by});
               | Some([])
-              | Some([_]) =>
-              ({x: bx, y: by}, {x: bx, y: by})
-              | Some([(x1, y1), (x2, y2), ..._]) as p =>
-                  (
-                   {x: float_of_int(x1) *. tileSizef,
-                    y: float_of_int(y1) *. tileSizef},
-                   {x: float_of_int(x2) *. tileSizef,
-                    y: float_of_int(y2) *. tileSizef}
-                    )
-            };
+              | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
+              | Some([(x1, y1), (x2, y2), ..._]) as p => (
+                  {
+                    x: float_of_int(x1) *. tileSizef,
+                    y: float_of_int(y1) *. tileSizef,
+                  },
+                  {
+                    x: float_of_int(x2) *. tileSizef,
+                    y: float_of_int(y2) *. tileSizef,
+                  },
+                )
+              };
             {
               ...g,
               state:
                 Boss({
                   ...bossState,
-                  movePair: movePair,
+                  movePair,
                   movingTime: timeToMove,
                   killed:
                     isTargetCloseEnough && ! isPlayer && eating ?
@@ -507,6 +569,8 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     } else if (health === 0) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
       drawAssetf(
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
@@ -515,9 +579,18 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     } else {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+      Draw.fill(Utils.color(0, 0, 255, 255), env);
+      Draw.rectf(
+        ~pos=(17. *. tileSizef, 16. *. tileSizef),
+        ~width=tileSizef,
+        ~height=tileSizef,
+        env,
+      );
       drawAssetf(
-        x -. tileSizef /. 2.,
-        y -. tileSizef /. 2.,
+        x -. tileSizef /. 4.,
+        y -. tileSizef /. 4.,
         "chick.png",
         state,
         env,
@@ -528,7 +601,8 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.popStyle(env);
 };
 
-let renderObject = (g, playerInBarn, playerBehindBarn, focusedObject, state, env) =>
+let renderObject =
+    (g, playerInBarn, playerBehindBarn, focusedObject, state, env) =>
   switch (g) {
   | {pos: {x, y}, state: Tombstone} when playerBehindBarn =>
     drawAssetf(
