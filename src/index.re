@@ -169,6 +169,7 @@ let setup = (assets, env) => {
     spritesheet:
       Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
     assets,
+    sounds: loadSounds(env),
     gameobjects: GameObject.init(grid),
     currentItem: None,
     journal: Journal.init(env),
@@ -187,6 +188,15 @@ let draw = (state, env) => {
   let state = {
     ...state,
     night: Env.keyPressed(N, env) ? ! state.night : state.night,
+  };
+  if (Random.float(1.0) < 0.01) {
+    if (state.night) {
+      let soundNum = Random.int(4) + 1;
+      playSound("night" ++ string_of_int(soundNum), state, env);
+    } else {
+      let soundNum = Random.int(5) + 1;
+      playSound("day" ++ string_of_int(soundNum), state, env);
+    };
   };
   let offset = {x: 0., y: 0.};
   let offset =

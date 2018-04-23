@@ -68,7 +68,7 @@ type bossStateT = {
   hunger: int,
   eatingTime: float,
   killed: list(gameobjectT),
-  eating: bool
+  eating: bool,
 }
 and gameobjectStateT =
   | Corn(int)
@@ -120,6 +120,7 @@ type stateT = {
   playerFacing: directionT,
   spritesheet: Reprocessing.imageT,
   assets: StringMap.t(assetT),
+  sounds: StringMap.t((Reprocessing.soundT, float)),
   currentItem: option(carryableT),
   gameobjects: list(gameobjectT),
   journal: journalT,
@@ -192,6 +193,41 @@ let drawAssetf = (x, y, name, state, env) =>
       env,
     )
   };
+
+let soundNames = [
+  ("day1", 1.0),
+  ("day2", 1.0),
+  ("day3", 1.0),
+  ("day4", 1.0),
+  ("day5", 1.0),
+  ("night1", 1.0),
+  ("night2", 1.0),
+  ("night3", 1.0),
+  ("night4", 1.0),
+];
+
+let playSound = (name, state, env) =>
+  switch (StringMap.find(name, state.sounds)) {
+  | (s, volume) => Reprocessing.Env.playSound(s, ~loop=false, ~volume, env)
+  | exception Not_found => print_endline("Couldn't find sound " ++ name)
+  };
+
+let loadSounds = env => {
+  let loadSoundHelper =
+      (soundMap, (soundName: string, volume)) =>
+    StringMap.add(
+      soundName,
+      (
+        Reprocessing.Env.loadSound(
+          Printf.sprintf("sounds/%s.wav", soundName),
+          env,
+        ),
+        volume,
+      ),
+      soundMap,
+    );
+  List.fold_left(loadSoundHelper, StringMap.empty, soundNames);
+};
 
 let anyKey = (keys, env) =>
   List.exists(k => Reprocessing.Env.key(k, env), keys);
