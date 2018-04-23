@@ -139,7 +139,7 @@ let init = grid => {
                 {
                   pos: {
                     x: 9. *. tileSizef,
-                    y: 6. *. tileSizef,
+                    y: 5. *. tileSizef,
                   },
                   action: NoAction,
                   state: Tombstone,

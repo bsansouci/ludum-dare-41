@@ -10,7 +10,7 @@ let mapString = {|
 0000qxxxxxxxxxxe0000000000000
 0000a0000000000d0000000000000
 0000a000000000030000000000000
-0000a000000000030000000000000
+0000a333333333030000000000000
 0000z333333333030000000000000
 000003834444430xxxxxxxxxxxxxx
 00000344444443000000000099999
@@ -476,7 +476,7 @@ let draw = (state, env) => {
   /** Draw large game objects */
   (
     if (playerBehindBarn) {
-      ();
+      drawAsset(5 * tileSize, 4 * tileSize, "short_barn_inside.png", state, env);
     } else {
       drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
     }
