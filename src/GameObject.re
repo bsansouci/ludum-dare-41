@@ -130,6 +130,14 @@ let init = grid => {
               addChick([
                 {
                   pos: {
+                    x: tileSizef *. 8.,
+                    y: tileSizef *. 11.,
+                  },
+                  action: DoBarnDoor,
+                  state: BarnDoor(Broken),
+                },
+                {
+                  pos: {
                     x: 6. *. tileSizef,
                     y: 8. *. tileSizef,
                   },
@@ -423,6 +431,9 @@ let renderBefore = (g, focusedObject, state, env) => {
 
 let renderObject = (g, focusedObject, state, env) =>
   switch (g) {
+  | {pos: {x, y}, action: DoBarnDoor} =>
+    Draw.fill(Utils.color(255, 0, 255, 255), env);
+    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -581,6 +592,9 @@ let renderAction = (state, focusedObject, env) => {
         when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
     | (None, Some({action: PickUp(Knife)})) => "Pickup ... the knife?"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Broken)})) => "Repair barn door"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Opened)})) => "Close barn door"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)})) => "Open barn door"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
@@ -605,39 +619,24 @@ let renderAction = (state, focusedObject, env) => {
 let checkPickUp = (state, focusedObject, env) =>
   if (Env.keyPressed(X, env) || Env.keyPressed(Space, env)) {
     switch (state.currentItem, focusedObject) {
-    | (Some(Knife), Some({state: Chick(s)} as go)) => (
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(barnState)} as go)) =>
+      let nextBarnState =
+        switch (barnState) {
+        | Broken => Opened
+        | Opened => Closed
+        | Closed => Opened
+        };
+      (
         {
           ...state,
           gameobjects:
             List.map(
-              g => g === go ? {...g, state: Chick({...s, health: 0})} : g,
+              g => g === go ? {...g, state: BarnDoor(nextBarnState)} : g,
               state.gameobjects,
             ),
         },
-        focusedObject,
-      )
-    | (Some(Knife), Some({state: Chicken(s)} as go)) => (
-        {
-          ...state,
-          gameobjects:
-            List.map(
-              g => g === go ? {...g, state: Chicken({...s, health: 0})} : g,
-              state.gameobjects,
-            ),
-        },
-        focusedObject,
-      )
-    | (Some(Knife), Some({state: Cow(s)} as go)) => (
-        {
-          ...state,
-          gameobjects:
-            List.map(
-              g => g === go ? {...g, state: Cow({...s, health: 0})} : g,
-              state.gameobjects,
-            ),
-        },
-        focusedObject,
-      )
+        None,
+      );
     | (None, Some({action: PickUp(Corn)} as go)) => (
         {
           ...state,
@@ -656,10 +655,6 @@ let checkPickUp = (state, focusedObject, env) =>
       )
     | (None, Some({action: PickUp(Seed)})) => (
         {...state, currentItem: Some(Seed)},
-        None,
-      )
-    | (Some(Seed), Some({action: PickUp(Seed)})) => (
-        {...state, currentItem: None},
         None,
       )
     | (Some(_), Some({action: PickUp(Water)})) => (
@@ -695,33 +690,38 @@ let checkPickUp = (state, focusedObject, env) =>
         },
         None,
       )
-    | (
-        Some(Water),
-        Some({action: WaterAnimals, state: WaterTank(Empty as s)} as go),
-      )
-    | (
-        Some(Water),
-        Some({action: WaterAnimals, state: WaterTank(HalfFull as s)} as go),
-      ) => (
+    | (Some(Knife), Some({state: Chick(s)} as go)) => (
         {
           ...state,
-          currentItem: None,
           gameobjects:
             List.map(
-              g =>
-                if (g !== go) {
-                  g;
-                } else {
-                  {
-                    ...g,
-                    action: s == Empty ? WaterAnimals : NoAction,
-                    state: WaterTank(s == Empty ? HalfFull : Full),
-                  };
-                },
+              g => g === go ? {...g, state: Chick({...s, health: 0})} : g,
               state.gameobjects,
             ),
         },
-        None,
+        focusedObject,
+      )
+    | (Some(Knife), Some({state: Chicken(s)} as go)) => (
+        {
+          ...state,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Chicken({...s, health: 0})} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
+    | (Some(Knife), Some({state: Cow(s)} as go)) => (
+        {
+          ...state,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Cow({...s, health: 0})} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
       )
     | (
         Some(Corn),
@@ -749,6 +749,10 @@ let checkPickUp = (state, focusedObject, env) =>
               state.gameobjects,
             ),
         },
+        None,
+      )
+    | (Some(Seed), Some({action: PickUp(Seed)})) => (
+        {...state, currentItem: None},
         None,
       )
     | (Some(Seed), Some({action: PlantSeed, state: Corn(_)} as go)) => (
@@ -792,6 +796,34 @@ let checkPickUp = (state, focusedObject, env) =>
                   g;
                 } else {
                   {...g, action: NoAction, state: Corn(stage)};
+                },
+              state.gameobjects,
+            ),
+        },
+        None,
+      )
+    | (
+        Some(Water),
+        Some({action: WaterAnimals, state: WaterTank(Empty as s)} as go),
+      )
+    | (
+        Some(Water),
+        Some({action: WaterAnimals, state: WaterTank(HalfFull as s)} as go),
+      ) => (
+        {
+          ...state,
+          currentItem: None,
+          gameobjects:
+            List.map(
+              g =>
+                if (g !== go) {
+                  g;
+                } else {
+                  {
+                    ...g,
+                    action: s == Empty ? WaterAnimals : NoAction,
+                    state: WaterTank(s == Empty ? HalfFull : Full),
+                  };
                 },
               state.gameobjects,
             ),
