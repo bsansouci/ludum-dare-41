@@ -107,8 +107,8 @@ let init = grid => {
   let addChick = gos => [
     {
       pos: {
-        x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
-        y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
+        x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+        y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
       },
       action: NoAction,
       state: Chick({
@@ -131,7 +131,7 @@ let init = grid => {
                 {
                   pos: {
                     x: tileSizef *. 8.,
-                    y: tileSizef *. 11.,
+                    y: tileSizef *. 16.,
                   },
                   action: DoBarnDoor,
                   state: BarnDoor(Broken),
@@ -139,7 +139,7 @@ let init = grid => {
                 {
                   pos: {
                     x: 6. *. tileSizef,
-                    y: 8. *. tileSizef,
+                    y: 13. *. tileSizef,
                   },
                   action: PickUp(Knife),
                   state: NoState,
@@ -147,7 +147,7 @@ let init = grid => {
                 {
                   pos: {
                     x: 6. *. tileSizef,
-                    y: 12. *. tileSizef,
+                    y: 17. *. tileSizef,
                   },
                   action: PickUp(Milk),
                   state: Cow({
@@ -161,7 +161,7 @@ let init = grid => {
                 {
                   pos: {
                     x: 8. *. tileSizef,
-                    y: 11. *. tileSizef,
+                    y: 16. *. tileSizef,
                   },
                   action: NoAction,
                   state: Chicken({
@@ -424,6 +424,27 @@ let renderBefore = (g, focusedObject, state, env) => {
       state,
       env,
     )
+  | {pos: {x, y}, action: NoAction, state: Chick({health})} =>
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dead_chick.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "chick.png",
+        state,
+        env,
+      );
+    }
   | _ => ()
   };
   Draw.popStyle(env);
@@ -481,27 +502,6 @@ let renderObject = (g, focusedObject, state, env) =>
         x -. tileSizef /. 2.,
         y -. tileSizef /. 2.,
         "bet_he_would_make_some_nice_fried_chicken.png",
-        state,
-        env,
-      );
-    }
-  | {pos: {x, y}, action: NoAction, state: Chick({health})} =>
-    if (health === (-1)) {
-      Draw.fill(Utils.color(255, 0, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
-    } else if (health === 0) {
-      drawAssetf(
-        x -. tileSizef /. 2.,
-        y -. tileSizef /. 2.,
-        "dead_chick.png",
-        state,
-        env,
-      );
-    } else {
-      drawAssetf(
-        x -. tileSizef /. 2.,
-        y -. tileSizef /. 2.,
-        "chick.png",
         state,
         env,
       );

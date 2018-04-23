@@ -88,16 +88,16 @@ let updateDay = (state, env) => {
       let gameobjects = [
         {
           pos: {
-            x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
-            y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
+            x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+            y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
           },
           action: PickUp(Egg),
           state: NoState,
         },
         {
           pos: {
-            x: Utils.randomf(~min=6., ~max=22.) *. tileSizef,
-            y: Utils.randomf(~min=13., ~max=15.) *. tileSizef,
+            x: Utils.randomf(~min=11., ~max=27.) *. tileSizef,
+            y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
           },
           action: Cleanup,
           state: NoState,
@@ -111,7 +111,7 @@ let updateDay = (state, env) => {
             {
               pos: {
                 x: tileSizef *. 17.8,
-                y: tileSizef *. 5.,
+                y: tileSizef *. 10.,
               },
               action: NoAction,
               state:
@@ -132,7 +132,7 @@ let updateDay = (state, env) => {
         },
         playerPos: {
           x: tileSizef *. 17.8,
-          y: tileSizef *. 5.,
+          y: tileSizef *. 10.,
         },
         playerFacing: DownD,
         currentItem: None,

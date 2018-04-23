@@ -3,7 +3,12 @@ open Reprocessing;
 open Common;
 
 let mapString = {|
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
+0000000000000000000000000000
 0000qxxxxxxxxxxe000000000000
+0000a0000000000d000000000000
 0000a00000000003000000000000
 0000a00000000003000000000000
 0000z33333333303000000000000
@@ -163,7 +168,7 @@ let setup = (assets, env) => {
     plants: Array.make_matrix(4, 6, 0),
     playerPos: {
       x: tileSizef *. 17.8,
-      y: tileSizef *. 5.,
+      y: tileSizef *. 10.,
     },
     playerFacing: DownD,
     spritesheet:
@@ -201,34 +206,35 @@ let draw = (state, env) => {
     };
   };
   let offset = {x: 0., y: 0.};
-  let offset = if (state.journal.dayTransition == NoTransition) {
-    let offset =
-      Env.key(Left, env) || Env.key(A, env) ?
-        handleCollision(
-          offset,
-          {...offset, x: -. playerSpeedDt},
-          state.playerPos,
-          state.grid,
-        ) :
-        offset;
-    let offset =
-      Env.key(Right, env) || Env.key(D, env) ?
-        handleCollision(
-          offset,
-          {...offset, x: playerSpeedDt},
-          state.playerPos,
-          state.grid,
-        ) :
-        offset;
-    let offset =
-      Env.key(Up, env) || Env.key(W, env) ?
-        handleCollision(
-          offset,
-          {...offset, y: -. playerSpeedDt},
-          state.playerPos,
-          state.grid,
-        ) :
-        offset;
+  let offset =
+    if (state.journal.dayTransition == NoTransition) {
+      let offset =
+        Env.key(Left, env) || Env.key(A, env) ?
+          handleCollision(
+            offset,
+            {...offset, x: -. playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
+      let offset =
+        Env.key(Right, env) || Env.key(D, env) ?
+          handleCollision(
+            offset,
+            {...offset, x: playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
+      let offset =
+        Env.key(Up, env) || Env.key(W, env) ?
+          handleCollision(
+            offset,
+            {...offset, y: -. playerSpeedDt},
+            state.playerPos,
+            state.grid,
+          ) :
+          offset;
       Env.key(Down, env) || Env.key(S, env) ?
         handleCollision(
           offset,
@@ -237,9 +243,9 @@ let draw = (state, env) => {
           state.grid,
         ) :
         offset;
-  } else {
-    offset;
-  };
+    } else {
+      offset;
+    };
   let mag = Utils.magf((offset.x, offset.y));
   let state =
     if (mag > 0.) {
@@ -438,17 +444,17 @@ let draw = (state, env) => {
       ),
       ~rect1W=tileSizef /. 2.,
       ~rect1H=tileSizef /. 2.,
-      ~rect2Pos=(5. *. tileSizef, 3. *. tileSizef),
+      ~rect2Pos=(5. *. tileSizef, 4. *. tileSizef),
       ~rect2W=288.,
-      ~rect2H=288.,
+      ~rect2H=416.,
     );
   /** Draw large game objects */
-  drawAsset(5 * tileSize, -1 * tileSize, "barn_inside.png", state, env);
-  drawAsset(24 * tileSize, 7 * tileSize, "pond.png", state, env);
-  drawAsset(24 * tileSize, 5 * tileSize, "truck.png", state, env);
+  drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
+  drawAsset(24 * tileSize, 12 * tileSize, "pond.png", state, env);
+  drawAsset(24 * tileSize, 10 * tileSize, "truck.png", state, env);
   drawAssetf(
     14.6 *. tileSizef,
-    0.2 *. tileSizef,
+    5.2 *. tileSizef,
     "im_coming_home.png",
     state,
     env,
@@ -477,17 +483,17 @@ let draw = (state, env) => {
         if (! playerInBarn
             && prevGameOjbect.pos.y
             +. tileSizef
-            /. 2. < 288.
+            /. 2. < 416.
             +. tileSizef
             *. 3.
             && curGameObject.pos.y
             +. tileSizef
-            /. 2. >= 288.
+            /. 2. >= 416.
             +. tileSizef
             *. 3.) {
           drawAsset(
             5 * tileSize,
-            -1 * tileSize,
+            4 * tileSize,
             "barn_outside.png",
             state,
             env,
@@ -539,8 +545,8 @@ let draw = (state, env) => {
           ~value=state.dollarAnimation,
           ~low1=0.,
           ~high1=totalTimeSec,
-          ~low2=5. *. tileSizef,
-          ~high2=2. *. tileSizef,
+          ~low2=10. *. tileSizef,
+          ~high2=7. *. tileSizef,
         ),
         "dolla_dolla_bills.png",
         state,
