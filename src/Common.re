@@ -127,6 +127,7 @@ type stateT = {
   dollarAnimation: float,
   time: float,
   night: bool,
+  mainFont: Reprocessing.fontT
 };
 
 let screenSize = 600.;
