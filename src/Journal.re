@@ -5,7 +5,7 @@ open Common;
 let fadeTimeSec = 1.5;
 
 let init = _env => {
-  dayIndex: 4,
+  dayIndex: 5,
   dayTransition: FadeOut,
   animationTime: 0.,
   pageNumber: 0,
@@ -113,7 +113,7 @@ let updateDay = (state, env) => {
         } else {
           gameobjects;
         };
-      let shouldAddManure = dayIndex === 1;
+      let shouldAddManure = dayIndex === 1 || dayIndex === 6;
       let gameobjects =
         if (shouldAddManure) {
           [
@@ -180,6 +180,43 @@ let updateDay = (state, env) => {
         } else {
           gameobjects;
         };
+      let shouldRemoveBoss = dayIndex === 6;
+      let gameobjects =
+        if (shouldRemoveBoss) {
+          List.filter(
+            g =>
+              switch (g) {
+              | {state: Boss(_)} => false
+              | _ => true
+              },
+            gameobjects,
+          );
+        } else {
+          gameobjects;
+        };
+      let checkIfAtLeastOneCorn = dayIndex === 6;
+      let gameobjects =
+        if (checkIfAtLeastOneCorn) {
+          let (gameobjects, _) =
+            List.fold_left(
+              ((gameobjects, isDone), g) =>
+                switch (isDone, g) {
+                | (false, {state: Corn(_)}) => (
+                    [
+                      {...g, state: Corn(5), action: PickUp(Corn)},
+                      ...gameobjects,
+                    ],
+                    true,
+                  )
+                | _ => ([g, ...gameobjects], isDone)
+                },
+              ([], false),
+              gameobjects,
+            );
+          gameobjects;
+        } else {
+          gameobjects;
+        };
       {
         ...state,
         night: dayIndex === 5 ? true : false,
@@ -196,6 +233,7 @@ let updateDay = (state, env) => {
         playerFacing: DownD,
         currentItem: None,
         gameobjects,
+        day6PlayerWentInBarn: false,
       };
     | {journal: {dayTransition: FadeIn, animationTime}}
         when animationTime > fadeTimeSec => {
@@ -296,7 +334,7 @@ let day1Stats = state =>
             cornNoAction + 1,
             plantSeed,
           |]
-        | {state: Corn((-1)), action: NoAction} => [|
+        | {state: Corn(0), action: NoAction} => [|
             pickUpEggs,
             pickUpMilk,
             emptyWaterTank,
@@ -305,7 +343,7 @@ let day1Stats = state =>
           |]
         | _ => acc
         }
-      | _ => failwith("beeeeen")
+      | _ => failwith("beeeeen 2")
       },
     [|0, 0, 0, 0, 0|],
     state.gameobjects,
@@ -322,7 +360,7 @@ let day2Stats = state =>
         | {action: Cleanup} => [|emptyWaterTank, emptyFoodTank, 1|]
         | _ => acc
         }
-      | _ => failwith("beeeeen")
+      | _ => failwith("beeeeen 3")
       },
     [|0, 0, 0|],
     state.gameobjects,
@@ -362,7 +400,7 @@ let day5Stats = state =>
         | {action: InspectTombstone} => [|1, flowerTombstone|]
         | _ => acc
         }
-      | _ => failwith("beeeeen")
+      | _ => failwith("beeeeen 4")
       },
     [|0, 0|],
     state.gameobjects,
@@ -455,7 +493,7 @@ let day7Stats = state =>
             emptyFoodTank,
             cleanup,
           |]
-        | {state: Corn((-1)), action: NoAction} => [|
+        | {state: Corn(0), action: NoAction} => [|
             wateredCorn,
             plantSeed + 1,
             pickUpEggs,
@@ -476,9 +514,9 @@ let day7Stats = state =>
           |]
         | _ => acc
         }
-      | _ => failwith("beeeeen")
+      | _ => failwith("beeeeen 1")
       },
-    [|0, 0, 0, 0, 0|],
+    [|0, 0, 0, 0, 0, 0, 0|],
     state.gameobjects,
   );
 

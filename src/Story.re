@@ -66,7 +66,7 @@ let entries = [|
   {
     tasks: [|
       Count("Water corn", 3),
-      Count("Plant seeds", 1),
+      Count("Plant seed and water it", 1),
       Bool("Sell eggs"),
       Bool("Sell milk"),
       Bool("Fill water trough"),

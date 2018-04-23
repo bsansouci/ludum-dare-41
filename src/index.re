@@ -208,6 +208,12 @@ let setup = (assets, env) => {
     mousePressedHack: false,
     day6PlayerWentInBarn: false,
     day6CameraAnimation: 0.,
+    shortDestroyedBarnAsset:
+      Draw.loadImage(
+        ~isPixel=true,
+        ~filename="short_destroyed_barn.png",
+        env,
+      ),
   };
 };
 
@@ -464,8 +470,8 @@ let draw = (state, env) => {
           },
         state.gameobjects,
       );
-    let endX = -. boss.pos.x  +. screenSize /. 4. -. tileSizef /. 2.;
-    let endY = -. boss.pos.y  +. screenSize /. 4. -. tileSizef /. 2.;
+    let endX = -. boss.pos.x +. screenSize /. 4. -. tileSizef /. 2.;
+    let endY = -. boss.pos.y +. screenSize /. 4. -. tileSizef /. 2.;
     Draw.translate(
       ~x=
         Utils.remapf(
@@ -584,13 +590,26 @@ let draw = (state, env) => {
   /** Draw large game objects */
   (
     if (playerBehindBarn) {
-      drawAsset(
-        5 * tileSize,
-        4 * tileSize,
-        "short_barn_inside.png",
-        state,
-        env,
-      );
+      /* @Hack */
+      if (state.journal.dayIndex === 6) {
+        Draw.image(
+          state.shortDestroyedBarnAsset,
+          ~pos=(5 * tileSize, 7 * tileSize),
+          ~width=284,
+          ~height=331,
+          env,
+        );
+      } else {
+        drawAsset(
+          5 * tileSize,
+          4 * tileSize,
+          "short_barn_inside.png",
+          state,
+          env,
+        );
+      };
+    } else if (state.journal.dayIndex === 6) {
+      drawAsset(5 * tileSize, 4 * tileSize, "destroyed_barn.png", state, env);
     } else {
       drawAsset(5 * tileSize, 4 * tileSize, "barn_inside.png", state, env);
     }
@@ -639,11 +658,21 @@ let draw = (state, env) => {
             -. collisionPadding
             && curGameObject.pos.y >= barnBottom
             -. collisionPadding) {
-          let assetName =
-            if (playerBehindBarn) {"short_barn_inside.png"} else {
-              "barn_outside.png"
-            };
-          drawAsset(5 * tileSize, 4 * tileSize, assetName, state, env);
+          if (state.journal.dayIndex === 6 && playerBehindBarn) {
+            Draw.image(
+              state.shortDestroyedBarnAsset,
+              ~pos=(5 * tileSize, 7 * tileSize),
+              ~width=284,
+              ~height=331,
+              env,
+            );
+          } else {
+            let assetName =
+              if (playerBehindBarn) {"short_barn_inside.png"} else {
+                "barn_outside.png"
+              };
+            drawAsset(5 * tileSize, 4 * tileSize, assetName, state, env);
+          };
         };
         /*Draw.fill(Utils.color(255, 0, 0, 255), env);*/
         /*Draw.rect(~pos=(5 * tileSize, int_of_float(barnBottom-. collisionPadding)), ~width=tileSize, ~height=256, env);*/
@@ -717,11 +746,11 @@ let draw = (state, env) => {
       state;
     };
   /*Draw.fill(Utils.color(255, 0, 0, 255), env);
-  Draw.rect(~pos=(8 * tileSize, 12 * tileSize), ~width=tileSize, ~height=tileSize, env);
-  Draw.fill(Utils.color(0, 255, 0, 255), env);
-  Draw.rectf(~pos=(floor(state.playerPos.x /. tileSizef) *. tileSizef, floor(state.playerPos.y /. tileSizef) *. tileSizef +. tileSizef), ~width=tileSizef, ~height=tileSizef, env);
-  Draw.fill(Utils.color(0, 0, 255, 255), env);
-  Draw.rectf(~pos=(state.playerPos.x, state.playerPos.y), ~width=tileSizef, ~height=tileSizef, env);*/
+    Draw.rect(~pos=(8 * tileSize, 12 * tileSize), ~width=tileSize, ~height=tileSize, env);
+    Draw.fill(Utils.color(0, 255, 0, 255), env);
+    Draw.rectf(~pos=(floor(state.playerPos.x /. tileSizef) *. tileSizef, floor(state.playerPos.y /. tileSizef) *. tileSizef +. tileSizef), ~width=tileSizef, ~height=tileSizef, env);
+    Draw.fill(Utils.color(0, 0, 255, 255), env);
+    Draw.rectf(~pos=(state.playerPos.x, state.playerPos.y), ~width=tileSizef, ~height=tileSizef, env);*/
   Draw.popStyle(env);
   Draw.popMatrix(env);
   if (state.night) {

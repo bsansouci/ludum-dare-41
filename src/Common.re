@@ -146,7 +146,8 @@ type stateT = {
   mousePressed: bool,
   mousePressedHack: bool,
   day6PlayerWentInBarn: bool,
-  day6CameraAnimation: float
+  day6CameraAnimation: float,
+  shortDestroyedBarnAsset: Reprocessing.imageT,
 };
 
 let screenSize = 600.;
