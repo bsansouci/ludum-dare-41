@@ -15,7 +15,7 @@ let init = env => {
 let updateDay = (state, env) => {
   let state =
     switch (state) {
-    | {gameobjects, journal: {dayTransition: NoTransition}} =>
+    /*| {gameobjects, journal: {dayTransition: NoTransition}} =>
       let allDone =
         if (debug && Env.keyPressed(P, env)) {
           true;
@@ -46,7 +46,7 @@ let updateDay = (state, env) => {
         };
       } else {
         state;
-      };
+      };*/
     | {journal: {dayTransition: JournalOut, animationTime}}
         when animationTime > fadeTimeSec => {
         ...state,
@@ -323,4 +323,28 @@ let renderTransition = (state, deltaTime, env) =>
       };
     };
   | _ => state
+  };
+
+let checkTasks = (state, _env) =>
+  if (state.journal.dayIndex === 1) {
+    List.for_all(
+      (o: gameobjectT) =>
+        /* Check for everything that needs to be done for the next day to happen. */
+        switch (o) {
+        /*     "Water corn",
+               "Plant seeds",
+               "Sell eggs",
+               "Sell milk"*/
+        | {action: PickUp(Egg)}
+        | {action: PickUp(Corn)}
+        | {state: WaterTank(HalfFull)}
+        | {state: WaterTank(Empty)}
+        | {action: PickUp(Milk), state: Cow(_)}
+        | {action: WaterCorn} => false
+        | _ => true
+        },
+      state.gameobjects,
+    );
+  } else {
+    false;
   };

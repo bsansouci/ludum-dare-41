@@ -45,6 +45,7 @@ type actionT =
   | PutBackSeed
   | Sell
   | DoBarnDoor
+  | GoToBed
   | NoAction;
 
 type tankStateT =

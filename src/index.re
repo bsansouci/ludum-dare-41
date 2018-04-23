@@ -321,8 +321,9 @@ let draw = (state, env) => {
         }, ([], boss.killed), state.gameobjects);*/
       {...state, gameobjects};
     | _ =>
-      failwith("Well we certainly didn't think this could happen�\132�")
+      failwith("Well we certainly didn't think this could happen")
     };
+  let finishedAllTasks = Journal.checkTasks(state, env);
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -370,7 +371,7 @@ let draw = (state, env) => {
       ~rect2H=256.,
     );
   let (state, focusedObject) =
-    GameObject.applyAction(state, playerInBarn, focusedObject, env);
+    GameObject.applyAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
   let state = Journal.updateDay(state, env);
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
@@ -607,7 +608,7 @@ let draw = (state, env) => {
   if (state.night) {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
   };
-  GameObject.renderAction(state, playerInBarn, focusedObject, env);
+  GameObject.renderAction(state, playerInBarn, finishedAllTasks, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
   state;
 };
