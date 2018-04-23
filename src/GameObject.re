@@ -844,7 +844,7 @@ let renderObject =
       | (_, _, true, 3) => "monster_gory_eating_two.png"
       | (_, true, _, _)
       | (DownD, false, _, 0)
-      | (DownD, false, _, 2) => "monster_front_face.png"
+      | (DownD, false, _, 2) => "monster_mouth_open.png"
       | (DownD, false, _, 1) => "monster_front_face_walk_one.png"
       | (DownD, false, _, 3) => "monster_front_face_walk_two.png"
       | (RightD, false, _, 0)
