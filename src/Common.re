@@ -245,6 +245,18 @@ let facingToOffset = dir =>
   | LeftD => {x: (-0.5), y: 0.}
   };
 
+let isCollidable = (x, y, grid: array(array(tileT))) =>
+  switch (grid[x][y]) {
+  | Blocked
+  | Water
+  | Fence(_)
+  | SeedBin
+  | WaterTrough
+  | Truck
+  | FoodTrough => true
+  | _ => false
+  };
+
 let handleCollision = (state, prevOffset, offset, pos, grid) => {
   let l = [
     (0, 0),
@@ -263,47 +275,33 @@ let handleCollision = (state, prevOffset, offset, pos, grid) => {
       ((dx, dy)) => {
         let tx = dx + int_of_float((offset.x +. pos.x) /. tileSizef);
         let ty = dy + int_of_float((offset.y +. pos.y) /. tileSizef);
-        if (tx >= Array.length(grid)
-            || tx < 0
-            || ty > Array.length(grid[0])
-            || ty < 0) {
-          true;
-        } else {
-          switch (grid[tx][ty]) {
-          | Blocked
-          | Water
-          | Fence(_)
-          | SeedBin
-          | WaterTrough
-          | Truck
-          | FoodTrough =>
-            Reprocessing.Utils.intersectRectRect(
-              ~rect1Pos=(
-                pos.x +. offset.x +. padding,
-                pos.y +. offset.y +. padding,
-              ),
-              ~rect1W=tileSizef -. padding -. padding,
-              ~rect1H=tileSizef -. padding -. padding,
-              ~rect2Pos=(
-                float_of_int(tx * tileSize),
-                float_of_int(ty * tileSize),
-              ),
-              ~rect2W=tileSizef,
-              ~rect2H=tileSizef,
-            )
-          | _ => false
-          };
-        };
+        (
+          tx >= Array.length(grid)
+          || tx < 0
+          || ty >= Array.length(grid[0])
+          || ty < 0
+        )
+        || isCollidable(tx, ty, grid)
+        && Reprocessing.Utils.intersectRectRect(
+             ~rect1Pos=(
+               pos.x +. offset.x +. padding,
+               pos.y +. offset.y +. padding,
+             ),
+             ~rect1W=tileSizef -. padding -. padding,
+             ~rect1H=tileSizef -. padding -. padding,
+             ~rect2Pos=(
+               float_of_int(tx * tileSize),
+               float_of_int(ty * tileSize),
+             ),
+             ~rect2W=tileSizef,
+             ~rect2H=tileSizef,
+           );
       },
       l,
     );
   /*.Check if anything collides with the barn door */
   let collided =
     if (! collided) {
-      /* barn door pos = {
-           x: tileSizef *. 10.,
-           y: tileSizef *. 16.,
-         } */
       let collided =
         Reprocessing.Utils.intersectRectRect(
           ~rect1Pos=(pos.x +. offset.x, pos.y +. offset.y),
