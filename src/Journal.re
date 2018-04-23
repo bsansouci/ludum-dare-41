@@ -15,7 +15,7 @@ let init = env => {
       "more seeds, watered the ",
       "beautiful growing corn and gave",
       "water to my domestic",
-      "companions."
+      "companions.",
     |],
   |],
   dayTransition: NoTransition,
@@ -113,6 +113,23 @@ let updateDay = (state, env) =>
       },
       ...gameobjects,
     ];
+    let shouldAddBoss = dayIndex + 1 === 2;
+    let gameobjects =
+      if (shouldAddBoss) {
+        [
+          {
+            pos: {
+              x: tileSizef *. 17.8,
+              y: tileSizef *. 5.,
+            },
+            action: NoAction,
+            state: Boss({hunger: 4, eatingTime: 0., killed: [], eating: false}),
+          },
+          ...gameobjects,
+        ];
+      } else {
+        gameobjects;
+      };
     {
       ...state,
       journal: {
@@ -243,30 +260,22 @@ let renderTransition = (state, deltaTime, env) =>
         ~a=
           int_of_float(
             Utils.constrain(
-              ~amt=Utils.remapf(animationTime, 0., fadeTimeSec, minAlpha, maxAlpha),
+              ~amt=
+                Utils.remapf(
+                  animationTime,
+                  0.,
+                  fadeTimeSec,
+                  minAlpha,
+                  maxAlpha,
+                ),
               ~low=0.,
-              ~high=255.)
+              ~high=255.,
+            ),
           ),
       ),
       env,
     );
-    switch (StringMap.find("journal_page.png", state.assets)) {
-    | exception Not_found =>
-      print_endline(
-        "Journal asset not found"
-      )
-    | asset =>
-      Reprocessing.Draw.subImagef(
-        state.spritesheet,
-        ~pos=(10., 10.),
-        ~width=asset.size.x *. 2.,
-        ~height=asset.size.y *. 2.,
-        ~texPos=(int_of_float(asset.pos.x), int_of_float(asset.pos.y)),
-        ~texWidth=int_of_float(asset.size.x),
-        ~texHeight=int_of_float(asset.size.y),
-        env,
-      )
-    };
+    drawAssetFullscreen("journal_page.png", state, env);
     Draw.text(~body="Day " ++ string_of_int(dayIndex), ~pos=(55, 40), env);
     ignore @@
     Array.fold_left(

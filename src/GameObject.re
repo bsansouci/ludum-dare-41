@@ -131,6 +131,14 @@ let init = grid => {
                 {
                   pos: {
                     x: 6. *. tileSizef,
+                    y: 8. *. tileSizef,
+                  },
+                  action: PickUp(Knife),
+                  state: NoState,
+                },
+                {
+                  pos: {
+                    x: 6. *. tileSizef,
                     y: 12. *. tileSizef,
                   },
                   action: PickUp(Milk),
@@ -217,7 +225,8 @@ let update = (state, env) => {
     List.map(
       (g: gameobjectT) =>
         switch (g) {
-        | {pos, state: Cow({momentum: {x, y}} as cow)} =>
+        | {pos, state: Cow({momentum: {x, y}, health} as cow)}
+            when health > 0 =>
           let (pos, x, y) = moveAnimal(x, y, 1., pos, state.grid, env);
           {...g, pos, state: Cow({
                                ...cow,
@@ -226,7 +235,8 @@ let update = (state, env) => {
                                  y,
                                },
                              })};
-        | {pos, state: Chicken({momentum: {x, y}} as chicken)} =>
+        | {pos, state: Chicken({momentum: {x, y}, health} as chicken)}
+            when health > 0 =>
           let (pos, x, y) = moveAnimal(x, y, 2., pos, state.grid, env);
           {...g, pos, state: Chicken({
                                ...chicken,
@@ -235,7 +245,8 @@ let update = (state, env) => {
                                  y,
                                },
                              })};
-        | {pos, state: Chick({momentum: {x, y}} as chick)} =>
+        | {pos, state: Chick({momentum: {x, y}, health} as chick)}
+            when health > 0 =>
           let (pos, x, y) = moveAnimal(x, y, 4., pos, state.grid, env);
           {...g, pos, state: Chick({
                                ...chick,
@@ -244,6 +255,106 @@ let update = (state, env) => {
                                  y,
                                },
                              })};
+        | {
+            pos: {x: bx, y: by} as pos,
+            state: Boss({hunger, eatingTime, eating} as bossState),
+          } =>
+          if (eatingTime <= 0.) {
+            let allNextTargets =
+              List.filter(
+                g =>
+                  switch (g) {
+                  | {state: Chicken({health: 0})}
+                  | {state: Cow({health: 0})}
+                  | {state: Chick({health: 0})} => true
+                  | _ => false
+                  },
+                state.gameobjects,
+              );
+            let allNextTargets =
+              List.sort(
+                (
+                  {pos: {x: x1, y: y1}}: gameobjectT,
+                  {pos: {x: x2, y: y2}}: gameobjectT,
+                ) => {
+                  let dx1 = x1 -. bx;
+                  let dy1 = y1 -. by;
+                  let dx2 = x2 -. bx;
+                  let dy2 = y2 -. by;
+                  int_of_float(dx1 +. dy1 -. dx2 -. dy2);
+                },
+                allNextTargets,
+              );
+            let (nextTarget, isPlayer) =
+              switch (allNextTargets) {
+              | [] => (
+                  {
+                    x: state.playerPos.x +. tileSizef /. 2.,
+                    y: state.playerPos.y +. tileSizef /. 2.,
+                  },
+                  true,
+                )
+              | [first, ..._] => (first.pos, false)
+              };
+            let dx = nextTarget.x -. bx;
+            let dy = nextTarget.y -. by;
+            let mag = Utils.magf((dx, dy));
+            let isTargetCloseEnough = mag < 32.;
+            if (isTargetCloseEnough) {
+              print_endline("CLOSE");
+            };
+            if (isPlayer && isTargetCloseEnough) {
+              print_endline("You should be dead by now");
+            };
+            let moveBoss = ({x: bx, y: by} as pos, nextTarget, grid) => {
+              let bossSpeed = 100.;
+              let bossSpeedDt = Env.deltaTime(env) *. bossSpeed;
+              let dx = nextTarget.x -. bx;
+              let dy = nextTarget.y -. by;
+              let mag = Utils.magf((dx, dy));
+              if (mag > 0.) {
+                let dx = dx /. mag *. bossSpeedDt;
+                let dy = dy /. mag *. bossSpeedDt;
+                let offset =
+                  handleCollision(
+                    {x: 0., y: 0.},
+                    {x: dx, y: dy},
+                    pos,
+                    grid,
+                  );
+                {x: bx +. offset.x, y: by +. offset.y};
+              } else {
+                pos;
+              };
+            };
+            {
+              ...g,
+              pos: moveBoss(pos, nextTarget, state.grid),
+              state:
+                Boss({
+                  ...bossState,
+                  killed:
+                    isTargetCloseEnough && ! isPlayer && eating ?
+                      [List.hd(allNextTargets), ...bossState.killed] :
+                      bossState.killed,
+                  eating: isTargetCloseEnough && ! eating,
+                  eatingTime: isTargetCloseEnough && ! eating ? 3. : 0.,
+                }),
+            };
+          } else {
+            {
+              ...g,
+              state:
+                Boss({
+                  ...bossState,
+                  eatingTime: eatingTime -. Env.deltaTime(env),
+                }),
+            };
+          }
+        /*{
+            ...g,
+            pos:
+          }*/
         | _ => g
         },
       state.gameobjects,
@@ -320,31 +431,70 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
-  | {pos: {x, y}, action: NoAction, state: Cow(_)}
-  | {pos: {x, y}, action: PickUp(Milk), state: Cow(_)} =>
-    drawAssetf(
-      x -. tileSizef /. 2.,
-      y -. tileSizef /. 2.,
-      "pile_of_bacon.png",
-      state,
-      env,
-    )
-  | {pos: {x, y}, action: NoAction, state: Chicken(_)} =>
-    drawAssetf(
-      x -. tileSizef /. 2.,
-      y -. tileSizef /. 2.,
-      "bet_he_would_make_some_nice_fried_chicken.png",
-      state,
-      env,
-    )
-  | {pos: {x, y}, action: NoAction, state: Chick(_)} =>
-    drawAssetf(
-      x -. tileSizef /. 2.,
-      y -. tileSizef /. 2.,
-      "chick.png",
-      state,
-      env,
-    )
+  | {pos: {x, y}, action: NoAction, state: Cow({health})}
+  | {pos: {x, y}, action: PickUp(Milk), state: Cow({health})} =>
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dead_cown.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "pile_of_bacon.png",
+        state,
+        env,
+      );
+    }
+  | {pos: {x, y}, action: NoAction, state: Chicken({health})} =>
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dead_chicken.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "bet_he_would_make_some_nice_fried_chicken.png",
+        state,
+        env,
+      );
+    }
+  | {pos: {x, y}, action: NoAction, state: Chick({health})} =>
+    if (health === (-1)) {
+      Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+    } else if (health === 0) {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "dead_chick.png",
+        state,
+        env,
+      );
+    } else {
+      drawAssetf(
+        x -. tileSizef /. 2.,
+        y -. tileSizef /. 2.,
+        "chick.png",
+        state,
+        env,
+      );
+    }
   | {pos: {x, y}, state: WaterTank(s)} =>
     let assetName =
       switch (s) {
@@ -403,6 +553,20 @@ let renderObject = (g, focusedObject, state, env) =>
       state,
       env,
     )
+  | {pos: {x, y}, state: Boss(_)} =>
+    Draw.pushStyle(env);
+    Draw.tint(Utils.color(0, 0, 0, 255), env);
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "egg.png",
+      state,
+      env,
+    );
+    Draw.popStyle(env);
+  | {pos: {x, y}, action: PickUp(Knife)} =>
+    Draw.fill(Utils.color(0, 0, 0, 255), env);
+    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
   /*TODO Draw highlighted pond*/
   | _ => ()
   };
@@ -413,8 +577,10 @@ let renderAction = (state, focusedObject, env) => {
     | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
     | (None, Some({action: PickUp(Water)})) => "Pickup water"
     | (None, Some({action: PickUp(Egg)})) => "Pickup egg"
-    | (None, Some({action: PickUp(Milk)})) => "Milk cow"
+    | (None, Some({action: PickUp(Milk), state: Cow({health})}))
+        when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
+    | (None, Some({action: PickUp(Knife)})) => "Pickup ... the knife?"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
@@ -439,6 +605,39 @@ let renderAction = (state, focusedObject, env) => {
 let checkPickUp = (state, focusedObject, env) =>
   if (Env.keyPressed(X, env) || Env.keyPressed(Space, env)) {
     switch (state.currentItem, focusedObject) {
+    | (Some(Knife), Some({state: Chick(s)} as go)) => (
+        {
+          ...state,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Chick({...s, health: 0})} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
+    | (Some(Knife), Some({state: Chicken(s)} as go)) => (
+        {
+          ...state,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Chicken({...s, health: 0})} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
+    | (Some(Knife), Some({state: Cow(s)} as go)) => (
+        {
+          ...state,
+          gameobjects:
+            List.map(
+              g => g === go ? {...g, state: Cow({...s, health: 0})} : g,
+              state.gameobjects,
+            ),
+        },
+        focusedObject,
+      )
     | (None, Some({action: PickUp(Corn)} as go)) => (
         {
           ...state,
@@ -467,7 +666,8 @@ let checkPickUp = (state, focusedObject, env) =>
         {...state, currentItem: None},
         focusedObject,
       )
-    | (None, Some({action: PickUp(Milk)} as cow)) => (
+    | (None, Some({action: PickUp(Milk), state: Cow({health})} as cow))
+        when health > 0 => (
         {
           ...state,
           currentItem: Some(Milk),
@@ -484,6 +684,14 @@ let checkPickUp = (state, focusedObject, env) =>
           ...state,
           currentItem: Some(Egg),
           gameobjects: List.filter(go => go !== egg, state.gameobjects),
+        },
+        None,
+      )
+    | (None, Some({action: PickUp(Knife)} as knife)) => (
+        {
+          ...state,
+          currentItem: Some(Knife),
+          gameobjects: List.filter(go => go !== knife, state.gameobjects),
         },
         None,
       )

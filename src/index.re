@@ -150,6 +150,8 @@ let renderPlayer = (state, env) => {
       env,
     )
   | Some(Wood) => print_endline("Can't draw wood")
+  | Some(Knife) => ()
+  | _ => print_endline("You piece of shit ben")
   };
 };
 
@@ -172,6 +174,7 @@ let setup = (assets, env) => {
     journal: Journal.init(env),
     dollarAnimation: (-1.),
     time: 0.,
+    night: false,
   };
 };
 
@@ -180,6 +183,11 @@ let draw = (state, env) => {
   let dt = Env.deltaTime(env);
   let state = {...state, time: state.time +. dt};
   let playerSpeedDt = playerSpeed *. dt;
+  /*TODO: remove this */
+  let state = {
+    ...state,
+    night: Env.keyPressed(N, env) ? ! state.night : state.night,
+  };
   let offset = {x: 0., y: 0.};
   let offset =
     Env.key(Left, env) || Env.key(A, env) ?
@@ -240,6 +248,55 @@ let draw = (state, env) => {
   let state = {...state, playerFacing: facing};
   let facingOffset = facingToOffset(facing);
   let state = GameObject.update(state, env);
+  /* Kill off the animals that have been eaten by the monster. */
+  let state =
+    switch (
+      List.filter(
+        g =>
+          switch (g) {
+          | {state: Boss(_)} => true
+          | _ => false
+          },
+        state.gameobjects,
+      )
+    ) {
+    | [] => state
+    | [{state: Boss(boss)}] =>
+      let gameobjects =
+        List.map(
+          go =>
+            switch (List.exists(k => k === go, boss.killed)) {
+            | false => go
+            | true =>
+              switch (go) {
+              | {state: Cow(cowState)} => {
+                  ...go,
+                  state: Cow({...cowState, health: (-1)}),
+                }
+              | {state: Chicken(cowState)} => {
+                  ...go,
+                  state: Chicken({...cowState, health: (-1)}),
+                }
+              | {state: Chick(cowState)} => {
+                  ...go,
+                  state: Chick({...cowState, health: (-1)}),
+                }
+              | _ => go
+              }
+            },
+          state.gameobjects,
+        );
+      /* This is another piece of code to remove the animals from the gameobjects if we want to */
+      /*let (gameobjects, _) = List.fold_left(((newGameobjects, killed), go) => {
+          switch (List.exists(k => k === go, killed)) {
+          | false => ([go, ...newGameobjects], killed)
+          | true => (newGameobjects, List.filter(k => k !== go, killed))
+          }
+        }, ([], boss.killed), state.gameobjects);*/
+      {...state, gameobjects};
+    | _ =>
+      failwith("Well we certainly didn't think this could happen�\132�")
+    };
   let focusedObject =
     List.fold_left(
       (foundobject, gameobject: gameobjectT) => {
@@ -280,12 +337,14 @@ let draw = (state, env) => {
   Draw.pushMatrix(env);
   Draw.scale(~x=2., ~y=2., env);
   Draw.translate(
-    ~x=-. state.playerPos.x +. screenSize /. 4.,
-    ~y=-. state.playerPos.y +. screenSize /. 4.,
+    ~x=-. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.,
+    ~y=-. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.,
     env,
   );
-  /* Nighttime tint */
-  /* Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env); */
+  Draw.pushStyle(env);
+  if (state.night) {
+    Draw.tint(Utils.color(~r=100, ~g=100, ~b=200, ~a=255), env);
+  };
   Array.iteri(
     (x, row) =>
       Array.iteri(
@@ -341,12 +400,6 @@ let draw = (state, env) => {
             | 'q' =>
               drawAsset(px, py, "fence_top_left_corner.png", state, env)
             | 'z' => drawAsset(px, py, "fence_bottom_left.png", state, env)
-            /* | 'z' => */
-            /* Draw.pushMatrix(env); */
-            /* Draw.scale(~x=(-1.), ~y=(1.), env); */
-            /* Draw.translate(~x=float_of_int(px) -. tileSizef, ~y=float_of_int(py), env); */
-            /* drawAsset(0, 0, "corner_fence.png", state, env); */
-            /* Draw.popMatrix(env); */
             | _ => drawAsset(px, py, "keep_the_dogs_out.png", state, env)
             };
           | Water
@@ -487,7 +540,11 @@ let draw = (state, env) => {
     } else {
       state;
     };
+  Draw.popStyle(env);
   Draw.popMatrix(env);
+  if (state.night) {
+    drawAssetFullscreen("baby_its_dark_outside.png", state, env);
+  };
   GameObject.renderAction(state, focusedObject, env);
   let state = Journal.renderTransition(state, dt, env);
   state;
