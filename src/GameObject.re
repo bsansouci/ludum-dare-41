@@ -130,9 +130,25 @@ let init = grid => {
               addChick([
                 {
                   pos: {
-                    x: tileSizef *. 8.,
-                    y: tileSizef *. 16.,
+                    x: tileSizef *. 17.8,
+                    y: tileSizef *. 10.,
                   },
+                  action: GoToBed,
+                  state: NoState,
+                },
+                {
+                  pos: {
+                    x: 9. *. tileSizef,
+                    y: 6. *. tileSizef,
+                  },
+                  action: NoAction,
+                  state: Tombstone,
+                },
+                {
+                  pos: {
+                    x: tileSizef *. 10.,
+                    y: tileSizef *. 17.,
+                  }, /* off by one so the door's drawn on top of the barn */
                   action: DoBarnDoor,
                   state: BarnDoor(Broken),
                 },
@@ -208,7 +224,7 @@ let maybeHighlight = (state, g, focusedObject, env) =>
   | _ => ()
   };
 
-let moveAnimal = (mx, my, speed, pos, grid, env) => {
+let moveAnimal = (state, mx, my, speed, pos, grid, env) => {
   let mx =
     Utils.constrain(
       ~amt=mx +. Random.float(2.) -. 1.,
@@ -223,7 +239,13 @@ let moveAnimal = (mx, my, speed, pos, grid, env) => {
     );
   let dt = Reprocessing.Env.deltaTime(env);
   let offset =
-    handleCollision({x: 0., y: 0.}, {x: dt *. mx, y: dt *. my}, pos, grid);
+    handleCollision(
+      state,
+      {x: 0., y: 0.},
+      {x: dt *. mx, y: dt *. my},
+      pos,
+      grid,
+    );
   ({x: pos.x +. offset.x, y: pos.y +. offset.y}, mx, my);
 };
 
@@ -235,7 +257,8 @@ let update = (state, env) => {
         switch (g) {
         | {pos, state: Cow({momentum: {x, y}, health} as cow)}
             when health > 0 =>
-          let (pos, x, y) = moveAnimal(x, y, 1., pos, state.grid, env);
+          let (pos, x, y) =
+            moveAnimal(state, x, y, 1., pos, state.grid, env);
           {...g, pos, state: Cow({
                                ...cow,
                                momentum: {
@@ -245,7 +268,8 @@ let update = (state, env) => {
                              })};
         | {pos, state: Chicken({momentum: {x, y}, health} as chicken)}
             when health > 0 =>
-          let (pos, x, y) = moveAnimal(x, y, 2., pos, state.grid, env);
+          let (pos, x, y) =
+            moveAnimal(state, x, y, 2., pos, state.grid, env);
           {...g, pos, state: Chicken({
                                ...chicken,
                                momentum: {
@@ -255,7 +279,8 @@ let update = (state, env) => {
                              })};
         | {pos, state: Chick({momentum: {x, y}, health} as chick)}
             when health > 0 =>
-          let (pos, x, y) = moveAnimal(x, y, 4., pos, state.grid, env);
+          let (pos, x, y) =
+            moveAnimal(state, x, y, 4., pos, state.grid, env);
           {...g, pos, state: Chick({
                                ...chick,
                                momentum: {
@@ -325,6 +350,7 @@ let update = (state, env) => {
                 let dy = dy /. mag *. bossSpeedDt;
                 let offset =
                   handleCollision(
+                    state,
                     {x: 0., y: 0.},
                     {x: dx, y: dy},
                     pos,
@@ -450,11 +476,29 @@ let renderBefore = (g, focusedObject, state, env) => {
   Draw.popStyle(env);
 };
 
-let renderObject = (g, focusedObject, state, env) =>
+let renderObject = (g, playerInBarn, focusedObject, state, env) =>
   switch (g) {
-  | {pos: {x, y}, action: DoBarnDoor} =>
-    Draw.fill(Utils.color(255, 0, 255, 255), env);
-    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);
+  | {pos: {x, y}, state: Tombstone} when playerInBarn =>
+    drawAssetf(
+      x -. tileSizef /. 2.,
+      y -. tileSizef /. 2.,
+      "tombstone.png",
+      state,
+      env,
+    )
+  | {pos: {x, y}, action: DoBarnDoor} when ! playerInBarn =>
+    /*Draw.fill(Utils.color(255, 0, 0, 255), env);
+      Draw.rectf(~pos=(x,
+        y), ~width=tileSizef, ~height=tileSizef, env);*/
+    drawAssetf(
+      x -. tileSizef /. 2. +. 3.,
+      y -. 2. *. tileSizef -. tileSizef /. 2.,
+      "barn_door.png",
+      state,
+      env,
+    )
+  /*Draw.fill(Utils.color(255, 0, 255, 255), env);
+    Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);*/
   | {pos: {x, y}, action: PickUp(Seed)} =>
     drawAssetf(
       x -. tileSizef /. 2.,
@@ -582,7 +626,7 @@ let renderObject = (g, focusedObject, state, env) =>
   | _ => ()
   };
 
-let renderAction = (state, focusedObject, env) => {
+let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) => {
   let body =
     switch (state.currentItem, focusedObject) {
     | (None, Some({action: PickUp(Corn)})) => "Pickup corn"
@@ -592,9 +636,12 @@ let renderAction = (state, focusedObject, env) => {
         when health > 0 => "Milk cow"
     | (None, Some({action: PickUp(Seed)})) => "Pickup seed"
     | (None, Some({action: PickUp(Knife)})) => "Pickup ... the knife?"
-    | (None, Some({action: DoBarnDoor, state: BarnDoor(Broken)})) => "Repair barn door"
-    | (None, Some({action: DoBarnDoor, state: BarnDoor(Opened)})) => "Close barn door"
-    | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)})) => "Open barn door"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Broken)}))
+        when ! playerInBarn => "Repair barn door"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Opened)}))
+        when ! playerInBarn => "Close barn door"
+    | (None, Some({action: DoBarnDoor, state: BarnDoor(Closed)}))
+        when ! playerInBarn => "Open barn door"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put back water"
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Put back seed"
@@ -605,6 +652,7 @@ let renderAction = (state, focusedObject, env) => {
     | (Some(Egg), Some({action: Sell})) => "Sell egg"
     | (Some(Milk), Some({action: Sell})) => "Sell milk"
     | (Some(Water), Some({action: Cleanup})) => "Cleanup mess"
+    | (_, Some({action: GoToBed})) when finishedAllTasks => "Go to bed"
     | _ => ""
     };
   if (body != "") {
@@ -619,22 +667,39 @@ let renderAction = (state, focusedObject, env) => {
   };
 };
 
-let checkPickUp = (state, focusedObject, env) =>
-  if (state.journal.dayTransition == NoTransition && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
+let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
+  if (state.journal.dayTransition == NoTransition
+      && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
     switch (state.currentItem, focusedObject) {
-    | (None, Some({action: DoBarnDoor, state: BarnDoor(barnState)} as go)) =>
-      let nextBarnState =
+    | (_, Some({action: GoToBed})) when finishedAllTasks => (
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            dayTransition: FadeOut,
+            animationTime: 0.,
+          },
+        },
+        focusedObject,
+      )
+    | (
+        None,
+        Some({action: DoBarnDoor, pos, state: BarnDoor(barnState)} as go),
+      )
+        when ! playerInBarn =>
+      let (nextBarnState, pos) =
         switch (barnState) {
-        | Broken => Opened
-        | Opened => Closed
-        | Closed => Opened
+        | Broken => (Opened, pos)
+        | Opened => (Closed, {x: pos.x -. tileSizef, y: pos.y})
+        | Closed => (Opened, {x: pos.x +. tileSizef, y: pos.y})
         };
       (
         {
           ...state,
           gameobjects:
             List.map(
-              g => g === go ? {...g, state: BarnDoor(nextBarnState)} : g,
+              g =>
+                g === go ? {...g, state: BarnDoor(nextBarnState), pos} : g,
               state.gameobjects,
             ),
         },
