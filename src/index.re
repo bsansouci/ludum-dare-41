@@ -213,11 +213,10 @@ let draw = (state, env) => {
     night: Env.keyPressed(N, env) ? ! state.night : state.night,
   };
   if (Random.float(1.0) < 0.005) {
+    let soundNum = Random.int(5) + 1;
     if (state.night) {
-      let soundNum = Random.int(4) + 1;
       playSound("night" ++ string_of_int(soundNum), state, env);
-    } else {
-      let soundNum = Random.int(5) + 1;
+    } else if (Random.float(1.0) < 0.5) {
       playSound("day" ++ string_of_int(soundNum), state, env);
     };
   };

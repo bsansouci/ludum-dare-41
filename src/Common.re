@@ -215,6 +215,14 @@ let soundNames = [
   ("night2", 1.0),
   ("night3", 1.0),
   ("night4", 1.0),
+  ("night5", 1.0),
+  ("monster1", 1.0),
+  ("monster2", 1.0),
+  ("door_scratch1", 1.0),
+  ("door_scratch2", 1.0),
+  ("hit", 1.0),
+  ("pickup", 1.0),
+  ("drop", 1.0),
 ];
 
 let playSound = (name, state, env) =>

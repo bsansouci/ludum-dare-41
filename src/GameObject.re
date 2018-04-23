@@ -863,7 +863,7 @@ let renderObject =
       };
     drawAssetf(x, y -. tileSizef, img, state, env);
   | {pos: {x, y}, action: PickUp(Knife)} =>
-    drawAssetf(x, y, "axe_standing.png", state, env);
+    drawAssetf(x, y, "axe_standing.png", state, env)
   | _ => ()
   };
 
@@ -915,8 +915,13 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
 let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
   if (state.journal.dayTransition == NoTransition
       && (Env.keyPressed(X, env) || Env.keyPressed(Space, env))) {
+    let pickup = () => playSound("pickup", state, env);
+    let drop = () => playSound("drop", state, env);
+    let kill = () => playSound("hit", state, env);
     switch (state.currentItem, focusedObject) {
-    | (Some(Flower), Some({state: Tombstone(_)} as go)) => (
+    | (Some(Flower), Some({state: Tombstone(_)} as go)) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
@@ -927,7 +932,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         focusedObject,
-      )
+      );
     | (_, Some({action: GoToBed})) when finishedAllTasks => (
         {
           ...state,
@@ -950,19 +955,22 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         focusedObject,
       )
-    | (None, Some({action: PickUp(Flower)} as go)) => (
+    | (None, Some({action: PickUp(Flower)} as go)) =>
+      pickup();
+      (
         {
           ...state,
           currentItem: Some(Flower),
           gameobjects: List.filter(g => g !== go, state.gameobjects),
         },
         None,
-      )
+      );
     | (
         None,
         Some({action: DoBarnDoor, pos, state: BarnDoor(barnState)} as go),
       )
         when ! playerInBarn =>
+      pickup();
       let (nextBarnState, pos) =
         switch (barnState) {
         | Broken => (Opened, pos)
@@ -981,7 +989,9 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         },
         None,
       );
-    | (None, Some({action: PickUp(Corn)} as go)) => (
+    | (None, Some({action: PickUp(Corn)} as go)) =>
+      pickup();
+      (
         {
           ...state,
           currentItem: Some(Corn),
@@ -992,21 +1002,20 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         None,
-      )
-    | (None, Some({action: PickUp(Water)})) => (
-        {...state, currentItem: Some(Water)},
-        None,
-      )
-    | (None, Some({action: PickUp(Seed)})) => (
-        {...state, currentItem: Some(Seed)},
-        None,
-      )
-    | (Some(_), Some({action: PickUp(Water)})) => (
-        {...state, currentItem: None},
-        focusedObject,
-      )
+      );
+    | (None, Some({action: PickUp(Water)})) =>
+      pickup();
+      ({...state, currentItem: Some(Water)}, None);
+    | (None, Some({action: PickUp(Seed)})) =>
+      pickup();
+      ({...state, currentItem: Some(Seed)}, None);
+    | (Some(_), Some({action: PickUp(Water)})) =>
+      drop();
+      ({...state, currentItem: None}, focusedObject);
     | (None, Some({action: PickUp(Milk), state: Cow({health})} as cow))
-        when health > 0 => (
+        when health > 0 =>
+      pickup();
+      (
         {
           ...state,
           currentItem: Some(Milk),
@@ -1017,24 +1026,30 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         Some({...cow, action: NoAction}),
-      )
-    | (None, Some({action: PickUp(Egg)} as egg)) => (
+      );
+    | (None, Some({action: PickUp(Egg)} as egg)) =>
+      pickup();
+      (
         {
           ...state,
           currentItem: Some(Egg),
           gameobjects: List.filter(go => go !== egg, state.gameobjects),
         },
         None,
-      )
-    | (None, Some({action: PickUp(Knife)} as knife)) => (
+      );
+    | (None, Some({action: PickUp(Knife)} as knife)) =>
+      pickup();
+      (
         {
           ...state,
           currentItem: Some(Knife),
           gameobjects: List.filter(go => go !== knife, state.gameobjects),
         },
         None,
-      )
-    | (Some(Knife), Some({state: Chick(s)} as go)) when s.health > 0 => (
+      );
+    | (Some(Knife), Some({state: Chick(s)} as go)) when s.health > 0 =>
+      kill();
+      (
         {
           ...state,
           gameobjects:
@@ -1044,8 +1059,10 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         focusedObject,
-      )
-    | (Some(Knife), Some({state: Chicken(s)} as go)) when s.health > 0 => (
+      );
+    | (Some(Knife), Some({state: Chicken(s)} as go)) when s.health > 0 =>
+      kill();
+      (
         {
           ...state,
           gameobjects:
@@ -1055,8 +1072,10 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         focusedObject,
-      )
-    | (Some(Knife), Some({state: Cow(s)} as go)) when s.health > 0 => (
+      );
+    | (Some(Knife), Some({state: Cow(s)} as go)) when s.health > 0 =>
+      kill();
+      (
         {
           ...state,
           gameobjects:
@@ -1066,7 +1085,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         focusedObject,
-      )
+      );
     | (
         Some(Corn),
         Some({action: FeedAnimals, state: FoodTank(Empty as s)} as go),
@@ -1074,7 +1093,9 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
     | (
         Some(Corn),
         Some({action: FeedAnimals, state: FoodTank(HalfFull as s)} as go),
-      ) => (
+      ) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
@@ -1094,12 +1115,13 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         None,
-      )
-    | (Some(Seed), Some({action: PickUp(Seed)})) => (
-        {...state, currentItem: None},
-        None,
-      )
-    | (Some(Seed), Some({action: PlantSeed, state: Corn(_)} as go)) => (
+      );
+    | (Some(Seed), Some({action: PickUp(Seed)})) =>
+      drop();
+      ({...state, currentItem: None}, None);
+    | (Some(Seed), Some({action: PlantSeed, state: Corn(_)} as go)) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
@@ -1115,21 +1137,24 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         None,
-      )
+      );
     | (Some(Egg), Some({action: Sell}))
-    | (Some(Milk), Some({action: Sell})) => (
-        {...state, currentItem: None, dollarAnimation: 0.},
-        None,
-      )
-    | (Some(Water), Some({action: Cleanup} as go)) => (
+    | (Some(Milk), Some({action: Sell})) =>
+      drop();
+      ({...state, currentItem: None, dollarAnimation: 0.}, None);
+    | (Some(Water), Some({action: Cleanup} as go)) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
           gameobjects: List.filter(g => g !== go, state.gameobjects),
         },
         None,
-      )
-    | (Some(Water), Some({action: WaterCorn, state: Corn(stage)} as go)) => (
+      );
+    | (Some(Water), Some({action: WaterCorn, state: Corn(stage)} as go)) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
@@ -1145,7 +1170,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         None,
-      )
+      );
     | (
         Some(Water),
         Some({action: WaterAnimals, state: WaterTank(Empty as s)} as go),
@@ -1153,7 +1178,9 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
     | (
         Some(Water),
         Some({action: WaterAnimals, state: WaterTank(HalfFull as s)} as go),
-      ) => (
+      ) =>
+      drop();
+      (
         {
           ...state,
           currentItem: None,
@@ -1173,7 +1200,7 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
             ),
         },
         None,
-      )
+      );
     | _ => (state, focusedObject)
     };
   } else {
