@@ -367,7 +367,7 @@ let draw = (state, env) => {
   let facingOffset = facingToOffset(facing);
   let state = GameObject.update(state, env);
   /* Kill off the animals that have been eaten by the monster. */
-  let state =
+  let (state, maybeBoss) =
     if (state.journal.dayIndex === 7) {
       switch (
         List.find(
@@ -379,8 +379,8 @@ let draw = (state, env) => {
           state.gameobjects,
         )
       ) {
-      | exception Not_found => state
-      | {state: Boss(boss)} =>
+      | exception Not_found => failwith(" Tghis should reall ynot happen")
+      | {state: Boss(boss)} as bossGo =>
         let gameobjects =
           List.map(
             go =>
@@ -421,11 +421,11 @@ let draw = (state, env) => {
             | true => (newGameobjects, List.filter(k => k !== go, killed))
             }
           }, ([], boss.killed), state.gameobjects);*/
-        {...state, gameobjects};
+        ({...state, gameobjects}, Some(bossGo));
       | _ => failwith("Well we certainly didn't think this could happen")
       };
     } else {
-      state;
+      (state, None);
     };
   let finishedAllTasks = Journal.checkTasks(state, env);
   let focusedObject =
@@ -770,6 +770,32 @@ let draw = (state, env) => {
   Draw.popMatrix(env);
   if (state.night) {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
+  };
+  switch (maybeBoss) {
+  | Some({pos: {x, y}, state: Boss({movePair})}) =>
+    let ({x: x1, y: y1}, {x: x2, y: y2}) = movePair;
+    let facing =
+      if (x1 > x2) {
+        LeftD;
+      } else if (x1 < x2) {
+        RightD;
+      } else if (y1 < y2) {
+        DownD;
+      } else {
+        UpD;
+      };
+    if (facing === DownD) {
+      Draw.pushMatrix(env);
+      Draw.scale(~x=2., ~y=2., env);
+      Draw.translate(
+        ~x=-. state.playerPos.x +. screenSize /. 4. -. tileSizef /. 2.,
+        ~y=-. state.playerPos.y +. screenSize /. 4. -. tileSizef /. 2.,
+        env,
+      );
+      drawAssetf(x, y -. tileSizef -. 10., "eyes.png", state, env);
+      Draw.popMatrix(env);
+    };
+  | _ => ()
   };
   GameObject.renderAction(
     state,
