@@ -5,8 +5,8 @@ open Common;
 let fadeTimeSec = 1.5;
 
 let init = _env => {
-  dayIndex: 6,
-  dayTransition: FadeOut,
+  dayIndex: 0,
+  dayTransition: JournalIn,
   animationTime: 0.,
   pageNumber: 0,
 };
@@ -78,8 +78,19 @@ let updateDay = (state, env) => {
               | (Chicken({willDie: true} as chickenState), _)
                   when dayIndex === 3 =>
                 Chicken({...chickenState, health: 0})
+              | (Chicken({willDie: true} as chickenState), _)
+                  when dayIndex === 7 =>
+                Chicken({...chickenState, health: -1})
               | (BarnDoor(_), _) when dayIndex >= 6 => BarnDoor(Broken)
               | _ => go.state
+              };
+            let pos =
+              switch (go.state) {
+              | Chicken({willDie: true}) when dayIndex === 3 => {
+                  x: 9. *. tileSizef,
+                  y: 15. *. tileSizef,
+                }
+              | _ => go.pos
               };
             let action =
               switch (state) {
@@ -90,12 +101,11 @@ let updateDay = (state, env) => {
               | Cow(_) => PickUp(Milk)
               | Corn(n) when n >= 0 && n < 5 => WaterCorn
               | BarnDoor(Broken) when dayIndex === 2 => DoBarnDoor
-              | AxeStanding when dayIndex === 7 =>
-                print_endline("PICKUP AXES YOU DUMB SHIT");
-                PickUp(Axe);
+              | BarnDoor(Broken) when dayIndex >= 6 => NoAction
+              | AxeStanding when dayIndex === 7 => PickUp(Axe)
               | _ => go.action
               };
-            {...go, state, action};
+            {...go, pos, state, action};
           },
           state.gameobjects,
         );
@@ -173,7 +183,7 @@ let updateDay = (state, env) => {
             {
               pos: {
                 x: tileSizef *. 17.,
-                y: tileSizef *. 15.,
+                y: tileSizef *. 11.,
               },
               action: PickUp(Flower),
               state: NoState,
@@ -248,7 +258,7 @@ let updateDay = (state, env) => {
       {
         ...state,
         playerDead: false,
-        night: dayIndex === 5 ? true : false,
+        night: dayIndex === 5 || dayIndex === 7 ? true : false,
         journal: {
           dayTransition: JournalIn,
           animationTime: 0.,

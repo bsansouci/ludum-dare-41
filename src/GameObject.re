@@ -19,7 +19,7 @@ let init = grid => {
                           x * tileSize + tileSize / 2,
                           y * tileSize + tileSize / 2,
                         ),
-                      action: WaterCorn,
+                      action: PlantSeed,
                       state: Corn(-1),
                     }
                   | 18 => {
@@ -207,7 +207,7 @@ let init = grid => {
                     x: tileSizef *. 10.,
                     y: tileSizef *. 17.,
                   }, /* off by one so the door's drawn on top of the barn */
-                  action: DoBarnDoor,
+                  action: NoAction,
                   state: BarnDoor(Broken),
                 },
                 {
