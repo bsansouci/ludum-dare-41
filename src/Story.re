@@ -23,6 +23,20 @@ let entries = [|
     |],
     pages: [|
       [|
+        "You arrive at long last to your late uncle's farm.",
+        "",
+        "Waiting for you at the gate is the mayor.",
+        "He frowns and hands you a burned journal.",
+        "After the house fire that claimed your uncle's",
+        "life, this was all that's left. He tells you that",
+        "part of the journal was burned, but perhaps",
+        "you may find solace in the rest of it.",
+        "",
+        "Most of the beginning of the book was",
+        "burned, but you flip towards the end and read",
+        "one of the entries.",
+      |],
+      [|
         "Oh, but I am tired! I spent all day laying",
         "traps today for the fox that had torn up",
         "chickens a month ago. I don't want to rinse",
@@ -75,5 +89,5 @@ let entries = [|
     |],
     pages: [|[||]|],
   }, /* Day 7 */
-  {tasks: [| Bool("Feed Maria") |], pages: [|[||]|]} /* Day 8 */
+  {tasks: [|Bool("Feed Maria")|], pages: [|[||]|]} /* Day 8 */
 |];

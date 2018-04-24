@@ -80,7 +80,7 @@ let updateDay = (state, env) => {
                 Chicken({...chickenState, health: 0})
               | (Chicken({willDie: true} as chickenState), _)
                   when dayIndex === 7 =>
-                Chicken({...chickenState, health: -1})
+                Chicken({...chickenState, health: (-1)})
               | (BarnDoor(_), _) when dayIndex >= 6 => BarnDoor(Broken)
               | _ => go.state
               };
@@ -91,9 +91,9 @@ let updateDay = (state, env) => {
                   y: 15. *. tileSizef,
                 }
               | BarnDoor(Closed) when dayIndex >= 6 => {
-                x: go.pos.x +. tileSizef -. 3.,
-                y: go.pos.y,
-              }
+                  x: go.pos.x +. tileSizef -. 3.,
+                  y: go.pos.y,
+                }
               | _ => go.pos
               };
             let action =
@@ -574,27 +574,30 @@ let day8Stats = state =>
     state.gameobjects,
   );
 
-let lineHeight = 32;
+let lineHeight = 38;
 
 let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   drawAssetFullscreen("journal_page.png", state, env);
   Draw.pushStyle(env);
   Draw.tint(Utils.color(~r=0, ~g=0, ~b=0, ~a=255), env);
-  let date = dayIndex + 14;
-  let th =
-    if (date === 21) {
-      "st";
-    } else if (date === 22) {
-      "nd";
-    } else {
-      "th";
-    };
-  Draw.text(
-    ~body="July " ++ string_of_int(date) ++ th,
-    ~font=state.mainFont,
-    ~pos=(55, 60),
-    env,
-  );
+  if (dayIndex === 0 && pageNumber === 0) {
+    ();
+  } else {
+    let date = dayIndex + 14;
+    let th =
+      if (date === 21) {
+        "st";
+      } else if (date === 22) {
+        "nd";
+      } else {
+        "th";
+      };
+    let title = "July " ++ string_of_int(date) ++ th;
+    Draw.text(~body=title, ~font=state.mainFont, ~pos=(55, 60), env);
+    let w = Draw.textWidth(~body=title, ~font=state.mainFont, env);
+    Draw.fill(Utils.color(0, 0, 0, 255), env);
+    Draw.rect(~pos=(55, 60), ~width=w, ~height=2, env);
+  };
   let currentEntry = Story.entries[dayIndex];
   {
     let (body, x1, y1, w1, h1) = getForwardButton(state, env);
