@@ -18408,7 +18408,7 @@ var index = (function (exports) {
               ], 256, 256);
   }
 
-  var debug = /* boolean */1;
+  var debug = /* boolean */0;
 
   var screenSize = 600;
 
@@ -18443,33 +18443,33 @@ var index = (function (exports) {
           "After the house fire that claimed your uncle's",
           "life, this was all that's left. He tells you that",
           "part of the journal was burned, but perhaps",
-          "you may find solace in the rest of it.",
+          "you may find comfort in the rest of it.",
           "",
           "Most of the beginning of the book was",
           "burned, but you flip towards the end and read",
           "one of the entries."
         ],
         /* array */[
-          "Oh, but I am tired! I spent all day laying",
-          "traps today for the fox that had torn up",
+          "I am so tired! I spent all day laying",
+          "traps today for the fox that had attacked",
           "chickens a month ago. I don't want to rinse",
           "off another puddle of chicken blood again.",
           "But my, just think of all that has changed",
           "since then...",
           "",
           "Maria and I had a lovely walk today. She is",
-          "becoming so strong! It does renew my faith. I",
-          "fretted the worst would happen again. Maria,",
-          "after a while, was in gay spirits, owing, I think,",
+          "becoming so strong! It gives me hope. I",
+          "worried the worst would happen again. Maria,",
+          "after a while, was feeling happy, owing, I think,",
           "to the cow who came nosing towards us. I",
-          "feared they would be frightened to see a new",
-          "body on the farm, but Maria did not scare"
+          "feared the animals would be frightened to",
+          "see someone new on the farm, but they weren't!"
         ],
         /* array */[
-          "them. The walk did her well though.",
+          "The walk did Maria well though.",
           "Her attitude on the farm reminds me of... ",
           "best not to trouble my dreams with it. I would",
-          "rather go to sleep with light pen and light heart.",
+          "rather go to sleep with a light heart.",
           "I really believe she has turned the corner, and",
           "that we are over her troubles."
         ]
@@ -18481,18 +18481,114 @@ var index = (function (exports) {
         /* Bool */__(0, ["Feed animals"]),
         /* Bool */__(0, ["Wash away manure"])
       ],
-      /* pages : array */[/* array */[]]
+      /* pages : array */[
+        /* array */[
+          "I can't sleep now, so I may as well write. We",
+          "have had such an adventure, such an",
+          "agonizing experience. Suddenly I became",
+          "awake, and sat up, with a horrible sense of",
+          "fear upon me. The room was dark, so I could",
+          "not see Maria's bed. I rushed across and",
+          "felt for her. The bed was empty. I lit a",
+          "match and found that she was not in the",
+          "room. The door was shut, but not locked. I",
+          "ran downstairs. Not there! Then I looked in",
+          "all the other rooms of the house, with an",
+          "ever-growing fear chilling my heart.",
+          "Finally I came to the front door and found",
+          "it open. It was not wide open, but not"
+        ],
+        /* array */[
+          "locked either.  I am usually so careful to",
+          "lock the door every night, but these days",
+          "things seem to be slipping. There was no",
+          "time to think of what might happen.  I took",
+          "a jacket and ran out. For a moment or two I",
+          "could see nothing, then the clouds moved",
+          "and I saw her on top of the barn. My heart",
+          "froze. How did she get there? I ran to the",
+          "building and began climbing up.  It seemed",
+          "to take forever.  I called in fright,",
+          "\"Maria! Maria!\" She looked at me calmly as if",
+          "all were perfectly natural. In the",
+          "adrenaline I had felt nothing, but sitting",
+          "on the barn I could feel the pain of the"
+        ],
+        /* array */[
+          "climb seep back in. My body ached, and my",
+          "hands were covered in blood, fingernails",
+          "torn from the climb up the barn. I held",
+          "them out in front of me trembling, and",
+          "Maria turned her attention to them. Instead",
+          "of fear, I saw that she was curious.  I",
+          "hesitate to write the next words, but she",
+          "stretched her neck over and began to lick",
+          "my fingers as a dog would lick a wound. I",
+          "pulled my hands back into my clothes,",
+          "covering them. I could swear I saw a glimmer",
+          "of red anger in her eyes."
+        ]
+      ]
     ],
     /* record */[
       /* tasks : array */[/* Bool */__(0, ["Fix the barn door"])],
-      /* pages : array */[/* array */[]]
+      /* pages : array */[
+        /* array */[
+          "Twice during the night I was wakened by Maria",
+          "trying to get out. She seemed, even in her",
+          "sleep, to be a little impatient at finding",
+          "the door shut, and went back to bed under a",
+          "sort of protest. I woke with the dawn, and",
+          "heard the birds chirping outside of the",
+          "window. Maria woke, too, and, I was sad to",
+          "see, was much worse than on the previous",
+          "morning. She is no longer taking to the milk",
+          "which I have been having her eat. I took her",
+          "down to the kitchen to see if she would have",
+          "any bread or corn, but she seemed entirely",
+          "uninterested. I remember when my daughter was",
+          "young I would feed her a bit of fried egg"
+        ],
+        /* array */[
+          "when she was sick. So I broke a few eggs and",
+          "and began to fry them one by one. Strangely",
+          "enough when I turned around I found Maria",
+          "gulping down the eggs... Raw..."
+        ]
+      ]
     ],
     /* record */[
       /* tasks : array */[
         /* Bool */__(0, ["Investigate barn"]),
         /* Bool */__(0, ["Wash away any mess"])
       ],
-      /* pages : array */[/* array */[]]
+      /* pages : array */[
+        /* array */[
+          "I have not had the heart to write. Some sort",
+          "of shadow seems to be coming over our",
+          "happiness. Maria seems to be growing weaker.",
+          "I do not understand why Maria is fading away",
+          "like this. She eats, still a diet of raw eggs",
+          "(to which I have surreptitiously added some",
+          "bread), well and sleeps well, but I fear all",
+          "the time shut in the room is causing her to",
+          "worsen. The color in her cheeks are fading,",
+          "and she gets weaker day by day. At night I",
+          "hear her gasping as if for air. I keep the",
+          "key of our door always fastened to my wrist",
+          "at night, but she gets up and walks around",
+          "the room, and sits at the open window. Last"
+        ],
+        /* array */[
+          "night I found her leaning out when I woke",
+          "up, and when I tried to wake her I could",
+          "not, and she moaned silently between long,",
+          "painful struggles for breath. ",
+          "",
+          "I do not know what is to be done. I fear this",
+          "is the end."
+        ]
+      ]
     ],
     /* record */[
       /* tasks : array */[
@@ -18532,10 +18628,10 @@ var index = (function (exports) {
           "that day so long ago, on the night my first",
           "daughter died. She was so small back then",
           "and sweet. I named her after my daughter,",
-          "and thusly I still had my Maria.",
+          "and so I still had my Maria.",
           "",
           "Now she is strong. Quite strong. She almost did",
-          "not recognize me but I coaxed her to come"
+          "not recognize me but I convinced her to come"
         ],
         /* array */[
           "back to the farm with me. Ah my darling. My",
@@ -18572,7 +18668,7 @@ var index = (function (exports) {
       /* pages : array */[
         /* array */[
           "She truly does love me.",
-          "As soon as I peak into the barn she looks at",
+          "As soon as I peek into the barn she looks at",
           "me so lovingly and jumps up to try to play with",
           "me. My beautiful Maria. She is so strong now,",
           "at times it seems that she is almost able to",
@@ -18582,25 +18678,24 @@ var index = (function (exports) {
           "I have such frightful dreams these nights. I",
           "see my daughter. My old daughter. My human",
           "daughter, she tells me I am in danger. She tells",
-          "me I need to kill Maria. But I could not even get"
+          "me I need to kill Maria."
         ],
         /* array */[
-          "close to her with my ax she is so strong these",
-          "days. I often dream of that one night, on top",
-          "of the barn. I see her craning her neck over.",
+          "I often dream of that one night, on top",
+          "of the barn. I see her stretching her neck over.",
           "Licking the blood off my hands hungrily.",
           "I push my hands towards her. She opens her",
           "mouth and I see her teeth close around me.",
           "I shudder even recalling it.",
           "",
-          "But what am I to do? You see this new daughter,",
-          "this new Maria she loves me more than all the",
+          "But what am I to do? You see? This new daughter,",
+          "this new Maria, she loves me more than all the",
           "other animals in the farm. She won't even play",
           "with the chickens any more she wants to play"
         ],
         /* array */[
           "with me so much. But won't she grow weak if",
-          "she does not play with the chickens. If she",
+          "she does not play with the chickens? If she",
           "does not eat the chickens. If she just wants",
           "me instead...",
           "",
@@ -18621,7 +18716,7 @@ var index = (function (exports) {
           "I even went into the barn and laid a blanket on",
           "her. So beautiful, when she sleeps. ",
           "",
-          "Wait there was a crash outside. The barn door",
+          "Wait, there was a crash outside. The barn door",
           "is broken down. I hear a banging downstairs.",
           "She wants to play with me..."
         ],
@@ -18633,13 +18728,24 @@ var index = (function (exports) {
           "pounding is growing louder. She is not my",
           "daughter, it is a monster. Whoever is reading",
           "this must slay it. The axe is in the barn. You",
-          "must slay it as it sleeps. The door is nearly bust.",
-          "When it enters I shall throw the latern at it.",
-          "That will keep it licking its wounds while you,",
-          "my heir, prepare to slay it.",
+          "must kill it as it sleeps.",
+          "The door is nearly broken.",
           "My dear Maria, I will see you soon. "
         ]
       ]
+    ],
+    /* record */[
+      /* tasks : array */[],
+      /* pages : array */[/* array */[
+          "This is the end of this game.",
+          "Thanks for playing.",
+          "",
+          "Made by:",
+          " - Maude (graphics)",
+          " - Avery (programming)",
+          " - Ben (programming)",
+          " - Nate (writing)"
+        ]]
     ]
   ];
   /* No side effect */
@@ -18648,8 +18754,8 @@ var index = (function (exports) {
 
   function init$5() {
     return /* record */[
-            /* dayIndex */3,
-            /* dayTransition : FadeOut */4,
+            /* dayIndex */0,
+            /* dayTransition : JournalIn */2,
             /* animationTime */0,
             /* pageNumber */0
           ];
@@ -19052,7 +19158,7 @@ var index = (function (exports) {
         var x1$1 = match$5[1];
         didClickOnBack = +(mx > x1$1 && mx < (x1$1 + match$5[3] | 0) && my > y1$1 && my < (y1$1 + match$5[4] | 0));
       }
-      if ((keyPressed(/* Right */51, env) || didClickOnForward) && pageNumber < caml_array_get(entries, dayIndex)[/* pages */1].length) {
+      if ((keyPressed(/* Right */51, env) || didClickOnForward || keyPressed(/* Space */4, env) || keyPressed(/* X */48, env)) && pageNumber < caml_array_get(entries, dayIndex)[/* pages */1].length) {
         var newrecord$4 = state.slice();
         var init$3 = state[/* journal */9];
         newrecord$4[/* journal */9] = /* record */[
@@ -19072,7 +19178,7 @@ var index = (function (exports) {
           /* pageNumber */pageNumber - 1 | 0
         ];
         return newrecord$5;
-      } else if ((keyPressed(/* Right */51, env) || didClickOnForward) && pageNumber === caml_array_get(entries, dayIndex)[/* pages */1].length) {
+      } else if ((keyPressed(/* Right */51, env) || didClickOnForward || keyPressed(/* Space */4, env) || keyPressed(/* X */48, env)) && pageNumber === caml_array_get(entries, dayIndex)[/* pages */1].length) {
         var newrecord$6 = state.slice();
         var init$5 = state[/* journal */9];
         newrecord$6[/* journal */9] = /* record */[
@@ -19614,7 +19720,7 @@ var index = (function (exports) {
     if (pageNumber === currentEntry[/* pages */1].length) {
       text(/* Some */[state[/* mainFont */13]], "Todo list:", /* tuple */[
             55,
-            136
+            124
           ], env);
       var stats = dayIndex === 0 ? day1Stats(state) : (
           dayIndex === 1 ? day2Stats(state) : (
@@ -19623,7 +19729,7 @@ var index = (function (exports) {
                       dayIndex === 4 ? day5Stats(state) : (
                           dayIndex === 5 ? day6Stats(state) : (
                               dayIndex === 6 ? day7Stats(state) : (
-                                  dayIndex === 7 ? day8Stats(state) : failwith("todo ")
+                                  dayIndex === 7 ? day8Stats(state) : /* int array */[]
                                 )
                             )
                         )
@@ -19632,7 +19738,7 @@ var index = (function (exports) {
             )
         );
       fold_left$1((function (i, task) {
-              var y = (110 + imul(i, 38) | 0) + 76 | 0;
+              var y = (110 + (i << 5) | 0) + 64 | 0;
               var match;
               if (typeof task === "number") {
                 var stat = caml_array_get(stats, i);
@@ -19681,7 +19787,7 @@ var index = (function (exports) {
                     55,
                     y
                   ], env);
-              return y + 38 | 0;
+              return y + 32 | 0;
             }), 110, caml_array_get(currentEntry[/* pages */1], pageNumber));
     }
     return popStyle(env);
@@ -19787,26 +19893,16 @@ var index = (function (exports) {
           /* pageNumber */init$4[/* pageNumber */3]
         ];
         return newrecord$4;
-      } else if (dayTransition === /* JournalIn */2 && (keyPressed(/* Space */4, env) || keyPressed(/* X */48, env))) {
+      } else {
         var newrecord$5 = state.slice();
         var init$5 = state[/* journal */9];
         newrecord$5[/* journal */9] = /* record */[
           /* dayIndex */init$5[/* dayIndex */0],
-          /* dayTransition : JournalOut */3,
-          /* animationTime */0,
+          /* dayTransition */init$5[/* dayTransition */1],
+          /* animationTime */animationTime + deltaTime(env),
           /* pageNumber */init$5[/* pageNumber */3]
         ];
         return newrecord$5;
-      } else {
-        var newrecord$6 = state.slice();
-        var init$6 = state[/* journal */9];
-        newrecord$6[/* journal */9] = /* record */[
-          /* dayIndex */init$6[/* dayIndex */0],
-          /* dayTransition */init$6[/* dayTransition */1],
-          /* animationTime */animationTime + deltaTime(env),
-          /* pageNumber */init$6[/* pageNumber */3]
-        ];
-        return newrecord$6;
       }
     }
     
@@ -20825,8 +20921,37 @@ var index = (function (exports) {
             }
           }), state[/* gameobjects */8]);
     if (hackRefPlayerDead[0]) {
+      var gameobjects$1;
+      try {
+        find((function (g) {
+                var match = g[/* state */2];
+                if (typeof match === "number" && match >= 3) {
+                  return /* boolean */1;
+                } else {
+                  return /* boolean */0;
+                }
+              }), gameobjects);
+        gameobjects$1 = gameobjects;
+      }
+      catch (exn){
+        if (exn === not_found) {
+          gameobjects$1 = /* :: */[
+            /* record */[
+              /* pos : record */[
+                /* x */13 * tileSizef,
+                /* y */8 * tileSizef
+              ],
+              /* action : PickUp */[/* Axe */6],
+              /* state : AxeStanding */3
+            ],
+            gameobjects
+          ];
+        } else {
+          throw exn;
+        }
+      }
       var newrecord = state.slice();
-      newrecord[/* gameobjects */8] = gameobjects;
+      newrecord[/* gameobjects */8] = gameobjects$1;
       var init = state[/* journal */9];
       newrecord[/* journal */9] = /* record */[
         /* dayIndex */state[/* journal */9][/* dayIndex */0] - 1 | 0,
@@ -23517,7 +23642,7 @@ var index = (function (exports) {
       offset$1 = offset;
     }
     var state$1;
-    if (!newrecord$1[/* hasPressedTheActionKeyOnce */21] && (key(/* X */48, env) || key(/* Space */4, env))) {
+    if (!newrecord$1[/* hasPressedTheActionKeyOnce */21] && (key(/* X */48, env) || key(/* Space */4, env)) && newrecord$1[/* journal */9][/* dayTransition */1] === /* NoTransition */0) {
       var newrecord$2 = newrecord$1.slice();
       newrecord$2[/* hasPressedTheActionKeyOnce */21] = /* boolean */1;
       state$1 = newrecord$2;
@@ -23972,22 +24097,23 @@ var index = (function (exports) {
       var match$13 = match$12[/* state */2];
       if (typeof match$13 !== "number") {
         if (match$13.tag === 5) {
-          var movePair = match$13[0][/* movePair */0];
-          var match$14 = movePair[1];
-          var x2 = match$14[/* x */0];
-          var match$15 = movePair[0];
-          var x1 = match$15[/* x */0];
-          var match$16 = match$12[/* pos */0];
+          var match$14 = match$13[0];
+          var movePair = match$14[/* movePair */0];
+          var match$15 = movePair[1];
+          var x2 = match$15[/* x */0];
+          var match$16 = movePair[0];
+          var x1 = match$16[/* x */0];
+          var match$17 = match$12[/* pos */0];
           var facing$5 = x1 > x2 ? /* LeftD */3 : (
               x1 < x2 ? /* RightD */2 : (
-                  match$15[/* y */1] < match$14[/* y */1] ? /* DownD */1 : /* UpD */0
+                  match$16[/* y */1] < match$15[/* y */1] ? /* DownD */1 : /* UpD */0
                 )
             );
-          if (facing$5 === /* DownD */1) {
+          if (facing$5 === /* DownD */1 && match$14[/* eatingTime */3] === 0) {
             pushMatrix(env);
             scale$9(2, 2, env);
             translate$4(-state$10[/* playerPos */2][/* x */0] + screenSize / 4 - tileSizef / 2, -state$10[/* playerPos */2][/* y */1] + screenSize / 4 - tileSizef / 2, env);
-            drawAssetf(match$16[/* x */0], match$16[/* y */1] - tileSizef - 10, "eyes.png", state$10, env);
+            drawAssetf(match$17[/* x */0], match$17[/* y */1] - tileSizef - 10, "eyes.png", state$10, env);
             popMatrix(env);
           }
           
