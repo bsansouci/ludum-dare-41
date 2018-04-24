@@ -90,6 +90,10 @@ let updateDay = (state, env) => {
                   x: 9. *. tileSizef,
                   y: 15. *. tileSizef,
                 }
+              | BarnDoor(Closed) when dayIndex >= 6 => {
+                x: go.pos.x +. tileSizef -. 3.,
+                y: go.pos.y,
+              }
               | _ => go.pos
               };
             let action =

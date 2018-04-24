@@ -1008,6 +1008,7 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (Some(Axe), Some({state: Chicken({health})}))
     | (Some(Axe), Some({state: Chick({health})}))
     | (Some(Axe), Some({state: Cow({health})})) when health > 0 => "Slay"
+    | (Some(Axe), Some({state: Boss({hunger: 0})})) => "End this all"
     | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"
     /* Can't drop corn in water, it'd lock the game up */
     | (Some(Corn), Some({action: PickUp(Water)})) => ""
@@ -1053,6 +1054,19 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
     let drop = () => playSound("drop", state, env);
     let kill = () => playSound("hit", state, env);
     switch (state.currentItem, focusedObject) {
+    | (Some(Axe), Some({state: Boss({hunger: 0})})) =>
+      kill();
+      (
+        {
+          ...state,
+          journal: {
+            ...state.journal,
+            dayTransition: FadeOut,
+            animationTime: 0.,
+          },
+        },
+        focusedObject,
+      );
     | (Some(Flower), Some({state: Tombstone(_)} as go)) =>
       drop();
       (
