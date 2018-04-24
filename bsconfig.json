@@ -2,6 +2,7 @@
   "name": "reprocessing-example",
   "sources": "src",
   "bs-dependencies": ["Reprocessing", "rex-json", "Reasongl"],
+  "package-specs": ["es6"],
   "entries": [{
     "backend": "bytecode",
     "main-module": "IndexHot"

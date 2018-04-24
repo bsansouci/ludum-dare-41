@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "Reprocessing": "schmavery/reprocessing#multifile-hotreloading",
-    "rex-json": "schmavery/rex-json"
+    "rex-json": "schmavery/rex-json",
+    "rollup": "^0.58.2",
+    "rollup-plugin-node-resolve": "^3.3.0"
   },
   "devDependencies": {
     "bs-platform": "bsansouci/bsb-native"
