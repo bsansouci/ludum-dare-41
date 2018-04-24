@@ -19,7 +19,7 @@ let entries = [|
       Bool("Sell milk"),
       Bool("Fill water trough"),
       Count("Water tall corn", 2),
-      Count("Plant seeds", 1),
+      Count("Plant seed and water it", 1),
     |],
     pages: [|
       [|
