@@ -86,89 +86,6 @@ var index = (function (exports) {
   undefined_recursive_module.tag = 248;
   /*  Not a pure module */
 
-  function caml_sys_getenv(s) {
-    var match = typeof (process) === "undefined" ? undefined : (process);
-    if (match !== undefined) {
-      var match$1 = match.env[s];
-      if (match$1 !== undefined) {
-        return match$1;
-      } else {
-        throw not_found;
-      }
-    } else {
-      throw not_found;
-    }
-  }
-
-  function caml_sys_random_seed() {
-    return /* array */[((Date.now() | 0) ^ 4294967295) * Math.random() | 0];
-  }
-
-  function caml_sys_get_argv() {
-    var match = typeof (process) === "undefined" ? undefined : (process);
-    if (match !== undefined) {
-      if (match.argv == null) {
-        return /* tuple */[
-                "",
-                /* array */[""]
-              ];
-      } else {
-        return /* tuple */[
-                match.argv[0],
-                match.argv
-              ];
-      }
-    } else {
-      return /* tuple */[
-              "",
-              /* array */[""]
-            ];
-    }
-  }
-  /* No side effect */
-
-  var id = [0];
-
-  function get_id() {
-    id[0] += 1;
-    return id[0];
-  }
-
-  function create(str) {
-    var v_001 = get_id(/* () */0);
-    var v = /* tuple */[
-      str,
-      v_001
-    ];
-    v.tag = 248;
-    return v;
-  }
-
-  function isCamlExceptionOrOpenVariant(e) {
-    if (e === undefined) {
-      return /* boolean */0;
-    } else if (e.tag === 248) {
-      return /* true */1;
-    } else {
-      var slot = e[0];
-      if (slot !== undefined) {
-        return +(slot.tag === 248);
-      } else {
-        return /* false */0;
-      }
-    }
-  }
-  /* No side effect */
-
-  var match = caml_sys_get_argv(/* () */0);
-
-  var Break = create("Sys.Break");
-
-  var argv = match[1];
-
-  var executable_name = match[0];
-  /* No side effect */
-
   function caml_array_sub(x, offset, len) {
     var result = new Array(len);
     var j = 0;
@@ -1008,6 +925,47 @@ var index = (function (exports) {
 
   var stdin = undefined;
   /* node_std_output Not a pure module */
+
+  function caml_sys_getenv(s) {
+    var match = typeof (process) === "undefined" ? undefined : (process);
+    if (match !== undefined) {
+      var match$1 = match.env[s];
+      if (match$1 !== undefined) {
+        return match$1;
+      } else {
+        throw not_found;
+      }
+    } else {
+      throw not_found;
+    }
+  }
+
+  function caml_sys_random_seed() {
+    return /* array */[((Date.now() | 0) ^ 4294967295) * Math.random() | 0];
+  }
+
+  function caml_sys_get_argv() {
+    var match = typeof (process) === "undefined" ? undefined : (process);
+    if (match !== undefined) {
+      if (match.argv == null) {
+        return /* tuple */[
+                "",
+                /* array */[""]
+              ];
+      } else {
+        return /* tuple */[
+                match.argv[0],
+                match.argv
+              ];
+      }
+    } else {
+      return /* tuple */[
+              "",
+              /* array */[""]
+            ];
+    }
+  }
+  /* No side effect */
 
   function div(x, y) {
     if (y === 0) {
@@ -2384,6 +2342,39 @@ var index = (function (exports) {
           ];
     } else {
       return s.charCodeAt(i);
+    }
+  }
+  /* No side effect */
+
+  var id = [0];
+
+  function get_id() {
+    id[0] += 1;
+    return id[0];
+  }
+
+  function create(str) {
+    var v_001 = get_id(/* () */0);
+    var v = /* tuple */[
+      str,
+      v_001
+    ];
+    v.tag = 248;
+    return v;
+  }
+
+  function isCamlExceptionOrOpenVariant(e) {
+    if (e === undefined) {
+      return /* boolean */0;
+    } else if (e.tag === 248) {
+      return /* true */1;
+    } else {
+      var slot = e[0];
+      if (slot !== undefined) {
+        return +(slot.tag === 248);
+      } else {
+        return /* false */0;
+      }
     }
   }
   /* No side effect */
@@ -12935,6 +12926,15 @@ var index = (function (exports) {
   }
   /* No side effect */
 
+  var match = caml_sys_get_argv(/* () */0);
+
+  var Break = create("Sys.Break");
+
+  var argv = match[1];
+
+  var executable_name = match[0];
+  /* No side effect */
+
   var max_int$2 = 2147483647;
   /* No side effect */
 
@@ -18360,6 +18360,8 @@ var index = (function (exports) {
     
   }
 
+  var basedirname = _1(dirname$1, caml_array_get(argv, 0)) + "/";
+
   function loadSounds(env) {
     var loadSoundHelper = function (soundMap, param) {
       var soundName = param[0];
@@ -18368,7 +18370,7 @@ var index = (function (exports) {
                                 /* String */__(2, [
                                     /* No_padding */0,
                                     /* String_literal */__(11, [
-                                        "/sounds/",
+                                        "sounds/",
                                         /* String */__(2, [
                                             /* No_padding */0,
                                             /* String_literal */__(11, [
@@ -18378,8 +18380,8 @@ var index = (function (exports) {
                                           ])
                                       ])
                                   ]),
-                                "%s/sounds/%s.wav"
-                              ]), _1(dirname$1, caml_array_get(argv, 0)), soundName), env),
+                                "%ssounds/%s.wav"
+                              ]), basedirname, soundName), env),
                   param[1]
                 ], soundMap);
     };
@@ -18436,15 +18438,22 @@ var index = (function (exports) {
   }
 
   function handleCollision(state, prevOffset, offset, pos, grid) {
+    var halfTileSizef = tileSizef / 2;
+    var offset_000 = /* x */constrain(offset[/* x */0], -halfTileSizef, halfTileSizef);
+    var offset_001 = /* y */constrain(offset[/* y */1], -halfTileSizef, halfTileSizef);
+    var offset$1 = /* record */[
+      offset_000,
+      offset_001
+    ];
     var collided = exists((function (param) {
-            var tx = param[0] + ((offset[/* x */0] + pos[/* x */0]) / tileSizef | 0) | 0;
-            var ty = param[1] + ((offset[/* y */1] + pos[/* y */1]) / tileSizef | 0) | 0;
+            var tx = param[0] + ((offset_000 + pos[/* x */0]) / tileSizef | 0) | 0;
+            var ty = param[1] + ((offset_001 + pos[/* y */1]) / tileSizef | 0) | 0;
             if (tx >= grid.length || tx < 0 || ty >= caml_array_get(grid, 0).length || ty < 0) {
               return /* true */1;
             } else if (isCollidable(tx, ty, grid)) {
               return intersectRectRect(/* tuple */[
-                          pos[/* x */0] + offset[/* x */0] + 8,
-                          pos[/* y */1] + offset[/* y */1] + 8
+                          pos[/* x */0] + offset_000 + 8,
+                          pos[/* y */1] + offset_001 + 8
                         ], tileSizef - 8 - 8, tileSizef - 8 - 8, /* tuple */[
                           (tx << 5),
                           (ty << 5)
@@ -18512,8 +18521,8 @@ var index = (function (exports) {
       collided$1 = /* boolean */1;
     } else {
       var collided$2 = intersectRectRect(/* tuple */[
-            pos[/* x */0] + offset[/* x */0],
-            pos[/* y */1] + offset[/* y */1]
+            pos[/* x */0] + offset_000,
+            pos[/* y */1] + offset_001
           ], tileSizef, tileSizef, /* tuple */[
             256,
             512
@@ -18530,7 +18539,7 @@ var index = (function (exports) {
     if (collided$1) {
       return prevOffset;
     } else {
-      return offset;
+      return offset$1;
     }
   }
 
@@ -18542,6 +18551,27 @@ var index = (function (exports) {
                 5 * tileSizef,
                 9 * tileSizef
               ], 256, 256);
+  }
+
+  function addChick(gos) {
+    return /* :: */[
+            /* record */[
+              /* pos : record */[
+                /* x */randomf(11, 22) * tileSizef,
+                /* y */randomf(18, 20) * tileSizef
+              ],
+              /* action : NoAction */12,
+              /* state : Chick */__(6, [/* record */[
+                    /* momentum : record */[
+                      /* x */0,
+                      /* y */0
+                    ],
+                    /* health */1,
+                    /* willDie : boolean */0
+                  ]])
+            ],
+            gos
+          ];
   }
 
   var debug = /* boolean */0;
@@ -18737,7 +18767,7 @@ var index = (function (exports) {
           "think let alone write of it. But after some days",
           "I have mustered the courage. Maria is gone...",
           "And I cannot help but think of my own hand",
-          "in it's doing. But no more of these thoughts.",
+          "in its doing. But no more of these thoughts.",
           "This was my second chance and I have thrown",
           "it away. ",
           "",
@@ -19238,6 +19268,38 @@ var index = (function (exports) {
             } else {
               gameobjects$7 = gameobjects$6;
             }
+            var shouldAddChicks = +(dayIndex$2 === 7);
+            var gameobjects$8;
+            if (shouldAddChicks) {
+              var animalsAliveCount = fold_left((function (count, x) {
+                      var match = x[/* state */2];
+                      var exit$$1 = 0;
+                      if (typeof match === "number") {
+                        return count;
+                      } else {
+                        switch (match.tag | 0) {
+                          case 1 : 
+                          case 4 : 
+                          case 6 : 
+                              exit$$1 = 1;
+                              break;
+                          default:
+                            return count;
+                        }
+                      }
+                      if (exit$$1 === 1) {
+                        if (match[0][/* health */1] > 0) {
+                          return count + 1 | 0;
+                        } else {
+                          return count;
+                        }
+                      }
+                      
+                    }), 0, gameobjects$7);
+              gameobjects$8 = animalsAliveCount < 6 ? addChick(addChick(addChick(addChick(addChick(addChick(gameobjects$7)))))) : gameobjects$7;
+            } else {
+              gameobjects$8 = gameobjects$7;
+            }
             var newrecord$2 = state.slice();
             newrecord$2[/* playerPos */2] = /* record */[
               /* x */tileSizef * 15.8,
@@ -19245,7 +19307,7 @@ var index = (function (exports) {
             ];
             newrecord$2[/* playerFacing */3] = /* DownD */1;
             newrecord$2[/* currentItem */7] = /* None */0;
-            newrecord$2[/* gameobjects */8] = gameobjects$7;
+            newrecord$2[/* gameobjects */8] = gameobjects$8;
             newrecord$2[/* journal */9] = /* record */[
               /* dayIndex */dayIndex$2,
               /* dayTransition : JournalIn */2,
@@ -19254,7 +19316,6 @@ var index = (function (exports) {
             ];
             var match$2 = +(dayIndex$2 === 5 || dayIndex$2 === 7);
             newrecord$2[/* night */12] = match$2 ? /* boolean */1 : /* boolean */0;
-            newrecord$2[/* day6PlayerWentInBarn */17] = /* boolean */0;
             newrecord$2[/* playerDead */22] = /* boolean */0;
             return newrecord$2;
           } else {
@@ -20556,26 +20617,6 @@ var index = (function (exports) {
           0,
           /* [] */0
         ], grid);
-    var addChick = function (gos) {
-      return /* :: */[
-              /* record */[
-                /* pos : record */[
-                  /* x */randomf(11, 24) * tileSizef,
-                  /* y */randomf(18, 20) * tileSizef
-                ],
-                /* action : NoAction */12,
-                /* state : Chick */__(6, [/* record */[
-                      /* momentum : record */[
-                        /* x */0,
-                        /* y */0
-                      ],
-                      /* health */1,
-                      /* willDie : boolean */0
-                    ]])
-              ],
-              gos
-            ];
-    };
     return addChick(addChick(addChick(addChick(addChick(addChick(/* :: */[
                                     /* record */[
                                       /* pos : record */[
@@ -21271,14 +21312,14 @@ var index = (function (exports) {
         var match$4 = g[/* state */2];
         if (typeof match$4 === "number") {
           switch (match$4) {
-            case 1 : 
-                exit$3 = 4;
-                break;
+            case 0 : 
+            case 2 : 
+                return /* () */0;
             case 3 : 
                 exit$1 = 2;
                 break;
             default:
-              return /* () */0;
+              exit$3 = 4;
           }
         } else {
           switch (match$4.tag | 0) {
@@ -21288,20 +21329,18 @@ var index = (function (exports) {
                 health = match$4[0][/* health */1];
                 exit$$1 = 1;
                 break;
-            case 0 : 
-            case 2 : 
-            case 3 : 
-                exit$3 = 4;
-                break;
             case 5 : 
                 exit$1 = 2;
                 break;
+            case 4 : 
+            case 6 : 
+                return /* () */0;
             case 7 : 
             case 8 : 
                 exit$5 = 6;
                 break;
             default:
-              return /* () */0;
+              exit$3 = 4;
           }
         }
       }
@@ -22506,9 +22545,20 @@ var index = (function (exports) {
                       }
                       var pos$1 = match$12[1];
                       var nextBarnState = match$12[0];
+                      var playedInDoor = intersectRectRect(/* tuple */[
+                            state[/* playerPos */2][/* x */0],
+                            state[/* playerPos */2][/* y */1]
+                          ], tileSizef, tileSizef, /* tuple */[
+                            tileSizef * 9 - 3,
+                            tileSizef * 16
+                          ], 2 * tileSizef + 3, tileSizef - 8);
+                      var playerPos = playedInDoor ? /* record */[
+                          /* x */state[/* playerPos */2][/* x */0],
+                          /* y */state[/* playerPos */2][/* y */1] + tileSizef / 4
+                        ] : state[/* playerPos */2];
                       var newrecord$11 = state.slice();
                       return /* tuple */[
-                              (newrecord$11[/* gameobjects */8] = map((function (g) {
+                              (newrecord$11[/* playerPos */2] = playerPos, newrecord$11[/* gameobjects */8] = map((function (g) {
                                         var match = +(g === go$4);
                                         if (match) {
                                           return /* record */[
@@ -23670,7 +23720,7 @@ var index = (function (exports) {
               /* y */tileSizef * 10
             ],
             /* playerFacing : DownD */1,
-            /* spritesheet */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/spritesheet/assets.png", /* Some */[/* boolean */1], env),
+            /* spritesheet */loadImage$2(basedirname + "spritesheet/assets.png", /* Some */[/* boolean */1], env),
             /* assets */assets,
             /* sounds */loadSounds(env),
             /* currentItem : None */0,
@@ -23679,14 +23729,14 @@ var index = (function (exports) {
             /* dollarAnimation */-1,
             /* time */0,
             /* night : boolean */0,
-            /* mainFont */loadFont(_1(dirname$1, caml_array_get(argv, 0)) + "/whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
+            /* mainFont */loadFont(basedirname + "whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
             /* monsterWasLockedIn : boolean */0,
             /* mousePressed : boolean */0,
             /* mousePressedHack : boolean */0,
             /* day6PlayerWentInBarn : boolean */0,
             /* day6CameraAnimation */0,
-            /* shortDestroyedBarnAsset */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/short_destroyed_barn.png", /* Some */[/* boolean */1], env),
-            /* sleepingMonsterAsset */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/sleeping_monster.png", /* Some */[/* boolean */1], env),
+            /* shortDestroyedBarnAsset */loadImage$2(basedirname + "short_destroyed_barn.png", /* Some */[/* boolean */1], env),
+            /* sleepingMonsterAsset */loadImage$2(basedirname + "sleeping_monster.png", /* Some */[/* boolean */1], env),
             /* hasPressedTheActionKeyOnce : boolean */0,
             /* playerDead : boolean */0
           ];
@@ -24111,9 +24161,9 @@ var index = (function (exports) {
                         }), row);
           }), state$9[/* grid */0]);
     var playerBehindBarn = playerInBarn ? /* boolean */0 : intersectRectRect(/* tuple */[
-            state$9[/* playerPos */2][/* x */0] + tileSizef / 2,
-            state$9[/* playerPos */2][/* y */1] + tileSizef / 2
-          ], tileSizef / 2, tileSizef / 2, /* tuple */[
+            state$9[/* playerPos */2][/* x */0],
+            state$9[/* playerPos */2][/* y */1]
+          ], tileSizef, tileSizef, /* tuple */[
             4 * tileSizef,
             4 * tileSizef
           ], 320, 32 * 4);
@@ -24138,7 +24188,7 @@ var index = (function (exports) {
             return renderBefore(g, focusedObject$2, state$9, env);
           }), state$9[/* gameobjects */8]);
     var sortedGameObjects = sort((function (a, b) {
-            return a[/* pos */0][/* y */1] - b[/* pos */0][/* y */1] + tileSizef | 0;
+            return a[/* pos */0][/* y */1] - b[/* pos */0][/* y */1] | 0;
           }), state$9[/* gameobjects */8]);
     var firstGameObject = hd(sortedGameObjects);
     if (firstGameObject[/* pos */0][/* y */1] >= state$9[/* playerPos */2][/* y */1] + tileSizef / 2) {
@@ -24147,7 +24197,7 @@ var index = (function (exports) {
     renderObject(firstGameObject, playerInBarn, playerBehindBarn, focusedObject$2, state$9, env);
     var lastGameObject = fold_left((function (prevGameOjbect, curGameObject) {
             var barnBottom = 256 + tileSizef * 9;
-            if (!playerInBarn && prevGameOjbect[/* pos */0][/* y */1] < barnBottom - 8 && curGameObject[/* pos */0][/* y */1] >= barnBottom - 8) {
+            if (!playerInBarn && prevGameOjbect[/* pos */0][/* y */1] < barnBottom - 8 - tileSizef / 2 && curGameObject[/* pos */0][/* y */1] >= barnBottom - 8 - tileSizef / 2) {
               if (state$9[/* journal */9][/* dayIndex */0] >= 6 && playerBehindBarn) {
                 image(state$9[/* shortDestroyedBarnAsset */19], /* tuple */[
                       imul(5, tileSize),
@@ -24255,7 +24305,7 @@ var index = (function (exports) {
                 }));
   }
 
-  loadAssetsAsync(_1(dirname$1, caml_array_get(argv, 0)) + "/spritesheet/sheet.json");
+  loadAssetsAsync(basedirname + "spritesheet/sheet.json");
   /*  Not a pure module */
 
   exports.mapString = mapString;
