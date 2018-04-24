@@ -587,6 +587,30 @@ let update = (state, env) => {
       state.gameobjects,
     );
   if (hackRefPlayerDead^) {
+    let gameobjects =
+      switch (
+        List.find(g =>
+          switch (g) {
+          | {state: AxeStanding} => true
+          | _ => false
+          },
+          gameobjects
+        )
+      ) {
+      | exception Not_found =>
+      [
+          {
+            pos: {
+              x: 13. *. tileSizef,
+              y: 8. *. tileSizef,
+            },
+            action: PickUp(Axe),
+            state: AxeStanding,
+          },
+          ...gameobjects,
+        ]
+      | _ => gameobjects
+      };
     {
       ...state,
       playerDead: true,

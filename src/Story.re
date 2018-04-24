@@ -250,7 +250,7 @@ let entries = [|
         "I have such frightful dreams these nights. I",
         "see my daughter. My old daughter. My human",
         "daughter, she tells me I am in danger. She tells",
-        "me I need to kill Maria."
+        "me I need to kill Maria.",
       |],
       [|
         "I often dream of that one night, on top",
@@ -305,5 +305,20 @@ let entries = [|
         "My dear Maria, I will see you soon. ",
       |],
     |],
-  } /* Day 8 */
+  }, /* Day 8 */
+  {
+    tasks: [||],
+    pages: [|
+      [|
+        "This is the end of this game.",
+        "Thanks for playing.",
+        "",
+        "Made by:",
+        " - Maude (graphics)",
+        " - Avery (programming)",
+        " - Ben (programming)",
+        " - Nate (writing)",
+      |],
+    |],
+  },
 |];

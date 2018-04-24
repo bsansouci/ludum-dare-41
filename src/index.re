@@ -781,7 +781,7 @@ let draw = (state, env) => {
     drawAssetFullscreen("baby_its_dark_outside.png", state, env);
   };
   switch (maybeBoss) {
-  | Some({pos: {x, y}, state: Boss({movePair})}) =>
+  | Some({pos: {x, y}, state: Boss({movePair, eatingTime})}) =>
     let ({x: x1, y: y1}, {x: x2, y: y2}) = movePair;
     let facing =
       if (x1 > x2) {
@@ -793,7 +793,7 @@ let draw = (state, env) => {
       } else {
         UpD;
       };
-    if (facing === DownD) {
+    if (facing === DownD && eatingTime === 0.) {
       Draw.pushMatrix(env);
       Draw.scale(~x=2., ~y=2., env);
       Draw.translate(

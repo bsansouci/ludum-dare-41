@@ -642,19 +642,7 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
       } else if (dayIndex === 7) {
         day8Stats(state);
       } else {
-        failwith(
-          "todo ",
-          /*let stats = day1Stats(state);
-            ignore @@ Array.fold_left(
-              (i, line) => {
-                let y = 110 + i * lineHeight + 2 * lineHeight;
-                Draw.text(~body=line, ~font=state.mainFont, ~pos=(55, y), env);
-                i + 1;
-              },
-              0,
-              currentEntry.tasks,
-            );*/
-        );
+        [||]
       };
     ignore @@
     Array.fold_left(
