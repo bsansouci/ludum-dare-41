@@ -75,7 +75,26 @@ let entries = [|
     tasks: [|Bool("Investigate barn"), Bool("Wash away any mess")|],
     pages: [|[||]|],
   }, /* Day 4 */
-  {tasks: [|Bool("Find Maria's grave"), Bool("Mourn")|], pages: [|[||]|]}, /* Day 5 */
+  {
+    tasks: [|Bool("Find Maria's grave"), Bool("Mourn")|],
+    pages: [|
+      [|
+        "The worst has happened. I could not bear to",
+        "think let alone write of it. But after some days",
+        "I have mustered the courage. Maria is gone...",
+        "And I cannot help but think of my own hand",
+        "in it's doing. But no more of these thoughts.",
+        "This was my second chance and I have thrown",
+        "it away. ",
+        "",
+        "I visited my daughter's grave today behind the",
+        "barn. I laid flowers there. Time moves so slowly",
+        "when you are alone. As if it were only yesterday.",
+        "All that is left now is to work. Perhaps through",
+      |],
+      [|"work I will forget. Perhaps I will be given", "another chance."|],
+    |],
+  }, /* Day 5 */
   {
     tasks: [|LockMonsterIn|],
     pages: [|
