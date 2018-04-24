@@ -1,24 +1,29 @@
-Reprocessing Example
+My Dear Farm
+---
+This is a game made for [Ludum Dare 41](https://ldjam.com/events/ludum-dare/41/my-dear-farm). The theme was "Combine 2 Incompatible Genres". 
+
+Play now!
 ---
 
-Clone this repo to get started with [Reprocessing](https://github.com/schmavery/reprocessing).
+- WASD or Arrow Keys to move. X or Space to interact
+- Go to bed when you’re done your tasks.
+- Farming Simulator + Horror Game
 
-Demos are on other branches:
+https://bsansouci.github.io/ludum-dare-41/
 
-- [Flappy Bird](https://github.com/bsansouci/reprocessing-example/tree/livestream-flappybird)
-- [2048](https://github.com/bsansouci/reprocessing-example/tree/2048)
+You can also download the [native Mac app](https://github.com/bsansouci/ludum-dare-41/releases/download/1.0/MyDearFarm.zip) (slightly better performance).
 
-...and more on the [Reprocessing repo](https://github.com/schmavery/reprocessing#projects-using-reprocessing).
+More Info
+---
+This game was build using [Reprocessing](https://github.com/schmavery/reprocessing), a 2D graphics library we wrote in ReasonML/OCaml, with an api inspired by Processing.
 
-## How to
-```
-git clone https://github.com/bsansouci/reprocessing-example.git
-```
+See [here](https://github.com/schmavery/reprocessing#projects-using-reprocessing) for more examples of games and demos built in Reprocessing.
 
 ### Install
-
+_warning_: this doesn't work with npm5. Use npm4 or use yarn. To downgrade to npm4 you can `npm install -g npm@latest-4`
 ```
-npm install
+git clone https://github.com/bsansouci/reprocessing-example.git
+yarn
 ```
 
 ### Build
