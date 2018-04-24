@@ -188,7 +188,7 @@ let setup = (assets, env) => {
     },
     playerFacing: DownD,
     spritesheet:
-      Draw.loadImage(~isPixel=true, ~filename="spritesheet/assets.png", env),
+      Draw.loadImage(~isPixel=true, ~filename=Filename.dirname(Sys.argv[0]) ++ "/spritesheet/assets.png", env),
     assets,
     sounds: loadSounds(env),
     gameobjects: GameObject.init(grid),
@@ -199,7 +199,7 @@ let setup = (assets, env) => {
     night: false,
     mainFont:
       Draw.loadFont(
-        ~filename="whatever it takes bold_2x.fnt",
+        ~filename=Filename.dirname(Sys.argv[0]) ++ "/whatever it takes bold_2x.fnt",
         ~isPixel=false,
         env,
       ),
@@ -211,11 +211,11 @@ let setup = (assets, env) => {
     shortDestroyedBarnAsset:
       Draw.loadImage(
         ~isPixel=true,
-        ~filename="short_destroyed_barn.png",
+        ~filename=Filename.dirname(Sys.argv[0]) ++ "/short_destroyed_barn.png",
         env,
       ),
     sleepingMonsterAsset:
-      Draw.loadImage(~isPixel=true, ~filename="sleeping_monster.png", env),
+      Draw.loadImage(~isPixel=true, ~filename=Filename.dirname(Sys.argv[0]) ++ "/sleeping_monster.png", env),
     hasPressedTheActionKeyOnce: false,
     playerDead: false,
   };
@@ -853,4 +853,4 @@ let loadAssetsAsync = filename =>
     },
   );
 
-loadAssetsAsync("spritesheet/sheet.json");
+loadAssetsAsync(Filename.dirname(Sys.argv[0]) ++ "/spritesheet/sheet.json");
