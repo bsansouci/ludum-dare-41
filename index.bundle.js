@@ -86,6 +86,89 @@ var index = (function (exports) {
   undefined_recursive_module.tag = 248;
   /*  Not a pure module */
 
+  function caml_sys_getenv(s) {
+    var match = typeof (process) === "undefined" ? undefined : (process);
+    if (match !== undefined) {
+      var match$1 = match.env[s];
+      if (match$1 !== undefined) {
+        return match$1;
+      } else {
+        throw not_found;
+      }
+    } else {
+      throw not_found;
+    }
+  }
+
+  function caml_sys_random_seed() {
+    return /* array */[((Date.now() | 0) ^ 4294967295) * Math.random() | 0];
+  }
+
+  function caml_sys_get_argv() {
+    var match = typeof (process) === "undefined" ? undefined : (process);
+    if (match !== undefined) {
+      if (match.argv == null) {
+        return /* tuple */[
+                "",
+                /* array */[""]
+              ];
+      } else {
+        return /* tuple */[
+                match.argv[0],
+                match.argv
+              ];
+      }
+    } else {
+      return /* tuple */[
+              "",
+              /* array */[""]
+            ];
+    }
+  }
+  /* No side effect */
+
+  var id = [0];
+
+  function get_id() {
+    id[0] += 1;
+    return id[0];
+  }
+
+  function create(str) {
+    var v_001 = get_id(/* () */0);
+    var v = /* tuple */[
+      str,
+      v_001
+    ];
+    v.tag = 248;
+    return v;
+  }
+
+  function isCamlExceptionOrOpenVariant(e) {
+    if (e === undefined) {
+      return /* boolean */0;
+    } else if (e.tag === 248) {
+      return /* true */1;
+    } else {
+      var slot = e[0];
+      if (slot !== undefined) {
+        return +(slot.tag === 248);
+      } else {
+        return /* false */0;
+      }
+    }
+  }
+  /* No side effect */
+
+  var match = caml_sys_get_argv(/* () */0);
+
+  var Break = create("Sys.Break");
+
+  var argv = match[1];
+
+  var executable_name = match[0];
+  /* No side effect */
+
   function caml_array_sub(x, offset, len) {
     var result = new Array(len);
     var j = 0;
@@ -925,33 +1008,6 @@ var index = (function (exports) {
 
   var stdin = undefined;
   /* node_std_output Not a pure module */
-
-  function caml_sys_random_seed() {
-    return /* array */[((Date.now() | 0) ^ 4294967295) * Math.random() | 0];
-  }
-
-  function caml_sys_get_argv() {
-    var match = typeof (process) === "undefined" ? undefined : (process);
-    if (match !== undefined) {
-      if (match.argv == null) {
-        return /* tuple */[
-                "",
-                /* array */[""]
-              ];
-      } else {
-        return /* tuple */[
-                match.argv[0],
-                match.argv
-              ];
-      }
-    } else {
-      return /* tuple */[
-              "",
-              /* array */[""]
-            ];
-    }
-  }
-  /* No side effect */
 
   function div(x, y) {
     if (y === 0) {
@@ -2328,39 +2384,6 @@ var index = (function (exports) {
           ];
     } else {
       return s.charCodeAt(i);
-    }
-  }
-  /* No side effect */
-
-  var id = [0];
-
-  function get_id() {
-    id[0] += 1;
-    return id[0];
-  }
-
-  function create(str) {
-    var v_001 = get_id(/* () */0);
-    var v = /* tuple */[
-      str,
-      v_001
-    ];
-    v.tag = 248;
-    return v;
-  }
-
-  function isCamlExceptionOrOpenVariant(e) {
-    if (e === undefined) {
-      return /* boolean */0;
-    } else if (e.tag === 248) {
-      return /* true */1;
-    } else {
-      var slot = e[0];
-      if (slot !== undefined) {
-        return +(slot.tag === 248);
-      } else {
-        return /* false */0;
-      }
     }
   }
   /* No side effect */
@@ -12912,6 +12935,553 @@ var index = (function (exports) {
   }
   /* No side effect */
 
+  var max_int$2 = 2147483647;
+  /* No side effect */
+
+  var max_int$3 = /* int64 */[
+    /* hi */2147483647,
+    /* lo */4294967295
+  ];
+  /* No side effect */
+
+  function cmn(q, a, b, x, s, t) {
+    var a$1 = ((a + q | 0) + x | 0) + t | 0;
+    return ((a$1 << s) | (a$1 >>> (32 - s | 0)) | 0) + b | 0;
+  }
+
+  function f(a, b, c, d, x, s, t) {
+    return cmn(b & c | (b ^ -1) & d, a, b, x, s, t);
+  }
+
+  function g(a, b, c, d, x, s, t) {
+    return cmn(b & d | c & (d ^ -1), a, b, x, s, t);
+  }
+
+  function h(a, b, c, d, x, s, t) {
+    return cmn(b ^ c ^ d, a, b, x, s, t);
+  }
+
+  function i(a, b, c, d, x, s, t) {
+    return cmn(c ^ (b | d ^ -1), a, b, x, s, t);
+  }
+
+  function cycle(x, k) {
+    var a = x[0];
+    var b = x[1];
+    var c = x[2];
+    var d = x[3];
+    a = f(a, b, c, d, k[0], 7, -680876936);
+    d = f(d, a, b, c, k[1], 12, -389564586);
+    c = f(c, d, a, b, k[2], 17, 606105819);
+    b = f(b, c, d, a, k[3], 22, -1044525330);
+    a = f(a, b, c, d, k[4], 7, -176418897);
+    d = f(d, a, b, c, k[5], 12, 1200080426);
+    c = f(c, d, a, b, k[6], 17, -1473231341);
+    b = f(b, c, d, a, k[7], 22, -45705983);
+    a = f(a, b, c, d, k[8], 7, 1770035416);
+    d = f(d, a, b, c, k[9], 12, -1958414417);
+    c = f(c, d, a, b, k[10], 17, -42063);
+    b = f(b, c, d, a, k[11], 22, -1990404162);
+    a = f(a, b, c, d, k[12], 7, 1804603682);
+    d = f(d, a, b, c, k[13], 12, -40341101);
+    c = f(c, d, a, b, k[14], 17, -1502002290);
+    b = f(b, c, d, a, k[15], 22, 1236535329);
+    a = g(a, b, c, d, k[1], 5, -165796510);
+    d = g(d, a, b, c, k[6], 9, -1069501632);
+    c = g(c, d, a, b, k[11], 14, 643717713);
+    b = g(b, c, d, a, k[0], 20, -373897302);
+    a = g(a, b, c, d, k[5], 5, -701558691);
+    d = g(d, a, b, c, k[10], 9, 38016083);
+    c = g(c, d, a, b, k[15], 14, -660478335);
+    b = g(b, c, d, a, k[4], 20, -405537848);
+    a = g(a, b, c, d, k[9], 5, 568446438);
+    d = g(d, a, b, c, k[14], 9, -1019803690);
+    c = g(c, d, a, b, k[3], 14, -187363961);
+    b = g(b, c, d, a, k[8], 20, 1163531501);
+    a = g(a, b, c, d, k[13], 5, -1444681467);
+    d = g(d, a, b, c, k[2], 9, -51403784);
+    c = g(c, d, a, b, k[7], 14, 1735328473);
+    b = g(b, c, d, a, k[12], 20, -1926607734);
+    a = h(a, b, c, d, k[5], 4, -378558);
+    d = h(d, a, b, c, k[8], 11, -2022574463);
+    c = h(c, d, a, b, k[11], 16, 1839030562);
+    b = h(b, c, d, a, k[14], 23, -35309556);
+    a = h(a, b, c, d, k[1], 4, -1530992060);
+    d = h(d, a, b, c, k[4], 11, 1272893353);
+    c = h(c, d, a, b, k[7], 16, -155497632);
+    b = h(b, c, d, a, k[10], 23, -1094730640);
+    a = h(a, b, c, d, k[13], 4, 681279174);
+    d = h(d, a, b, c, k[0], 11, -358537222);
+    c = h(c, d, a, b, k[3], 16, -722521979);
+    b = h(b, c, d, a, k[6], 23, 76029189);
+    a = h(a, b, c, d, k[9], 4, -640364487);
+    d = h(d, a, b, c, k[12], 11, -421815835);
+    c = h(c, d, a, b, k[15], 16, 530742520);
+    b = h(b, c, d, a, k[2], 23, -995338651);
+    a = i(a, b, c, d, k[0], 6, -198630844);
+    d = i(d, a, b, c, k[7], 10, 1126891415);
+    c = i(c, d, a, b, k[14], 15, -1416354905);
+    b = i(b, c, d, a, k[5], 21, -57434055);
+    a = i(a, b, c, d, k[12], 6, 1700485571);
+    d = i(d, a, b, c, k[3], 10, -1894986606);
+    c = i(c, d, a, b, k[10], 15, -1051523);
+    b = i(b, c, d, a, k[1], 21, -2054922799);
+    a = i(a, b, c, d, k[8], 6, 1873313359);
+    d = i(d, a, b, c, k[15], 10, -30611744);
+    c = i(c, d, a, b, k[6], 15, -1560198380);
+    b = i(b, c, d, a, k[13], 21, 1309151649);
+    a = i(a, b, c, d, k[4], 6, -145523070);
+    d = i(d, a, b, c, k[11], 10, -1120210379);
+    c = i(c, d, a, b, k[2], 15, 718787259);
+    b = i(b, c, d, a, k[9], 21, -343485551);
+    x[0] = a + x[0] | 0;
+    x[1] = b + x[1] | 0;
+    x[2] = c + x[2] | 0;
+    x[3] = d + x[3] | 0;
+    return /* () */0;
+  }
+
+  var state = /* array */[
+    1732584193,
+    -271733879,
+    -1732584194,
+    271733878
+  ];
+
+  var md5blk = /* array */[
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ];
+
+  function caml_md5_string(s, start, len) {
+    var s$1 = s.slice(start, len);
+    var n = s$1.length;
+    state[0] = 1732584193;
+    state[1] = -271733879;
+    state[2] = -1732584194;
+    state[3] = 271733878;
+    for(var i = 0; i <= 15; ++i){
+      md5blk[i] = 0;
+    }
+    var i_end = n / 64 | 0;
+    for(var i$1 = 1; i$1 <= i_end; ++i$1){
+      for(var j = 0; j <= 15; ++j){
+        var k = ((i$1 << 6) - 64 | 0) + (j << 2) | 0;
+        md5blk[j] = ((s$1.charCodeAt(k) + (s$1.charCodeAt(k + 1 | 0) << 8) | 0) + (s$1.charCodeAt(k + 2 | 0) << 16) | 0) + (s$1.charCodeAt(k + 3 | 0) << 24) | 0;
+      }
+      cycle(state, md5blk);
+    }
+    var s_tail = s$1.slice((i_end << 6));
+    for(var kk = 0; kk <= 15; ++kk){
+      md5blk[kk] = 0;
+    }
+    var i_end$1 = s_tail.length - 1 | 0;
+    for(var i$2 = 0; i$2 <= i_end$1; ++i$2){
+      md5blk[i$2 / 4 | 0] = md5blk[i$2 / 4 | 0] | (s_tail.charCodeAt(i$2) << (i$2 % 4 << 3));
+    }
+    var i$3 = i_end$1 + 1 | 0;
+    md5blk[i$3 / 4 | 0] = md5blk[i$3 / 4 | 0] | (128 << (i$3 % 4 << 3));
+    if (i$3 > 55) {
+      cycle(state, md5blk);
+      for(var i$4 = 0; i$4 <= 15; ++i$4){
+        md5blk[i$4] = 0;
+      }
+    }
+    md5blk[14] = (n << 3);
+    cycle(state, md5blk);
+    return String.fromCharCode(state[0] & 255, (state[0] >> 8) & 255, (state[0] >> 16) & 255, (state[0] >> 24) & 255, state[1] & 255, (state[1] >> 8) & 255, (state[1] >> 16) & 255, (state[1] >> 24) & 255, state[2] & 255, (state[2] >> 8) & 255, (state[2] >> 16) & 255, (state[2] >> 24) & 255, state[3] & 255, (state[3] >> 8) & 255, (state[3] >> 16) & 255, (state[3] >> 24) & 255);
+  }
+  /* No side effect */
+
+  function string$1(str) {
+    return caml_md5_string(str, 0, str.length);
+  }
+  /* No side effect */
+
+  var size = 54;
+  /* No side effect */
+
+  function assign(st1, st2) {
+    blit$3(st2[/* st */0], 0, st1[/* st */0], 0, 55);
+    st1[/* idx */1] = st2[/* idx */1];
+    return /* () */0;
+  }
+
+  function full_init(s, seed) {
+    var combine = function (accu, x) {
+      return string$1(accu + String(x));
+    };
+    var extract = function (d) {
+      return ((get(d, 0) + (get(d, 1) << 8) | 0) + (get(d, 2) << 16) | 0) + (get(d, 3) << 24) | 0;
+    };
+    var seed$1 = seed.length === 0 ? /* int array */[0] : seed;
+    var l = seed$1.length;
+    for(var i = 0; i <= 54; ++i){
+      caml_array_set(s[/* st */0], i, i);
+    }
+    var accu = "x";
+    for(var i$1 = 0 ,i_finish = 54 + (
+        55 > l ? 55 : l
+      ) | 0; i$1 <= i_finish; ++i$1){
+      var j = i$1 % 55;
+      var k = i$1 % l;
+      accu = combine(accu, caml_array_get(seed$1, k));
+      caml_array_set(s[/* st */0], j, (caml_array_get(s[/* st */0], j) ^ extract(accu)) & 1073741823);
+    }
+    s[/* idx */1] = 0;
+    return /* () */0;
+  }
+
+  function make$2(seed) {
+    var result = /* record */[
+      /* st */caml_make_vect(55, 0),
+      /* idx */0
+    ];
+    full_init(result, seed);
+    return result;
+  }
+
+  function make_self_init() {
+    return make$2(caml_sys_random_seed(/* () */0));
+  }
+
+  function copy$3(s) {
+    var result = /* record */[
+      /* st */caml_make_vect(55, 0),
+      /* idx */0
+    ];
+    assign(result, s);
+    return result;
+  }
+
+  function bits(s) {
+    s[/* idx */1] = (s[/* idx */1] + 1 | 0) % 55;
+    var curval = caml_array_get(s[/* st */0], s[/* idx */1]);
+    var newval = caml_array_get(s[/* st */0], (s[/* idx */1] + 24 | 0) % 55) + (curval ^ (curval >>> 25) & 31) | 0;
+    var newval30 = newval & 1073741823;
+    caml_array_set(s[/* st */0], s[/* idx */1], newval30);
+    return newval30;
+  }
+
+  function $$int(s, bound) {
+    if (bound > 1073741823 || bound <= 0) {
+      throw [
+            invalid_argument,
+            "Random.int"
+          ];
+    } else {
+      var s$1 = s;
+      var n = bound;
+      while(true) {
+        var r = bits(s$1);
+        var v = r % n;
+        if ((r - v | 0) > ((1073741823 - n | 0) + 1 | 0)) {
+          continue ;
+        } else {
+          return v;
+        }
+      }  }
+  }
+
+  function int32(s, bound) {
+    if (bound <= 0) {
+      throw [
+            invalid_argument,
+            "Random.int32"
+          ];
+    } else {
+      var s$1 = s;
+      var n = bound;
+      while(true) {
+        var b1 = bits(s$1);
+        var b2 = ((bits(s$1) & 1) << 30);
+        var r = b1 | b2;
+        var v = r % n;
+        if ((r - v | 0) > ((max_int$2 - n | 0) + 1 | 0)) {
+          continue ;
+        } else {
+          return v;
+        }
+      }  }
+  }
+
+  function int64(s, bound) {
+    if (le(bound, /* int64 */[
+            /* hi */0,
+            /* lo */0
+          ])) {
+      throw [
+            invalid_argument,
+            "Random.int64"
+          ];
+    } else {
+      var s$1 = s;
+      var n = bound;
+      while(true) {
+        var b1 = of_int32(bits(s$1));
+        var b2 = lsl_(of_int32(bits(s$1)), 30);
+        var b3 = lsl_(of_int32(bits(s$1) & 7), 60);
+        var r = or_(b1, /* int64 */[
+              /* hi */b2[0] | b3[0],
+              /* lo */((b2[1] | b3[1]) >>> 0)
+            ]);
+        var v = mod_$1(r, n);
+        if (gt(sub(r, v), add(sub(max_int$3, n), /* int64 */[
+                    /* hi */0,
+                    /* lo */1
+                  ]))) {
+          continue ;
+        } else {
+          return v;
+        }
+      }  }
+  }
+
+  var nativeint = size === 32 ? int32 : (function (s, bound) {
+        return int64(s, of_int32(bound))[1] | 0;
+      });
+
+  function rawfloat(s) {
+    var r1 = bits(s);
+    var r2 = bits(s);
+    return (r1 / 1073741824.0 + r2) / 1073741824.0;
+  }
+
+  function $$float(s, bound) {
+    return rawfloat(s) * bound;
+  }
+
+  function bool$1(s) {
+    return +((bits(s) & 1) === 0);
+  }
+
+  var $$default = /* record */[
+    /* st : array */[
+      987910699,
+      495797812,
+      364182224,
+      414272206,
+      318284740,
+      990407751,
+      383018966,
+      270373319,
+      840823159,
+      24560019,
+      536292337,
+      512266505,
+      189156120,
+      730249596,
+      143776328,
+      51606627,
+      140166561,
+      366354223,
+      1003410265,
+      700563762,
+      981890670,
+      913149062,
+      526082594,
+      1021425055,
+      784300257,
+      667753350,
+      630144451,
+      949649812,
+      48546892,
+      415514493,
+      258888527,
+      511570777,
+      89983870,
+      283659902,
+      308386020,
+      242688715,
+      482270760,
+      865188196,
+      1027664170,
+      207196989,
+      193777847,
+      619708188,
+      671350186,
+      149669678,
+      257044018,
+      87658204,
+      558145612,
+      183450813,
+      28133145,
+      901332182,
+      710253903,
+      510646120,
+      652377910,
+      409934019,
+      801085050
+    ],
+    /* idx */0
+  ];
+
+  function $$int$1(bound) {
+    return $$int($$default, bound);
+  }
+
+  function $$float$1(scale) {
+    return rawfloat($$default) * scale;
+  }
+
+  function full_init$1(seed) {
+    return full_init($$default, seed);
+  }
+
+  function init$3(seed) {
+    return full_init($$default, /* int array */[seed]);
+  }
+
+  function self_init() {
+    return full_init$1(caml_sys_random_seed(/* () */0));
+  }
+
+  function get_state() {
+    return copy$3($$default);
+  }
+
+  function set_state(s) {
+    return assign($$default, s);
+  }
+
+  var State = [
+    make$2,
+    make_self_init,
+    copy$3,
+    bits,
+    $$int,
+    int32,
+    nativeint,
+    int64,
+    $$float,
+    bool$1
+  ];
+  /* No side effect */
+
+  /* No side effect */
+
+  var forward_tag = 250;
+  /* No side effect */
+
+  var Undefined = create("CamlinternalLazy.Undefined");
+
+  function raise_undefined() {
+    throw Undefined;
+  }
+
+  function force_lazy_block(blk) {
+    var closure = blk[0];
+    blk[0] = raise_undefined;
+    try {
+      var result = _1(closure, /* () */0);
+      blk[0] = result;
+      blk.tag = forward_tag;
+      return result;
+    }
+    catch (e){
+      blk[0] = (function () {
+          throw e;
+        });
+      throw e;
+    }
+  }
+  /* No side effect */
+
+  function generic_dirname(is_dir_sep, current_dir_name, name) {
+    if (name === "") {
+      return current_dir_name;
+    } else {
+      var _n = name.length - 1 | 0;
+      while(true) {
+        var n = _n;
+        if (n < 0) {
+          return sub$2(name, 0, 1);
+        } else if (_2(is_dir_sep, name, n)) {
+          _n = n - 1 | 0;
+          continue ;
+        } else {
+          var _n$1 = n;
+          while(true) {
+            var n$1 = _n$1;
+            if (n$1 < 0) {
+              return current_dir_name;
+            } else if (_2(is_dir_sep, name, n$1)) {
+              var _n$2 = n$1;
+              while(true) {
+                var n$2 = _n$2;
+                if (n$2 < 0) {
+                  return sub$2(name, 0, 1);
+                } else if (_2(is_dir_sep, name, n$2)) {
+                  _n$2 = n$2 - 1 | 0;
+                  continue ;
+                } else {
+                  return sub$2(name, 0, n$2 + 1 | 0);
+                }
+              }          } else {
+              _n$1 = n$1 - 1 | 0;
+              continue ;
+            }
+          }      }
+      }  }
+  }
+
+  var current_dir_name = ".";
+
+  function is_dir_sep(s, i) {
+    return +(get(s, i) === /* "/" */47);
+  }
+
+  var temp_dir_name;
+
+  try {
+    temp_dir_name = caml_sys_getenv("TMPDIR");
+  }
+  catch (exn){
+    if (exn === not_found) {
+      temp_dir_name = "/tmp";
+    } else {
+      throw exn;
+    }
+  }
+
+  function dirname(param) {
+    return generic_dirname(is_dir_sep, current_dir_name, param);
+  }
+
+  var temp_dir_name$1;
+
+  try {
+    temp_dir_name$1 = caml_sys_getenv("TEMP");
+  }
+  catch (exn$1){
+    if (exn$1 === not_found) {
+      temp_dir_name$1 = ".";
+    } else {
+      throw exn$1;
+    }
+  }
+
+  var prng = __(246, [(function () {
+          return State[/* make_self_init */1](/* () */0);
+        })]);
+
+  var dirname$1 = dirname;
+  /* match Not a pure module */
+
   // Generated by BUCKLESCRIPT VERSION 2.2.4, PLEASE EDIT WITH CARE
 
 
@@ -14315,7 +14885,7 @@ var index = (function (exports) {
     return window.devicePixelRatio;
   }
 
-  function init$3(screen, _) {
+  function init$4(screen, _) {
     var node = screen ? null_undefined_to_opt(document.getElementById(screen[0])) : /* None */0;
     var canvas;
     if (node) {
@@ -14354,7 +14924,7 @@ var index = (function (exports) {
     /* getPixelWidth */getPixelWidth,
     /* getPixelHeight */getPixelHeight,
     /* getPixelScale */getPixelScale,
-    /* init */init$3,
+    /* init */init$4,
     /* setWindowSize */setWindowSize,
     /* getContext */getContext
   ];
@@ -15783,9 +16353,9 @@ var index = (function (exports) {
 
   // Generated by BUCKLESCRIPT VERSION 2.2.4, PLEASE EDIT WITH CARE
 
-  var compare$4 = caml_compare;
+  var compare$8 = caml_compare;
 
-  var KeySet = Make$1(/* module */[/* compare */compare$4]);
+  var KeySet = Make$1(/* module */[/* compare */compare$8]);
 
   function peekch(param) {
     var i = param[1];
@@ -16632,7 +17202,7 @@ var index = (function (exports) {
     return _2(KeySet[/* mem */2], key, env[/* keyboard */11][/* pressed */1]);
   }
 
-  function size(width, height, env) {
+  function size$1(width, height, env) {
     _3(Gl[/* Window */2][/* setWindowSize */6], env[/* window */1], width, height);
     return resetSize(env, width, height);
   }
@@ -16762,7 +17332,7 @@ var index = (function (exports) {
 
   var IntMap = Make(/* module */[/* compare */intCompare]);
 
-  function compare$5(param, param$1) {
+  function compare$9(param, param$1) {
     var first = intCompare(param[0], param$1[0]);
     if (first !== 0) {
       return first;
@@ -16771,7 +17341,7 @@ var index = (function (exports) {
     }
   }
 
-  var IntPairMap = Make(/* module */[/* compare */compare$5]);
+  var IntPairMap = Make(/* module */[/* compare */compare$9]);
 
   var defaultFont = [/* None */0];
 
@@ -17393,443 +17963,6 @@ var index = (function (exports) {
   }
   /* Reasongl_web Not a pure module */
 
-  var max_int$2 = 2147483647;
-  /* No side effect */
-
-  var max_int$3 = /* int64 */[
-    /* hi */2147483647,
-    /* lo */4294967295
-  ];
-  /* No side effect */
-
-  function cmn(q, a, b, x, s, t) {
-    var a$1 = ((a + q | 0) + x | 0) + t | 0;
-    return ((a$1 << s) | (a$1 >>> (32 - s | 0)) | 0) + b | 0;
-  }
-
-  function f(a, b, c, d, x, s, t) {
-    return cmn(b & c | (b ^ -1) & d, a, b, x, s, t);
-  }
-
-  function g(a, b, c, d, x, s, t) {
-    return cmn(b & d | c & (d ^ -1), a, b, x, s, t);
-  }
-
-  function h(a, b, c, d, x, s, t) {
-    return cmn(b ^ c ^ d, a, b, x, s, t);
-  }
-
-  function i(a, b, c, d, x, s, t) {
-    return cmn(c ^ (b | d ^ -1), a, b, x, s, t);
-  }
-
-  function cycle(x, k) {
-    var a = x[0];
-    var b = x[1];
-    var c = x[2];
-    var d = x[3];
-    a = f(a, b, c, d, k[0], 7, -680876936);
-    d = f(d, a, b, c, k[1], 12, -389564586);
-    c = f(c, d, a, b, k[2], 17, 606105819);
-    b = f(b, c, d, a, k[3], 22, -1044525330);
-    a = f(a, b, c, d, k[4], 7, -176418897);
-    d = f(d, a, b, c, k[5], 12, 1200080426);
-    c = f(c, d, a, b, k[6], 17, -1473231341);
-    b = f(b, c, d, a, k[7], 22, -45705983);
-    a = f(a, b, c, d, k[8], 7, 1770035416);
-    d = f(d, a, b, c, k[9], 12, -1958414417);
-    c = f(c, d, a, b, k[10], 17, -42063);
-    b = f(b, c, d, a, k[11], 22, -1990404162);
-    a = f(a, b, c, d, k[12], 7, 1804603682);
-    d = f(d, a, b, c, k[13], 12, -40341101);
-    c = f(c, d, a, b, k[14], 17, -1502002290);
-    b = f(b, c, d, a, k[15], 22, 1236535329);
-    a = g(a, b, c, d, k[1], 5, -165796510);
-    d = g(d, a, b, c, k[6], 9, -1069501632);
-    c = g(c, d, a, b, k[11], 14, 643717713);
-    b = g(b, c, d, a, k[0], 20, -373897302);
-    a = g(a, b, c, d, k[5], 5, -701558691);
-    d = g(d, a, b, c, k[10], 9, 38016083);
-    c = g(c, d, a, b, k[15], 14, -660478335);
-    b = g(b, c, d, a, k[4], 20, -405537848);
-    a = g(a, b, c, d, k[9], 5, 568446438);
-    d = g(d, a, b, c, k[14], 9, -1019803690);
-    c = g(c, d, a, b, k[3], 14, -187363961);
-    b = g(b, c, d, a, k[8], 20, 1163531501);
-    a = g(a, b, c, d, k[13], 5, -1444681467);
-    d = g(d, a, b, c, k[2], 9, -51403784);
-    c = g(c, d, a, b, k[7], 14, 1735328473);
-    b = g(b, c, d, a, k[12], 20, -1926607734);
-    a = h(a, b, c, d, k[5], 4, -378558);
-    d = h(d, a, b, c, k[8], 11, -2022574463);
-    c = h(c, d, a, b, k[11], 16, 1839030562);
-    b = h(b, c, d, a, k[14], 23, -35309556);
-    a = h(a, b, c, d, k[1], 4, -1530992060);
-    d = h(d, a, b, c, k[4], 11, 1272893353);
-    c = h(c, d, a, b, k[7], 16, -155497632);
-    b = h(b, c, d, a, k[10], 23, -1094730640);
-    a = h(a, b, c, d, k[13], 4, 681279174);
-    d = h(d, a, b, c, k[0], 11, -358537222);
-    c = h(c, d, a, b, k[3], 16, -722521979);
-    b = h(b, c, d, a, k[6], 23, 76029189);
-    a = h(a, b, c, d, k[9], 4, -640364487);
-    d = h(d, a, b, c, k[12], 11, -421815835);
-    c = h(c, d, a, b, k[15], 16, 530742520);
-    b = h(b, c, d, a, k[2], 23, -995338651);
-    a = i(a, b, c, d, k[0], 6, -198630844);
-    d = i(d, a, b, c, k[7], 10, 1126891415);
-    c = i(c, d, a, b, k[14], 15, -1416354905);
-    b = i(b, c, d, a, k[5], 21, -57434055);
-    a = i(a, b, c, d, k[12], 6, 1700485571);
-    d = i(d, a, b, c, k[3], 10, -1894986606);
-    c = i(c, d, a, b, k[10], 15, -1051523);
-    b = i(b, c, d, a, k[1], 21, -2054922799);
-    a = i(a, b, c, d, k[8], 6, 1873313359);
-    d = i(d, a, b, c, k[15], 10, -30611744);
-    c = i(c, d, a, b, k[6], 15, -1560198380);
-    b = i(b, c, d, a, k[13], 21, 1309151649);
-    a = i(a, b, c, d, k[4], 6, -145523070);
-    d = i(d, a, b, c, k[11], 10, -1120210379);
-    c = i(c, d, a, b, k[2], 15, 718787259);
-    b = i(b, c, d, a, k[9], 21, -343485551);
-    x[0] = a + x[0] | 0;
-    x[1] = b + x[1] | 0;
-    x[2] = c + x[2] | 0;
-    x[3] = d + x[3] | 0;
-    return /* () */0;
-  }
-
-  var state = /* array */[
-    1732584193,
-    -271733879,
-    -1732584194,
-    271733878
-  ];
-
-  var md5blk = /* array */[
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-  ];
-
-  function caml_md5_string(s, start, len) {
-    var s$1 = s.slice(start, len);
-    var n = s$1.length;
-    state[0] = 1732584193;
-    state[1] = -271733879;
-    state[2] = -1732584194;
-    state[3] = 271733878;
-    for(var i = 0; i <= 15; ++i){
-      md5blk[i] = 0;
-    }
-    var i_end = n / 64 | 0;
-    for(var i$1 = 1; i$1 <= i_end; ++i$1){
-      for(var j = 0; j <= 15; ++j){
-        var k = ((i$1 << 6) - 64 | 0) + (j << 2) | 0;
-        md5blk[j] = ((s$1.charCodeAt(k) + (s$1.charCodeAt(k + 1 | 0) << 8) | 0) + (s$1.charCodeAt(k + 2 | 0) << 16) | 0) + (s$1.charCodeAt(k + 3 | 0) << 24) | 0;
-      }
-      cycle(state, md5blk);
-    }
-    var s_tail = s$1.slice((i_end << 6));
-    for(var kk = 0; kk <= 15; ++kk){
-      md5blk[kk] = 0;
-    }
-    var i_end$1 = s_tail.length - 1 | 0;
-    for(var i$2 = 0; i$2 <= i_end$1; ++i$2){
-      md5blk[i$2 / 4 | 0] = md5blk[i$2 / 4 | 0] | (s_tail.charCodeAt(i$2) << (i$2 % 4 << 3));
-    }
-    var i$3 = i_end$1 + 1 | 0;
-    md5blk[i$3 / 4 | 0] = md5blk[i$3 / 4 | 0] | (128 << (i$3 % 4 << 3));
-    if (i$3 > 55) {
-      cycle(state, md5blk);
-      for(var i$4 = 0; i$4 <= 15; ++i$4){
-        md5blk[i$4] = 0;
-      }
-    }
-    md5blk[14] = (n << 3);
-    cycle(state, md5blk);
-    return String.fromCharCode(state[0] & 255, (state[0] >> 8) & 255, (state[0] >> 16) & 255, (state[0] >> 24) & 255, state[1] & 255, (state[1] >> 8) & 255, (state[1] >> 16) & 255, (state[1] >> 24) & 255, state[2] & 255, (state[2] >> 8) & 255, (state[2] >> 16) & 255, (state[2] >> 24) & 255, state[3] & 255, (state[3] >> 8) & 255, (state[3] >> 16) & 255, (state[3] >> 24) & 255);
-  }
-  /* No side effect */
-
-  function string$1(str) {
-    return caml_md5_string(str, 0, str.length);
-  }
-  /* No side effect */
-
-  var size$2 = 54;
-  /* No side effect */
-
-  function assign(st1, st2) {
-    blit$3(st2[/* st */0], 0, st1[/* st */0], 0, 55);
-    st1[/* idx */1] = st2[/* idx */1];
-    return /* () */0;
-  }
-
-  function full_init(s, seed) {
-    var combine = function (accu, x) {
-      return string$1(accu + String(x));
-    };
-    var extract = function (d) {
-      return ((get(d, 0) + (get(d, 1) << 8) | 0) + (get(d, 2) << 16) | 0) + (get(d, 3) << 24) | 0;
-    };
-    var seed$1 = seed.length === 0 ? /* int array */[0] : seed;
-    var l = seed$1.length;
-    for(var i = 0; i <= 54; ++i){
-      caml_array_set(s[/* st */0], i, i);
-    }
-    var accu = "x";
-    for(var i$1 = 0 ,i_finish = 54 + (
-        55 > l ? 55 : l
-      ) | 0; i$1 <= i_finish; ++i$1){
-      var j = i$1 % 55;
-      var k = i$1 % l;
-      accu = combine(accu, caml_array_get(seed$1, k));
-      caml_array_set(s[/* st */0], j, (caml_array_get(s[/* st */0], j) ^ extract(accu)) & 1073741823);
-    }
-    s[/* idx */1] = 0;
-    return /* () */0;
-  }
-
-  function make$2(seed) {
-    var result = /* record */[
-      /* st */caml_make_vect(55, 0),
-      /* idx */0
-    ];
-    full_init(result, seed);
-    return result;
-  }
-
-  function make_self_init() {
-    return make$2(caml_sys_random_seed(/* () */0));
-  }
-
-  function copy$12(s) {
-    var result = /* record */[
-      /* st */caml_make_vect(55, 0),
-      /* idx */0
-    ];
-    assign(result, s);
-    return result;
-  }
-
-  function bits(s) {
-    s[/* idx */1] = (s[/* idx */1] + 1 | 0) % 55;
-    var curval = caml_array_get(s[/* st */0], s[/* idx */1]);
-    var newval = caml_array_get(s[/* st */0], (s[/* idx */1] + 24 | 0) % 55) + (curval ^ (curval >>> 25) & 31) | 0;
-    var newval30 = newval & 1073741823;
-    caml_array_set(s[/* st */0], s[/* idx */1], newval30);
-    return newval30;
-  }
-
-  function $$int(s, bound) {
-    if (bound > 1073741823 || bound <= 0) {
-      throw [
-            invalid_argument,
-            "Random.int"
-          ];
-    } else {
-      var s$1 = s;
-      var n = bound;
-      while(true) {
-        var r = bits(s$1);
-        var v = r % n;
-        if ((r - v | 0) > ((1073741823 - n | 0) + 1 | 0)) {
-          continue ;
-        } else {
-          return v;
-        }
-      }  }
-  }
-
-  function int32(s, bound) {
-    if (bound <= 0) {
-      throw [
-            invalid_argument,
-            "Random.int32"
-          ];
-    } else {
-      var s$1 = s;
-      var n = bound;
-      while(true) {
-        var b1 = bits(s$1);
-        var b2 = ((bits(s$1) & 1) << 30);
-        var r = b1 | b2;
-        var v = r % n;
-        if ((r - v | 0) > ((max_int$2 - n | 0) + 1 | 0)) {
-          continue ;
-        } else {
-          return v;
-        }
-      }  }
-  }
-
-  function int64(s, bound) {
-    if (le(bound, /* int64 */[
-            /* hi */0,
-            /* lo */0
-          ])) {
-      throw [
-            invalid_argument,
-            "Random.int64"
-          ];
-    } else {
-      var s$1 = s;
-      var n = bound;
-      while(true) {
-        var b1 = of_int32(bits(s$1));
-        var b2 = lsl_(of_int32(bits(s$1)), 30);
-        var b3 = lsl_(of_int32(bits(s$1) & 7), 60);
-        var r = or_(b1, /* int64 */[
-              /* hi */b2[0] | b3[0],
-              /* lo */((b2[1] | b3[1]) >>> 0)
-            ]);
-        var v = mod_$1(r, n);
-        if (gt(sub(r, v), add(sub(max_int$3, n), /* int64 */[
-                    /* hi */0,
-                    /* lo */1
-                  ]))) {
-          continue ;
-        } else {
-          return v;
-        }
-      }  }
-  }
-
-  var nativeint = size$2 === 32 ? int32 : (function (s, bound) {
-        return int64(s, of_int32(bound))[1] | 0;
-      });
-
-  function rawfloat(s) {
-    var r1 = bits(s);
-    var r2 = bits(s);
-    return (r1 / 1073741824.0 + r2) / 1073741824.0;
-  }
-
-  function $$float(s, bound) {
-    return rawfloat(s) * bound;
-  }
-
-  function bool$1(s) {
-    return +((bits(s) & 1) === 0);
-  }
-
-  var $$default = /* record */[
-    /* st : array */[
-      987910699,
-      495797812,
-      364182224,
-      414272206,
-      318284740,
-      990407751,
-      383018966,
-      270373319,
-      840823159,
-      24560019,
-      536292337,
-      512266505,
-      189156120,
-      730249596,
-      143776328,
-      51606627,
-      140166561,
-      366354223,
-      1003410265,
-      700563762,
-      981890670,
-      913149062,
-      526082594,
-      1021425055,
-      784300257,
-      667753350,
-      630144451,
-      949649812,
-      48546892,
-      415514493,
-      258888527,
-      511570777,
-      89983870,
-      283659902,
-      308386020,
-      242688715,
-      482270760,
-      865188196,
-      1027664170,
-      207196989,
-      193777847,
-      619708188,
-      671350186,
-      149669678,
-      257044018,
-      87658204,
-      558145612,
-      183450813,
-      28133145,
-      901332182,
-      710253903,
-      510646120,
-      652377910,
-      409934019,
-      801085050
-    ],
-    /* idx */0
-  ];
-
-  function $$int$1(bound) {
-    return $$int($$default, bound);
-  }
-
-  function $$float$1(scale) {
-    return rawfloat($$default) * scale;
-  }
-
-  function full_init$1(seed) {
-    return full_init($$default, seed);
-  }
-
-  function init$4(seed) {
-    return full_init($$default, /* int array */[seed]);
-  }
-
-  function self_init() {
-    return full_init$1(caml_sys_random_seed(/* () */0));
-  }
-
-  function get_state() {
-    return copy$12($$default);
-  }
-
-  function set_state(s) {
-    return assign($$default, s);
-  }
-
-  var State = [
-    make$2,
-    make_self_init,
-    copy$12,
-    bits,
-    $$int,
-    int32,
-    nativeint,
-    int64,
-    $$float,
-    bool$1
-  ];
-  /* No side effect */
-
   // Generated by BUCKLESCRIPT VERSION 2.2.4, PLEASE EDIT WITH CARE
 
   var lookup_table = [/* int array */[]];
@@ -17977,7 +18110,7 @@ var index = (function (exports) {
 
   function noiseSeed(seed) {
     var state = get_state(/* () */0);
-    init$4(seed);
+    init$3(seed);
     var array = caml_make_vect(256, 0);
     var array$1 = mapi$4((function (i, _) {
             return i;
@@ -18231,19 +18364,22 @@ var index = (function (exports) {
     var loadSoundHelper = function (soundMap, param) {
       var soundName = param[0];
       return _3(StringMap[/* add */3], soundName, /* tuple */[
-                  loadSound$1(_1(sprintf(/* Format */[
-                                /* String_literal */__(11, [
-                                    "sounds/",
-                                    /* String */__(2, [
-                                        /* No_padding */0,
-                                        /* String_literal */__(11, [
-                                            ".wav",
-                                            /* End_of_format */0
+                  loadSound$1(_2(sprintf(/* Format */[
+                                /* String */__(2, [
+                                    /* No_padding */0,
+                                    /* String_literal */__(11, [
+                                        "/sounds/",
+                                        /* String */__(2, [
+                                            /* No_padding */0,
+                                            /* String_literal */__(11, [
+                                                ".wav",
+                                                /* End_of_format */0
+                                              ])
                                           ])
                                       ])
                                   ]),
-                                "sounds/%s.wav"
-                              ]), soundName), env),
+                                "%s/sounds/%s.wav"
+                              ]), _1(dirname$1, caml_array_get(argv, 0)), soundName), env),
                   param[1]
                 ], soundMap);
     };
@@ -18872,7 +19008,7 @@ var index = (function (exports) {
                                         /* health */0,
                                         /* willDie */chickenState[/* willDie */2]
                                       ]]) : (
-                                    dayIndex$2 === 7 ? /* Chicken */__(4, [/* record */[
+                                    dayIndex$2 >= 5 ? /* Chicken */__(4, [/* record */[
                                             /* momentum */chickenState[/* momentum */0],
                                             /* health */-1,
                                             /* willDie */chickenState[/* willDie */2]
@@ -19178,7 +19314,7 @@ var index = (function (exports) {
           /* pageNumber */pageNumber - 1 | 0
         ];
         return newrecord$5;
-      } else if ((keyPressed(/* Right */51, env) || didClickOnForward || keyPressed(/* Space */4, env) || keyPressed(/* X */48, env)) && pageNumber === caml_array_get(entries, dayIndex)[/* pages */1].length) {
+      } else if ((keyPressed(/* Right */51, env) || didClickOnForward) && pageNumber === caml_array_get(entries, dayIndex)[/* pages */1].length) {
         var newrecord$6 = state.slice();
         var init$5 = state[/* journal */9];
         newrecord$6[/* journal */9] = /* record */[
@@ -22718,15 +22854,6 @@ var index = (function (exports) {
   }
   /* Common Not a pure module */
 
-  var match = caml_sys_get_argv(/* () */0);
-
-  var Break = create("Sys.Break");
-
-  var argv = match[1];
-
-  var executable_name = match[0];
-  /* No side effect */
-
   function push(x, q) {
     if (q[/* length */0] === 0) {
       var cell = [];
@@ -22869,38 +22996,9 @@ var index = (function (exports) {
   }
   /* No side effect */
 
-  /* No side effect */
-
-  var forward_tag = 250;
-  /* No side effect */
-
-  var Undefined = create("CamlinternalLazy.Undefined");
-
-  function raise_undefined() {
-    throw Undefined;
-  }
-
-  function force_lazy_block(blk) {
-    var closure = blk[0];
-    blk[0] = raise_undefined;
-    try {
-      var result = _1(closure, /* () */0);
-      blk[0] = result;
-      blk.tag = forward_tag;
-      return result;
-    }
-    catch (e){
-      blk[0] = (function () {
-          throw e;
-        });
-      throw e;
-    }
-  }
-  /* No side effect */
-
   var randomized = [/* boolean */0];
 
-  var prng = __(246, [(function () {
+  var prng$1 = __(246, [(function () {
           return State[/* make_self_init */1](/* () */0);
         })]);
 
@@ -22920,9 +23018,9 @@ var index = (function (exports) {
     var s = power_2_above(16, initial_size);
     var seed;
     if (random) {
-      var tag = prng.tag | 0;
-      seed = State[/* bits */3](tag === 250 ? prng[0] : (
-              tag === 246 ? force_lazy_block(prng) : prng
+      var tag = prng$1.tag | 0;
+      seed = State[/* bits */3](tag === 250 ? prng$1[0] : (
+              tag === 246 ? force_lazy_block(prng$1) : prng$1
             ));
     } else {
       seed = 0;
@@ -23263,7 +23361,7 @@ var index = (function (exports) {
                   var width$$1 = _1(Gl[/* Window */2][/* getWidth */0], env[/* window */1]);
                   return resetSize(env, width$$1, height$$1);
                 } else {
-                  return size(width(env), height(env), env);
+                  return size$1(width(env), height(env), env);
                 }
               })], (function (f) {
               if (env[/* frame */15][/* count */0] === 2) {
@@ -23562,7 +23660,7 @@ var index = (function (exports) {
   }
 
   function setup(assets, env) {
-    size(600, 600, env);
+    size$1(600, 600, env);
     var grid = createGrid(mapString);
     return /* record */[
             /* grid */grid,
@@ -23572,7 +23670,7 @@ var index = (function (exports) {
               /* y */tileSizef * 10
             ],
             /* playerFacing : DownD */1,
-            /* spritesheet */loadImage$2("spritesheet/assets.png", /* Some */[/* boolean */1], env),
+            /* spritesheet */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/spritesheet/assets.png", /* Some */[/* boolean */1], env),
             /* assets */assets,
             /* sounds */loadSounds(env),
             /* currentItem : None */0,
@@ -23581,14 +23679,14 @@ var index = (function (exports) {
             /* dollarAnimation */-1,
             /* time */0,
             /* night : boolean */0,
-            /* mainFont */loadFont("whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
+            /* mainFont */loadFont(_1(dirname$1, caml_array_get(argv, 0)) + "/whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
             /* monsterWasLockedIn : boolean */0,
             /* mousePressed : boolean */0,
             /* mousePressedHack : boolean */0,
             /* day6PlayerWentInBarn : boolean */0,
             /* day6CameraAnimation */0,
-            /* shortDestroyedBarnAsset */loadImage$2("short_destroyed_barn.png", /* Some */[/* boolean */1], env),
-            /* sleepingMonsterAsset */loadImage$2("sleeping_monster.png", /* Some */[/* boolean */1], env),
+            /* shortDestroyedBarnAsset */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/short_destroyed_barn.png", /* Some */[/* boolean */1], env),
+            /* sleepingMonsterAsset */loadImage$2(_1(dirname$1, caml_array_get(argv, 0)) + "/sleeping_monster.png", /* Some */[/* boolean */1], env),
             /* hasPressedTheActionKeyOnce : boolean */0,
             /* playerDead : boolean */0
           ];
@@ -24157,7 +24255,7 @@ var index = (function (exports) {
                 }));
   }
 
-  loadAssetsAsync("spritesheet/sheet.json");
+  loadAssetsAsync(_1(dirname$1, caml_array_get(argv, 0)) + "/spritesheet/sheet.json");
   /*  Not a pure module */
 
   exports.mapString = mapString;
