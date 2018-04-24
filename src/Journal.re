@@ -79,7 +79,7 @@ let updateDay = (state, env) => {
                   when dayIndex === 3 =>
                 Chicken({...chickenState, health: 0})
               | (Chicken({willDie: true} as chickenState), _)
-                  when dayIndex === 7 =>
+                  when dayIndex >= 5 =>
                 Chicken({...chickenState, health: (-1)})
               | (BarnDoor(_), _) when dayIndex >= 6 => BarnDoor(Broken)
               | _ => go.state
@@ -328,8 +328,6 @@ let updateDay = (state, env) => {
       } else if ((
                    Env.keyPressed(Right, env)
                    || didClickOnForward
-                   || Env.keyPressed(Space, env)
-                   || Env.keyPressed(X, env)
                  )
                  && pageNumber === Array.length(Story.entries[dayIndex].pages)) {
         {
