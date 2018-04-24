@@ -854,5 +854,3 @@ let loadAssetsAsync = filename =>
   );
 
 loadAssetsAsync("spritesheet/sheet.json");
-
-loadAssetsAsync("spritesheet/sheet.json");
