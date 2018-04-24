@@ -302,7 +302,12 @@ let updateDay = (state, env) => {
           let (_, x1, y1, w1, h1) = getBackButton(state, env);
           mx > x1 && mx < x1 + w1 && my > y1 && my < y1 + h1;
         };
-      if ((Env.keyPressed(Right, env) || didClickOnForward)
+      if ((
+            Env.keyPressed(Right, env)
+            || didClickOnForward
+            || Env.keyPressed(Space, env)
+            || Env.keyPressed(X, env)
+          )
           && pageNumber < Array.length(Story.entries[dayIndex].pages)) {
         {
           ...state,
@@ -320,7 +325,12 @@ let updateDay = (state, env) => {
             pageNumber: pageNumber - 1,
           },
         };
-      } else if ((Env.keyPressed(Right, env) || didClickOnForward)
+      } else if ((
+                   Env.keyPressed(Right, env)
+                   || didClickOnForward
+                   || Env.keyPressed(Space, env)
+                   || Env.keyPressed(X, env)
+                 )
                  && pageNumber === Array.length(Story.entries[dayIndex].pages)) {
         {
           ...state,
@@ -642,7 +652,7 @@ let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
       } else if (dayIndex === 7) {
         day8Stats(state);
       } else {
-        [||]
+        [||];
       };
     ignore @@
     Array.fold_left(
@@ -844,16 +854,16 @@ let renderTransition = (state, env) =>
           dayTransition: NoTransition,
           animationTime: 0.,
         },
-      };
-    } else if (dayTransition == JournalIn
-               && (Env.keyPressed(Space, env) || Env.keyPressed(X, env))) {
-      {
-        ...state,
-        journal: {
-          ...state.journal,
-          dayTransition: JournalOut,
-          animationTime: 0.,
-        },
+        /*} else if (dayTransition == JournalIn
+                   && (Env.keyPressed(Space, env) || Env.keyPressed(X, env))) {
+          {
+            ...state,
+            journal: {
+              ...state.journal,
+              dayTransition: JournalOut,
+              animationTime: 0.,
+            },
+          };*/
       };
     } else {
       {
