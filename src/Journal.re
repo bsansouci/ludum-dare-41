@@ -574,7 +574,7 @@ let day8Stats = state =>
     state.gameobjects,
   );
 
-let lineHeight = 38;
+let lineHeight = 32;
 
 let renderJournal = ({journal: {dayIndex, pageNumber}} as state, env) => {
   drawAssetFullscreen("journal_page.png", state, env);
