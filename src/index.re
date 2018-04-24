@@ -217,7 +217,7 @@ let setup = (assets, env) => {
     sleepingMonsterAsset:
       Draw.loadImage(~isPixel=true, ~filename="sleeping_monster.png", env),
     hasPressedTheActionKeyOnce: false,
-    playerDead: false
+    playerDead: false,
   };
 };
 
@@ -287,7 +287,8 @@ let draw = (state, env) => {
     };
   let state =
     if (! state.hasPressedTheActionKeyOnce
-        && (Env.key(X, env) || Env.key(Space, env))) {
+        && (Env.key(X, env) || Env.key(Space, env))
+        && state.journal.dayTransition === NoTransition) {
       {...state, hasPressedTheActionKeyOnce: true};
     } else {
       state;
