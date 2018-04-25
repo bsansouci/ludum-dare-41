@@ -188,7 +188,7 @@ let setup = (assets, env) => {
     },
     playerFacing: DownD,
     spritesheet:
-      Draw.loadImage(~isPixel=true, ~filename=Filename.dirname(Sys.argv[0]) ++ "/spritesheet/assets.png", env),
+      Draw.loadImage(~isPixel=true, ~filename=basedirname ++ "spritesheet/assets.png", env),
     assets,
     sounds: loadSounds(env),
     gameobjects: GameObject.init(grid),
@@ -199,7 +199,7 @@ let setup = (assets, env) => {
     night: false,
     mainFont:
       Draw.loadFont(
-        ~filename=Filename.dirname(Sys.argv[0]) ++ "/whatever it takes bold_2x.fnt",
+        ~filename=basedirname ++ "whatever it takes bold_2x.fnt",
         ~isPixel=false,
         env,
       ),
@@ -211,11 +211,11 @@ let setup = (assets, env) => {
     shortDestroyedBarnAsset:
       Draw.loadImage(
         ~isPixel=true,
-        ~filename=Filename.dirname(Sys.argv[0]) ++ "/short_destroyed_barn.png",
+        ~filename=basedirname ++ "short_destroyed_barn.png",
         env,
       ),
     sleepingMonsterAsset:
-      Draw.loadImage(~isPixel=true, ~filename=Filename.dirname(Sys.argv[0]) ++ "/sleeping_monster.png", env),
+      Draw.loadImage(~isPixel=true, ~filename=basedirname ++ "sleeping_monster.png", env),
     hasPressedTheActionKeyOnce: false,
     playerDead: false,
   };
@@ -601,13 +601,13 @@ let draw = (state, env) => {
   let playerBehindBarn =
     playerInBarn ?
       false :
-      Reprocessing.Utils.intersectRectRect(
+      Utils.intersectRectRect(
         ~rect1Pos=(
-          state.playerPos.x +. tileSizef /. 2.,
-          state.playerPos.y +. tileSizef /. 2.,
+          state.playerPos.x,
+          state.playerPos.y,
         ),
-        ~rect1W=tileSizef /. 2.,
-        ~rect1H=tileSizef /. 2.,
+        ~rect1W=tileSizef,
+        ~rect1H=tileSizef,
         ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
         ~rect2W=320.,
         ~rect2H=32. *. 4.,
@@ -657,7 +657,7 @@ let draw = (state, env) => {
   let sortedGameObjects =
     List.sort(
       (a: gameobjectT, b: gameobjectT) =>
-        int_of_float(a.pos.y -. b.pos.y +. tileSizef),
+        int_of_float((a.pos.y -. b.pos.y)),
       state.gameobjects,
     );
   let firstGameObject = List.hd(sortedGameObjects);
@@ -680,9 +680,9 @@ let draw = (state, env) => {
         let barnBottom = 256. +. tileSizef *. 9.;
         if (! playerInBarn
             && prevGameOjbect.pos.y < barnBottom
-            -. collisionPadding
+            -. collisionPadding -. tileSizef /. 2.
             && curGameObject.pos.y >= barnBottom
-            -. collisionPadding) {
+            -. collisionPadding -. tileSizef /. 2.) {
           if (state.journal.dayIndex >= 6 && playerBehindBarn) {
             Draw.image(
               state.shortDestroyedBarnAsset,
@@ -853,4 +853,4 @@ let loadAssetsAsync = filename =>
     },
   );
 
-loadAssetsAsync(Filename.dirname(Sys.argv[0]) ++ "/spritesheet/sheet.json");
+loadAssetsAsync(basedirname ++ "spritesheet/sheet.json");

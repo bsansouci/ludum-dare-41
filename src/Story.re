@@ -182,7 +182,7 @@ let entries = [|
         "think let alone write of it. But after some days",
         "I have mustered the courage. Maria is gone...",
         "And I cannot help but think of my own hand",
-        "in it's doing. But no more of these thoughts.",
+        "in its doing. But no more of these thoughts.",
         "This was my second chance and I have thrown",
         "it away. ",
         "",
