@@ -259,6 +259,22 @@ let updateDay = (state, env) => {
         } else {
           gameobjects;
         };
+      let shouldAddChicks = dayIndex === 7;
+      let gameobjects = if (shouldAddChicks) {
+        let animalsAliveCount = List.fold_left((count, x) => switch (x) {
+        | {state: Chick({health})}
+        | {state: Cow({health})}
+        | {state: Chicken({health})}  when health > 0 => count + 1
+        | _ => count
+        }, 0, gameobjects);
+        if (animalsAliveCount < 6) {
+          addChick(addChick(addChick(addChick(addChick(addChick(gameobjects))))))
+        } else {
+          gameobjects
+        }
+      } else {
+        gameobjects
+      };
       {
         ...state,
         playerDead: false,
@@ -276,7 +292,6 @@ let updateDay = (state, env) => {
         playerFacing: DownD,
         currentItem: None,
         gameobjects,
-        day6PlayerWentInBarn: false,
       };
     | {journal: {dayTransition: FadeIn, animationTime}}
         when animationTime > fadeTimeSec => {

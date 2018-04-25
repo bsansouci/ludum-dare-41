@@ -244,13 +244,15 @@ let playSound = (name, state, env) =>
   | exception Not_found => print_endline("Couldn't find sound " ++ name)
   };
 
+let basedirname = Filename.dirname(Sys.argv[0]) ++ "/";
+
 let loadSounds = env => {
   let loadSoundHelper = (soundMap, (soundName: string, volume)) =>
     StringMap.add(
       soundName,
       (
         Reprocessing.Env.loadSound(
-          Printf.sprintf("%s/sounds/%s.wav", Filename.dirname(Sys.argv[0]), soundName),
+          Printf.sprintf("%ssounds/%s.wav", basedirname, soundName),
           env,
         ),
         volume,
@@ -297,6 +299,8 @@ let handleCollision = (state, prevOffset, offset, pos, grid) => {
     (0, 1),
   ];
   let padding = 8.;
+  let halfTileSizef = tileSizef /. 2.;
+  let offset = {x:Reprocessing.Utils.constrain(~amt=offset.x, ~low=-. halfTileSizef, ~high=halfTileSizef), y:Reprocessing.Utils.constrain(~amt=offset.y, ~low=-. halfTileSizef, ~high=halfTileSizef)};
   let collided =
     List.exists(
       ((dx, dy)) => {
@@ -365,3 +369,22 @@ let checkIfInBarn = pos =>
     ~rect2W=256.,
     ~rect2H=256.,
   );
+
+let addChick = gos => [
+    {
+      pos: {
+        x: Reprocessing.Utils.randomf(~min=11., ~max=22.) *. tileSizef,
+        y: Reprocessing.Utils.randomf(~min=18., ~max=20.) *. tileSizef,
+      },
+      action: NoAction,
+      state: Chick({
+               momentum: {
+                 x: 0.,
+                 y: 0.,
+               },
+               health: 1,
+               willDie: false,
+             }),
+    },
+    ...gos,
+  ];

@@ -153,24 +153,6 @@ let init = grid => {
       (0, []),
       grid,
     );
-  let addChick = gos => [
-    {
-      pos: {
-        x: Utils.randomf(~min=11., ~max=24.) *. tileSizef,
-        y: Utils.randomf(~min=18., ~max=20.) *. tileSizef,
-      },
-      action: NoAction,
-      state: Chick({
-               momentum: {
-                 x: 0.,
-                 y: 0.,
-               },
-               health: 1,
-               willDie: false,
-             }),
-    },
-    ...gos,
-  ];
   let gameobjects =
     addChick(
       addChick(
@@ -466,6 +448,7 @@ let update = (state, env) => {
               currentTileX +. tileSizef,
               currentTileY,
             );
+            /*print_endline("rightCurrentTileX: " ++ string_of_float(rightCurrentTileX) ++ " " ++ string_of_float(rightCurrentTileY));*/
             /*print_endline("w " ++ string_of_float(belowCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowCurrentTileY +. tileSizef -. nextTarget.y));*/
             /*print_endline("w " ++ string_of_float(belowRightCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowRightCurrentTileY +. tileSizef -. nextTarget.y));*/
             let currentTileArea =
@@ -481,7 +464,9 @@ let update = (state, env) => {
               (nextTarget.x +. tileSizef -. rightCurrentTileX)
               *. (rightCurrentTileY +. tileSizef -. nextTarget.y);
             /*print_endline("belowCurrentTileArea: " ++ string_of_float(belowCurrentTileArea));
-              print_endline("belowRightCurrentTileArea: " ++ string_of_float(belowRightCurrentTileArea));*/
+              print_endline("belowRightCurrentTileArea: " ++ string_of_float(belowRightCurrentTileArea));
+              print_endline("rightCurrentTileArea: " ++ string_of_float(rightCurrentTileArea));
+              print_endline("currentTileArea: " ++ string_of_float(currentTileArea));*/
             let targetTile =
               if (currentTileArea > belowCurrentTileArea
                   && currentTileArea > belowRightCurrentTileArea
@@ -719,6 +704,8 @@ let renderBefore = (g, focusedObject, state, env) => {
         env,
       );
     } else {
+      /*Draw.fill(Utils.color(255, 255, 0, 255), env);
+      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);*/
       drawAssetf(
         x -. tileSizef /. 4.,
         y -. tileSizef /. 4.,
@@ -1161,9 +1148,30 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         | Opened => (Closed, {x: pos.x -. tileSizef +. 3., y: pos.y})
         | Closed => (Opened, {x: pos.x +. tileSizef -. 3., y: pos.y})
         };
+
+      let playedInDoor = Utils.intersectRectRect(
+        ~rect1Pos=(
+          state.playerPos.x,
+          state.playerPos.y,
+        ),
+        ~rect1W=tileSizef,
+        ~rect1H=tileSizef,
+        ~rect2Pos=(tileSizef *. 9. -. 3., tileSizef *. 16. ),
+        ~rect2W=2. *. tileSizef +. 3.,
+        ~rect2H=tileSizef -. 8.,
+      );
+      let playerPos = if (playedInDoor) {
+        {
+          x: state.playerPos.x,
+          y: state.playerPos.y +. tileSizef /. 4.
+        }
+      } else {
+        state.playerPos
+      };
       (
         {
           ...state,
+          playerPos,
           gameobjects:
             List.map(
               g =>
