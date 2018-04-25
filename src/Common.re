@@ -244,7 +244,12 @@ let playSound = (name, state, env) =>
   | exception Not_found => print_endline("Couldn't find sound " ++ name)
   };
 
-let basedirname = Filename.dirname(Sys.argv[0]) ++ "/";
+let basedirname = Filename.dirname(Sys.argv[0]);
+let basedirname = if (basedirname !== "") {
+  basedirname ++ "/"
+} else {
+  basedirname
+};
 
 let loadSounds = env => {
   let loadSoundHelper = (soundMap, (soundName: string, volume)) =>
