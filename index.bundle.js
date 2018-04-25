@@ -23731,7 +23731,7 @@ var index = (function (exports) {
             /* dollarAnimation */-1,
             /* time */0,
             /* night : boolean */0,
-            /* mainFont */loadFont(basedirname$1 + "whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
+            /* mainFont */loadFont(basedirname$1 + "Times New Roman_2x.fnt", /* Some */[/* boolean */0], env),
             /* monsterWasLockedIn : boolean */0,
             /* mousePressed : boolean */0,
             /* mousePressedHack : boolean */0,
