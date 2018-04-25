@@ -199,7 +199,7 @@ let setup = (assets, env) => {
     night: false,
     mainFont:
       Draw.loadFont(
-        ~filename=basedirname ++ "whatever it takes bold_2x.fnt",
+        ~filename=basedirname ++ "Times New Roman_2x.fnt",
         ~isPixel=false,
         env,
       ),
