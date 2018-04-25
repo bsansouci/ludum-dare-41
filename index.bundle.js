@@ -20803,347 +20803,351 @@ var index = (function (exports) {
   }
 
   function update(state, env) {
-    var hackRefPlayerDead = [/* boolean */0];
-    var gameobjects = map((function (g) {
-            var match = g[/* state */2];
-            var pos = g[/* pos */0];
-            var by = pos[/* y */1];
-            var bx = pos[/* x */0];
-            if (typeof match === "number") {
-              return g;
-            } else {
-              switch (match.tag | 0) {
-                case 1 : 
-                    var cow = match[0];
-                    if (cow[/* health */1] > 0) {
-                      var match$1 = cow[/* momentum */0];
-                      var match$2 = moveAnimal(state, match$1[/* x */0], match$1[/* y */1], 1, pos, state[/* grid */0], env);
-                      return /* record */[
-                              /* pos */match$2[0],
-                              /* action */g[/* action */1],
-                              /* state : Cow */__(1, [/* record */[
-                                    /* momentum : record */[
-                                      /* x */match$2[1],
-                                      /* y */match$2[2]
-                                    ],
-                                    /* health */cow[/* health */1]
-                                  ]])
-                            ];
-                    } else {
-                      return g;
-                    }
-                case 4 : 
-                    var chicken = match[0];
-                    if (chicken[/* health */1] > 0) {
-                      var match$3 = chicken[/* momentum */0];
-                      var match$4 = moveAnimal(state, match$3[/* x */0], match$3[/* y */1], 2, pos, state[/* grid */0], env);
-                      return /* record */[
-                              /* pos */match$4[0],
-                              /* action */g[/* action */1],
-                              /* state : Chicken */__(4, [/* record */[
-                                    /* momentum : record */[
-                                      /* x */match$4[1],
-                                      /* y */match$4[2]
-                                    ],
-                                    /* health */chicken[/* health */1],
-                                    /* willDie */chicken[/* willDie */2]
-                                  ]])
-                            ];
-                    } else {
-                      return g;
-                    }
-                case 5 : 
-                    var bossState = match[0];
-                    var eating = bossState[/* eating */5];
-                    var eatingTime = bossState[/* eatingTime */3];
-                    var movingTime = bossState[/* movingTime */1];
-                    var match$5 = bossState[/* movePair */0];
-                    var dest = match$5[1];
-                    var start = match$5[0];
-                    if (movingTime > 0) {
-                      return /* record */[
-                              /* pos : record */[
-                                /* x */remapf(movingTime, 0.35, 0, start[/* x */0], dest[/* x */0]),
-                                /* y */remapf(movingTime, 0.35, 0, start[/* y */1], dest[/* y */1])
-                              ],
-                              /* action */g[/* action */1],
-                              /* state : Boss */__(5, [/* record */[
-                                    /* movePair */bossState[/* movePair */0],
-                                    /* movingTime */movingTime - deltaTime(env),
-                                    /* hunger */bossState[/* hunger */2],
-                                    /* eatingTime */bossState[/* eatingTime */3],
-                                    /* killed */bossState[/* killed */4],
-                                    /* eating */bossState[/* eating */5]
-                                  ]])
-                            ];
-                    } else if (state[/* day6CameraAnimation */18] > 0 || state[/* journal */9][/* dayTransition */1] === /* CheckJournal */1 || state[/* journal */9][/* dayTransition */1] === /* JournalIn */2 || bossState[/* hunger */2] === 0) {
-                      return g;
-                    } else if (eatingTime <= 0) {
-                      var allNextTargets = filter((function (g) {
-                                var match = g[/* state */2];
-                                var exit$$1 = 0;
-                                if (typeof match === "number") {
-                                  return /* boolean */0;
-                                } else {
-                                  switch (match.tag | 0) {
-                                    case 1 : 
-                                    case 4 : 
-                                    case 6 : 
-                                        exit$$1 = 1;
-                                        break;
-                                    default:
-                                      return /* boolean */0;
-                                  }
-                                }
-                                if (exit$$1 === 1) {
-                                  if (match[0][/* health */1] !== 0) {
+    if (state[/* journal */9][/* dayTransition */1] !== /* FadeOut */4 && state[/* journal */9][/* dayTransition */1] !== /* JournalIn */2 && state[/* journal */9][/* dayTransition */1] !== /* CheckJournal */1) {
+      var hackRefPlayerDead = [/* boolean */0];
+      var gameobjects = map((function (g) {
+              var match = g[/* state */2];
+              var pos = g[/* pos */0];
+              var by = pos[/* y */1];
+              var bx = pos[/* x */0];
+              if (typeof match === "number") {
+                return g;
+              } else {
+                switch (match.tag | 0) {
+                  case 1 : 
+                      var cow = match[0];
+                      if (cow[/* health */1] > 0) {
+                        var match$1 = cow[/* momentum */0];
+                        var match$2 = moveAnimal(state, match$1[/* x */0], match$1[/* y */1], 1, pos, state[/* grid */0], env);
+                        return /* record */[
+                                /* pos */match$2[0],
+                                /* action */g[/* action */1],
+                                /* state : Cow */__(1, [/* record */[
+                                      /* momentum : record */[
+                                        /* x */match$2[1],
+                                        /* y */match$2[2]
+                                      ],
+                                      /* health */cow[/* health */1]
+                                    ]])
+                              ];
+                      } else {
+                        return g;
+                      }
+                  case 4 : 
+                      var chicken = match[0];
+                      if (chicken[/* health */1] > 0) {
+                        var match$3 = chicken[/* momentum */0];
+                        var match$4 = moveAnimal(state, match$3[/* x */0], match$3[/* y */1], 2, pos, state[/* grid */0], env);
+                        return /* record */[
+                                /* pos */match$4[0],
+                                /* action */g[/* action */1],
+                                /* state : Chicken */__(4, [/* record */[
+                                      /* momentum : record */[
+                                        /* x */match$4[1],
+                                        /* y */match$4[2]
+                                      ],
+                                      /* health */chicken[/* health */1],
+                                      /* willDie */chicken[/* willDie */2]
+                                    ]])
+                              ];
+                      } else {
+                        return g;
+                      }
+                  case 5 : 
+                      var bossState = match[0];
+                      var eating = bossState[/* eating */5];
+                      var eatingTime = bossState[/* eatingTime */3];
+                      var movingTime = bossState[/* movingTime */1];
+                      var match$5 = bossState[/* movePair */0];
+                      var dest = match$5[1];
+                      var start = match$5[0];
+                      if (movingTime > 0) {
+                        return /* record */[
+                                /* pos : record */[
+                                  /* x */remapf(movingTime, 0.35, 0, start[/* x */0], dest[/* x */0]),
+                                  /* y */remapf(movingTime, 0.35, 0, start[/* y */1], dest[/* y */1])
+                                ],
+                                /* action */g[/* action */1],
+                                /* state : Boss */__(5, [/* record */[
+                                      /* movePair */bossState[/* movePair */0],
+                                      /* movingTime */movingTime - deltaTime(env),
+                                      /* hunger */bossState[/* hunger */2],
+                                      /* eatingTime */bossState[/* eatingTime */3],
+                                      /* killed */bossState[/* killed */4],
+                                      /* eating */bossState[/* eating */5]
+                                    ]])
+                              ];
+                      } else if (state[/* day6CameraAnimation */18] > 0 || state[/* journal */9][/* dayTransition */1] === /* CheckJournal */1 || state[/* journal */9][/* dayTransition */1] === /* JournalIn */2 || bossState[/* hunger */2] === 0) {
+                        return g;
+                      } else if (eatingTime <= 0) {
+                        var allNextTargets = filter((function (g) {
+                                  var match = g[/* state */2];
+                                  var exit$$1 = 0;
+                                  if (typeof match === "number") {
                                     return /* boolean */0;
                                   } else {
-                                    return /* boolean */1;
+                                    switch (match.tag | 0) {
+                                      case 1 : 
+                                      case 4 : 
+                                      case 6 : 
+                                          exit$$1 = 1;
+                                          break;
+                                      default:
+                                        return /* boolean */0;
+                                    }
                                   }
+                                  if (exit$$1 === 1) {
+                                    if (match[0][/* health */1] !== 0) {
+                                      return /* boolean */0;
+                                    } else {
+                                      return /* boolean */1;
+                                    }
+                                  }
+                                  
+                                }))(state[/* gameobjects */8]);
+                        var allNextTargets$1 = sort((function (param, param$1) {
+                                var match = param$1[/* pos */0];
+                                var match$1 = param[/* pos */0];
+                                var dx1 = abs(match$1[/* x */0] - bx | 0);
+                                var dy1 = abs(match$1[/* y */1] - by | 0);
+                                var dx2 = abs(match[/* x */0] - bx | 0);
+                                var dy2 = abs(match[/* y */1] - by | 0);
+                                return ((dx1 + dy1 | 0) - dx2 | 0) - dy2 | 0;
+                              }), allNextTargets);
+                        var match$6 = allNextTargets$1 ? /* tuple */[
+                            allNextTargets$1[0][/* pos */0],
+                            /* boolean */0
+                          ] : /* tuple */[
+                            /* record */[
+                              /* x */state[/* playerPos */2][/* x */0],
+                              /* y */state[/* playerPos */2][/* y */1]
+                            ],
+                            /* boolean */1
+                          ];
+                        var isPlayer = match$6[1];
+                        var nextTarget = match$6[0];
+                        var dx = nextTarget[/* x */0] - bx;
+                        var dy = nextTarget[/* y */1] - by;
+                        var mag$$1 = magf(/* tuple */[
+                              dx,
+                              dy
+                            ]);
+                        var isTargetCloseEnough = +(mag$$1 < 32);
+                        if (isTargetCloseEnough) {
+                          console.log("CLOSE");
+                        }
+                        var match$7 = bossState[/* movePair */0];
+                        var match$8 = match$7[1];
+                        var by$1 = match$8[/* y */1];
+                        var bx$1 = match$8[/* x */0];
+                        var bossTile_000 = bx$1 / tileSizef | 0;
+                        var bossTile_001 = by$1 / tileSizef | 0;
+                        var bossTile = /* tuple */[
+                          bossTile_000,
+                          bossTile_001
+                        ];
+                        var currentTileX = Math.floor(nextTarget[/* x */0] / tileSizef) * tileSizef;
+                        var currentTileY = Math.floor(nextTarget[/* y */1] / tileSizef) * tileSizef;
+                        var belowCurrentTileY = currentTileY + tileSizef;
+                        var belowRightCurrentTileX = currentTileX + tileSizef;
+                        var belowRightCurrentTileY = currentTileY + tileSizef;
+                        var rightCurrentTileX = currentTileX + tileSizef;
+                        var currentTileArea = (currentTileX + tileSizef - nextTarget[/* x */0]) * (currentTileY + tileSizef - nextTarget[/* y */1]);
+                        var belowCurrentTileArea = (currentTileX + tileSizef - nextTarget[/* x */0]) * (nextTarget[/* y */1] + tileSizef - belowCurrentTileY);
+                        var belowRightCurrentTileArea = (nextTarget[/* x */0] + tileSizef - belowRightCurrentTileX) * (nextTarget[/* y */1] + tileSizef - belowRightCurrentTileY);
+                        var rightCurrentTileArea = (nextTarget[/* x */0] + tileSizef - rightCurrentTileX) * (currentTileY + tileSizef - nextTarget[/* y */1]);
+                        var targetTile = currentTileArea > belowCurrentTileArea && currentTileArea > belowRightCurrentTileArea && currentTileArea > rightCurrentTileArea ? /* tuple */[
+                            currentTileX / tileSizef | 0,
+                            currentTileY / tileSizef | 0
+                          ] : (
+                            belowCurrentTileArea > currentTileArea && belowCurrentTileArea > belowRightCurrentTileArea && belowCurrentTileArea > rightCurrentTileArea ? /* tuple */[
+                                currentTileX / tileSizef | 0,
+                                belowCurrentTileY / tileSizef | 0
+                              ] : (
+                                belowRightCurrentTileArea > currentTileArea && belowRightCurrentTileArea > belowCurrentTileArea && belowRightCurrentTileArea > rightCurrentTileArea ? /* tuple */[
+                                    belowRightCurrentTileX / tileSizef | 0,
+                                    belowRightCurrentTileY / tileSizef | 0
+                                  ] : /* tuple */[
+                                    rightCurrentTileX / tileSizef | 0,
+                                    currentTileY / tileSizef | 0
+                                  ]
+                              )
+                          );
+                        var barnDoor = find((function (g) {
+                                var tmp = g[/* state */2];
+                                if (typeof tmp === "number" || tmp.tag !== 7) {
+                                  return /* boolean */0;
+                                } else {
+                                  return /* boolean */1;
                                 }
-                                
-                              }))(state[/* gameobjects */8]);
-                      var allNextTargets$1 = sort((function (param, param$1) {
-                              var match = param$1[/* pos */0];
-                              var match$1 = param[/* pos */0];
-                              var dx1 = abs(match$1[/* x */0] - bx | 0);
-                              var dy1 = abs(match$1[/* y */1] - by | 0);
-                              var dx2 = abs(match[/* x */0] - bx | 0);
-                              var dy2 = abs(match[/* y */1] - by | 0);
-                              return ((dx1 + dy1 | 0) - dx2 | 0) - dy2 | 0;
-                            }), allNextTargets);
-                      var match$6 = allNextTargets$1 ? /* tuple */[
-                          allNextTargets$1[0][/* pos */0],
-                          /* boolean */0
-                        ] : /* tuple */[
-                          /* record */[
-                            /* x */state[/* playerPos */2][/* x */0],
-                            /* y */state[/* playerPos */2][/* y */1]
-                          ],
-                          /* boolean */1
-                        ];
-                      var isPlayer = match$6[1];
-                      var nextTarget = match$6[0];
-                      var dx = nextTarget[/* x */0] - bx;
-                      var dy = nextTarget[/* y */1] - by;
-                      var mag$$1 = magf(/* tuple */[
-                            dx,
-                            dy
-                          ]);
-                      var isTargetCloseEnough = +(mag$$1 < 32);
-                      if (isTargetCloseEnough) {
-                        console.log("CLOSE");
-                      }
-                      var match$7 = bossState[/* movePair */0];
-                      var match$8 = match$7[1];
-                      var by$1 = match$8[/* y */1];
-                      var bx$1 = match$8[/* x */0];
-                      var bossTile_000 = bx$1 / tileSizef | 0;
-                      var bossTile_001 = by$1 / tileSizef | 0;
-                      var bossTile = /* tuple */[
-                        bossTile_000,
-                        bossTile_001
-                      ];
-                      var currentTileX = Math.floor(nextTarget[/* x */0] / tileSizef) * tileSizef;
-                      var currentTileY = Math.floor(nextTarget[/* y */1] / tileSizef) * tileSizef;
-                      var belowCurrentTileY = currentTileY + tileSizef;
-                      var belowRightCurrentTileX = currentTileX + tileSizef;
-                      var belowRightCurrentTileY = currentTileY + tileSizef;
-                      var rightCurrentTileX = currentTileX + tileSizef;
-                      var currentTileArea = (currentTileX + tileSizef - nextTarget[/* x */0]) * (currentTileY + tileSizef - nextTarget[/* y */1]);
-                      var belowCurrentTileArea = (currentTileX + tileSizef - nextTarget[/* x */0]) * (nextTarget[/* y */1] + tileSizef - belowCurrentTileY);
-                      var belowRightCurrentTileArea = (nextTarget[/* x */0] + tileSizef - belowRightCurrentTileX) * (nextTarget[/* y */1] + tileSizef - belowRightCurrentTileY);
-                      var rightCurrentTileArea = (nextTarget[/* x */0] + tileSizef - rightCurrentTileX) * (currentTileY + tileSizef - nextTarget[/* y */1]);
-                      var targetTile = currentTileArea > belowCurrentTileArea && currentTileArea > belowRightCurrentTileArea && currentTileArea > rightCurrentTileArea ? /* tuple */[
-                          currentTileX / tileSizef | 0,
-                          currentTileY / tileSizef | 0
-                        ] : (
-                          belowCurrentTileArea > currentTileArea && belowCurrentTileArea > belowRightCurrentTileArea && belowCurrentTileArea > rightCurrentTileArea ? /* tuple */[
-                              currentTileX / tileSizef | 0,
-                              belowCurrentTileY / tileSizef | 0
-                            ] : (
-                              belowRightCurrentTileArea > currentTileArea && belowRightCurrentTileArea > belowCurrentTileArea && belowRightCurrentTileArea > rightCurrentTileArea ? /* tuple */[
-                                  belowRightCurrentTileX / tileSizef | 0,
-                                  belowRightCurrentTileY / tileSizef | 0
-                                ] : /* tuple */[
-                                  rightCurrentTileX / tileSizef | 0,
-                                  currentTileY / tileSizef | 0
-                                ]
-                            )
-                        );
-                      var barnDoor = find((function (g) {
-                              var tmp = g[/* state */2];
-                              if (typeof tmp === "number" || tmp.tag !== 7) {
-                                return /* boolean */0;
+                              }), state[/* gameobjects */8]);
+                        var match$9 = barnDoor[/* state */2];
+                        var isBarnDoorClosed;
+                        isBarnDoorClosed = typeof match$9 === "number" || !(match$9.tag === 7 && match$9[0] >= 2) ? /* boolean */0 : /* boolean */1;
+                        var movePair;
+                        if (isBarnDoorClosed) {
+                          movePair = /* tuple */[
+                            g[/* pos */0],
+                            g[/* pos */0]
+                          ];
+                        } else {
+                          var p = getPath$1(bossTile, targetTile, state[/* grid */0]);
+                          var exit$$1 = 0;
+                          if (p) {
+                            var match$10 = p[0];
+                            if (match$10) {
+                              var match$11 = match$10[1];
+                              if (match$11) {
+                                var match$12 = match$11[0];
+                                var match$13 = match$10[0];
+                                movePair = /* tuple */[
+                                  /* record */[
+                                    /* x */match$13[0] * tileSizef,
+                                    /* y */match$13[1] * tileSizef
+                                  ],
+                                  /* record */[
+                                    /* x */match$12[0] * tileSizef,
+                                    /* y */match$12[1] * tileSizef
+                                  ]
+                                ];
                               } else {
-                                return /* boolean */1;
+                                exit$$1 = 1;
                               }
-                            }), state[/* gameobjects */8]);
-                      var match$9 = barnDoor[/* state */2];
-                      var isBarnDoorClosed;
-                      isBarnDoorClosed = typeof match$9 === "number" || !(match$9.tag === 7 && match$9[0] >= 2) ? /* boolean */0 : /* boolean */1;
-                      var movePair;
-                      if (isBarnDoorClosed) {
-                        movePair = /* tuple */[
-                          g[/* pos */0],
-                          g[/* pos */0]
-                        ];
-                      } else {
-                        var p = getPath$1(bossTile, targetTile, state[/* grid */0]);
-                        var exit$$1 = 0;
-                        if (p) {
-                          var match$10 = p[0];
-                          if (match$10) {
-                            var match$11 = match$10[1];
-                            if (match$11) {
-                              var match$12 = match$11[0];
-                              var match$13 = match$10[0];
-                              movePair = /* tuple */[
-                                /* record */[
-                                  /* x */match$13[0] * tileSizef,
-                                  /* y */match$13[1] * tileSizef
-                                ],
-                                /* record */[
-                                  /* x */match$12[0] * tileSizef,
-                                  /* y */match$12[1] * tileSizef
-                                ]
-                              ];
                             } else {
                               exit$$1 = 1;
                             }
                           } else {
-                            exit$$1 = 1;
+                            movePair = /* tuple */[
+                              /* record */[
+                                /* x */bx$1,
+                                /* y */by$1
+                              ],
+                              /* record */[
+                                /* x */bx$1,
+                                /* y */by$1
+                              ]
+                            ];
                           }
-                        } else {
-                          movePair = /* tuple */[
-                            /* record */[
-                              /* x */bx$1,
-                              /* y */by$1
-                            ],
-                            /* record */[
-                              /* x */bx$1,
-                              /* y */by$1
-                            ]
-                          ];
+                          if (exit$$1 === 1) {
+                            movePair = /* tuple */[
+                              /* record */[
+                                /* x */bx$1,
+                                /* y */by$1
+                              ],
+                              /* record */[
+                                /* x */bx$1,
+                                /* y */by$1
+                              ]
+                            ];
+                          }
+                          
                         }
-                        if (exit$$1 === 1) {
-                          movePair = /* tuple */[
-                            /* record */[
-                              /* x */bx$1,
-                              /* y */by$1
-                            ],
-                            /* record */[
-                              /* x */bx$1,
-                              /* y */by$1
-                            ]
-                          ];
-                        }
-                        
+                        hackRefPlayerDead[0] = isPlayer && isTargetCloseEnough;
+                        var match$14 = isTargetCloseEnough && 1 - eating;
+                        var match$15 = isTargetCloseEnough && 1 - isPlayer && eating;
+                        return /* record */[
+                                /* pos */g[/* pos */0],
+                                /* action */g[/* action */1],
+                                /* state : Boss */__(5, [/* record */[
+                                      /* movePair */movePair,
+                                      /* movingTime */0.35,
+                                      /* hunger */bossState[/* hunger */2],
+                                      /* eatingTime */match$14 ? 3 : 0,
+                                      /* killed */match$15 ? /* :: */[
+                                          hd(allNextTargets$1),
+                                          bossState[/* killed */4]
+                                        ] : bossState[/* killed */4],
+                                      /* eating */isTargetCloseEnough && 1 - eating
+                                    ]])
+                              ];
+                      } else {
+                        return /* record */[
+                                /* pos */g[/* pos */0],
+                                /* action */g[/* action */1],
+                                /* state : Boss */__(5, [/* record */[
+                                      /* movePair */bossState[/* movePair */0],
+                                      /* movingTime */bossState[/* movingTime */1],
+                                      /* hunger */bossState[/* hunger */2],
+                                      /* eatingTime */eatingTime - deltaTime(env),
+                                      /* killed */bossState[/* killed */4],
+                                      /* eating */bossState[/* eating */5]
+                                    ]])
+                              ];
                       }
-                      hackRefPlayerDead[0] = isPlayer && isTargetCloseEnough;
-                      var match$14 = isTargetCloseEnough && 1 - eating;
-                      var match$15 = isTargetCloseEnough && 1 - isPlayer && eating;
-                      return /* record */[
-                              /* pos */g[/* pos */0],
-                              /* action */g[/* action */1],
-                              /* state : Boss */__(5, [/* record */[
-                                    /* movePair */movePair,
-                                    /* movingTime */0.35,
-                                    /* hunger */bossState[/* hunger */2],
-                                    /* eatingTime */match$14 ? 3 : 0,
-                                    /* killed */match$15 ? /* :: */[
-                                        hd(allNextTargets$1),
-                                        bossState[/* killed */4]
-                                      ] : bossState[/* killed */4],
-                                    /* eating */isTargetCloseEnough && 1 - eating
-                                  ]])
-                            ];
-                    } else {
-                      return /* record */[
-                              /* pos */g[/* pos */0],
-                              /* action */g[/* action */1],
-                              /* state : Boss */__(5, [/* record */[
-                                    /* movePair */bossState[/* movePair */0],
-                                    /* movingTime */bossState[/* movingTime */1],
-                                    /* hunger */bossState[/* hunger */2],
-                                    /* eatingTime */eatingTime - deltaTime(env),
-                                    /* killed */bossState[/* killed */4],
-                                    /* eating */bossState[/* eating */5]
-                                  ]])
-                            ];
-                    }
-                    break;
-                case 6 : 
-                    var chick = match[0];
-                    if (chick[/* health */1] > 0) {
-                      var match$16 = chick[/* momentum */0];
-                      var match$17 = moveAnimal(state, match$16[/* x */0], match$16[/* y */1], 4, pos, state[/* grid */0], env);
-                      return /* record */[
-                              /* pos */match$17[0],
-                              /* action */g[/* action */1],
-                              /* state : Chick */__(6, [/* record */[
-                                    /* momentum : record */[
-                                      /* x */match$17[1],
-                                      /* y */match$17[2]
-                                    ],
-                                    /* health */chick[/* health */1],
-                                    /* willDie */chick[/* willDie */2]
-                                  ]])
-                            ];
-                    } else {
-                      return g;
-                    }
-                default:
-                  return g;
-              }
-            }
-          }), state[/* gameobjects */8]);
-    if (hackRefPlayerDead[0]) {
-      var gameobjects$1;
-      try {
-        find((function (g) {
-                var match = g[/* state */2];
-                if (typeof match === "number" && match >= 3) {
-                  return /* boolean */1;
-                } else {
-                  return /* boolean */0;
+                      break;
+                  case 6 : 
+                      var chick = match[0];
+                      if (chick[/* health */1] > 0) {
+                        var match$16 = chick[/* momentum */0];
+                        var match$17 = moveAnimal(state, match$16[/* x */0], match$16[/* y */1], 4, pos, state[/* grid */0], env);
+                        return /* record */[
+                                /* pos */match$17[0],
+                                /* action */g[/* action */1],
+                                /* state : Chick */__(6, [/* record */[
+                                      /* momentum : record */[
+                                        /* x */match$17[1],
+                                        /* y */match$17[2]
+                                      ],
+                                      /* health */chick[/* health */1],
+                                      /* willDie */chick[/* willDie */2]
+                                    ]])
+                              ];
+                      } else {
+                        return g;
+                      }
+                  default:
+                    return g;
                 }
-              }), gameobjects);
-        gameobjects$1 = gameobjects;
-      }
-      catch (exn){
-        if (exn === not_found) {
-          gameobjects$1 = /* :: */[
-            /* record */[
-              /* pos : record */[
-                /* x */13 * tileSizef,
-                /* y */8 * tileSizef
-              ],
-              /* action : PickUp */[/* Axe */6],
-              /* state : AxeStanding */3
-            ],
-            gameobjects
-          ];
-        } else {
-          throw exn;
+              }
+            }), state[/* gameobjects */8]);
+      if (hackRefPlayerDead[0]) {
+        var gameobjects$1;
+        try {
+          find((function (g) {
+                  var match = g[/* state */2];
+                  if (typeof match === "number" && match >= 3) {
+                    return /* boolean */1;
+                  } else {
+                    return /* boolean */0;
+                  }
+                }), gameobjects);
+          gameobjects$1 = gameobjects;
         }
+        catch (exn){
+          if (exn === not_found) {
+            gameobjects$1 = /* :: */[
+              /* record */[
+                /* pos : record */[
+                  /* x */13 * tileSizef,
+                  /* y */8 * tileSizef
+                ],
+                /* action : PickUp */[/* Axe */6],
+                /* state : AxeStanding */3
+              ],
+              gameobjects
+            ];
+          } else {
+            throw exn;
+          }
+        }
+        var newrecord = state.slice();
+        newrecord[/* gameobjects */8] = gameobjects$1;
+        var init = state[/* journal */9];
+        newrecord[/* journal */9] = /* record */[
+          /* dayIndex */state[/* journal */9][/* dayIndex */0] - 1 | 0,
+          /* dayTransition : FadeOut */4,
+          /* animationTime */0,
+          /* pageNumber */init[/* pageNumber */3]
+        ];
+        newrecord[/* playerDead */22] = /* boolean */1;
+        return newrecord;
+      } else {
+        var newrecord$1 = state.slice();
+        newrecord$1[/* gameobjects */8] = gameobjects;
+        return newrecord$1;
       }
-      var newrecord = state.slice();
-      newrecord[/* gameobjects */8] = gameobjects$1;
-      var init = state[/* journal */9];
-      newrecord[/* journal */9] = /* record */[
-        /* dayIndex */state[/* journal */9][/* dayIndex */0] - 1 | 0,
-        /* dayTransition : FadeOut */4,
-        /* animationTime */0,
-        /* pageNumber */init[/* pageNumber */3]
-      ];
-      newrecord[/* playerDead */22] = /* boolean */1;
-      return newrecord;
     } else {
-      var newrecord$1 = state.slice();
-      newrecord$1[/* gameobjects */8] = gameobjects;
-      return newrecord$1;
+      return state;
     }
   }
 
@@ -21314,14 +21318,14 @@ var index = (function (exports) {
         var match$4 = g[/* state */2];
         if (typeof match$4 === "number") {
           switch (match$4) {
-            case 0 : 
-            case 2 : 
-                return /* () */0;
+            case 1 : 
+                exit$3 = 4;
+                break;
             case 3 : 
                 exit$1 = 2;
                 break;
             default:
-              exit$3 = 4;
+              return /* () */0;
           }
         } else {
           switch (match$4.tag | 0) {
@@ -21331,18 +21335,20 @@ var index = (function (exports) {
                 health = match$4[0][/* health */1];
                 exit$$1 = 1;
                 break;
+            case 0 : 
+            case 2 : 
+            case 3 : 
+                exit$3 = 4;
+                break;
             case 5 : 
                 exit$1 = 2;
                 break;
-            case 4 : 
-            case 6 : 
-                return /* () */0;
             case 7 : 
             case 8 : 
                 exit$5 = 6;
                 break;
             default:
-              exit$3 = 4;
+              return /* () */0;
           }
         }
       }
@@ -21836,6 +21842,9 @@ var index = (function (exports) {
               exit$$1 = 1;
             }
             break;
+        case 5 : 
+            exit$$1 = 1;
+            break;
         case 6 : 
             if (focusedObject) {
               var match$6 = focusedObject[0][/* state */2];
@@ -21872,30 +21881,38 @@ var index = (function (exports) {
               exit$$1 = 1;
             }
             break;
-        case 5 : 
         case 7 : 
-            exit$$1 = 1;
+            if (focusedObject) {
+              var match$7 = focusedObject[0][/* action */1];
+              if (typeof match$7 === "number" || match$7[0] !== 1) {
+                exit$$1 = 1;
+              } else {
+                body = "";
+              }
+            } else {
+              exit$$1 = 1;
+            }
             break;
         
       }
     } else if (focusedObject) {
-      var match$7 = focusedObject[0];
-      var match$8 = match$7[/* action */1];
+      var match$8 = focusedObject[0];
+      var match$9 = match$8[/* action */1];
       var exit$2 = 0;
-      if (typeof match$8 === "number") {
-        if (match$8 >= 9) {
-          switch (match$8 - 9 | 0) {
+      if (typeof match$9 === "number") {
+        if (match$9 >= 9) {
+          switch (match$9 - 9 | 0) {
             case 0 : 
-                var match$9 = match$7[/* state */2];
-                if (typeof match$9 === "number") {
+                var match$10 = match$8[/* state */2];
+                if (typeof match$10 === "number") {
                   exit$$1 = 1;
                 } else {
-                  switch (match$9.tag | 0) {
+                  switch (match$10.tag | 0) {
                     case 4 : 
                         exit$2 = 2;
                         break;
                     case 7 : 
-                        switch (match$9[0]) {
+                        switch (match$10[0]) {
                           case 0 : 
                               if (playerInBarn) {
                                 exit$$1 = 1;
@@ -21929,7 +21946,7 @@ var index = (function (exports) {
                 exit$2 = 2;
                 break;
             case 2 : 
-                var tmp = match$7[/* state */2];
+                var tmp = match$8[/* state */2];
                 if (typeof tmp === "number") {
                   exit$$1 = 1;
                 } else {
@@ -21946,7 +21963,7 @@ var index = (function (exports) {
                 }
                 break;
             case 3 : 
-                var tmp$1 = match$7[/* state */2];
+                var tmp$1 = match$8[/* state */2];
                 if (typeof tmp$1 === "number") {
                   exit$$1 = 1;
                 } else {
@@ -21968,7 +21985,7 @@ var index = (function (exports) {
           exit$2 = 2;
         }
       } else {
-        switch (match$8[0]) {
+        switch (match$9[0]) {
           case 0 : 
               body = "Pickup seed";
               break;
@@ -21976,13 +21993,13 @@ var index = (function (exports) {
               body = "Pickup water";
               break;
           case 2 : 
-              var match$10 = match$7[/* state */2];
-              if (typeof match$10 === "number") {
+              var match$11 = match$8[/* state */2];
+              if (typeof match$11 === "number") {
                 exit$$1 = 1;
               } else {
-                switch (match$10.tag | 0) {
+                switch (match$11.tag | 0) {
                   case 1 : 
-                      if (match$10[0][/* health */1] > 0) {
+                      if (match$11[0][/* health */1] > 0) {
                         body = "Milk cow";
                       } else {
                         exit$$1 = 1;
@@ -22015,8 +22032,8 @@ var index = (function (exports) {
         }
       }
       if (exit$2 === 2) {
-        var match$11 = match$7[/* state */2];
-        if (typeof match$11 === "number" || !(match$11.tag === 4 && match$11[0][/* health */1] === 0)) {
+        var match$12 = match$8[/* state */2];
+        if (typeof match$12 === "number" || !(match$12.tag === 4 && match$12[0][/* health */1] === 0)) {
           exit$$1 = 1;
         } else {
           body = "There's not much to do now...";
@@ -22031,8 +22048,8 @@ var index = (function (exports) {
       if (match) {
         var exit$4 = 0;
         if (focusedObject) {
-          var match$12 = focusedObject[0][/* action */1];
-          if (typeof match$12 === "number" || match$12[0] !== 1) {
+          var match$13 = focusedObject[0][/* action */1];
+          if (typeof match$13 === "number" || match$13[0] !== 1) {
             exit$4 = 3;
           } else {
             body = "Drop into water";
@@ -22058,8 +22075,8 @@ var index = (function (exports) {
       }
       if (exit$3 === 2) {
         if (focusedObject) {
-          var match$13 = focusedObject[0][/* action */1];
-          body = typeof match$13 === "number" && match$13 === 10 ? (
+          var match$14 = focusedObject[0][/* action */1];
+          body = typeof match$14 === "number" && match$14 === 10 ? (
               finishedAllTasks ? "Go to bed" : (
                   finishedAllTasks ? "" : "Open Journal"
                 )
@@ -22397,9 +22414,11 @@ var index = (function (exports) {
           case 7 : 
               if (focusedObject) {
                 var go$3 = focusedObject[0];
+                var match$8 = go$3[/* action */1];
+                var exit$4 = 0;
                 var tmp$2 = go$3[/* state */2];
                 if (typeof tmp$2 === "number" || tmp$2.tag !== 8) {
-                  exit$2 = 3;
+                  exit$4 = 5;
                 } else {
                   playSound$2("drop", state, env);
                   var newrecord$8 = state.slice();
@@ -22419,6 +22438,29 @@ var index = (function (exports) {
                           focusedObject
                         ];
                 }
+                if (exit$4 === 5) {
+                  if (typeof match$8 === "number") {
+                    if (match$8 !== 10) {
+                      return /* tuple */[
+                              state,
+                              focusedObject
+                            ];
+                    } else {
+                      exit$1 = 2;
+                    }
+                  } else if (match$8[0] !== 1) {
+                    return /* tuple */[
+                            state,
+                            focusedObject
+                          ];
+                  } else {
+                    return /* tuple */[
+                            state,
+                            focusedObject
+                          ];
+                  }
+                }
+                
               } else {
                 return /* tuple */[
                         state,
@@ -22430,9 +22472,9 @@ var index = (function (exports) {
         }
         if (exit$3 === 4) {
           if (focusedObject) {
-            var match$8 = focusedObject[0][/* action */1];
-            if (typeof match$8 === "number") {
-              var switcher = match$8 - 8 | 0;
+            var match$9 = focusedObject[0][/* action */1];
+            if (typeof match$9 === "number") {
+              var switcher = match$9 - 8 | 0;
               if (switcher > 2 || switcher < 0) {
                 return /* tuple */[
                         state,
@@ -22470,14 +22512,14 @@ var index = (function (exports) {
         }
         if (exit$2 === 3) {
           if (focusedObject) {
-            var match$9 = focusedObject[0][/* action */1];
-            if (typeof match$9 === "number") {
-              if (match$9 !== 10) {
+            var match$10 = focusedObject[0][/* action */1];
+            if (typeof match$10 === "number") {
+              if (match$10 !== 10) {
                 exit$$1 = 1;
               } else {
                 exit$1 = 2;
               }
-            } else if (match$9[0] !== 1) {
+            } else if (match$10[0] !== 1) {
               exit$$1 = 1;
             } else {
               playSound$2("drop", state, env);
@@ -22497,19 +22539,19 @@ var index = (function (exports) {
         
       } else if (focusedObject) {
         var go$4 = focusedObject[0];
-        var match$10 = go$4[/* action */1];
+        var match$11 = go$4[/* action */1];
         var pos = go$4[/* pos */0];
-        if (typeof match$10 === "number") {
-          if (match$10 >= 9) {
-            switch (match$10 - 9 | 0) {
+        if (typeof match$11 === "number") {
+          if (match$11 >= 9) {
+            switch (match$11 - 9 | 0) {
               case 0 : 
-                  var match$11 = go$4[/* state */2];
-                  if (typeof match$11 === "number") {
+                  var match$12 = go$4[/* state */2];
+                  if (typeof match$12 === "number") {
                     return /* tuple */[
                             state,
                             focusedObject
                           ];
-                  } else if (match$11.tag === 7) {
+                  } else if (match$12.tag === 7) {
                     if (playerInBarn) {
                       return /* tuple */[
                               state,
@@ -22517,16 +22559,16 @@ var index = (function (exports) {
                             ];
                     } else {
                       playSound$2("pickup", state, env);
-                      var match$12;
-                      switch (match$11[0]) {
+                      var match$13;
+                      switch (match$12[0]) {
                         case 0 : 
-                            match$12 = /* tuple */[
+                            match$13 = /* tuple */[
                               /* Opened */1,
                               pos
                             ];
                             break;
                         case 1 : 
-                            match$12 = /* tuple */[
+                            match$13 = /* tuple */[
                               /* Closed */2,
                               /* record */[
                                 /* x */pos[/* x */0] - tileSizef + 3,
@@ -22535,7 +22577,7 @@ var index = (function (exports) {
                             ];
                             break;
                         case 2 : 
-                            match$12 = /* tuple */[
+                            match$13 = /* tuple */[
                               /* Opened */1,
                               /* record */[
                                 /* x */pos[/* x */0] + tileSizef - 3,
@@ -22545,8 +22587,8 @@ var index = (function (exports) {
                             break;
                         
                       }
-                      var pos$1 = match$12[1];
-                      var nextBarnState = match$12[0];
+                      var pos$1 = match$13[1];
+                      var nextBarnState = match$13[0];
                       var playedInDoor = intersectRectRect(/* tuple */[
                             state[/* playerPos */2][/* x */0],
                             state[/* playerPos */2][/* y */1]
@@ -22628,7 +22670,7 @@ var index = (function (exports) {
                   ];
           }
         } else {
-          switch (match$10[0]) {
+          switch (match$11[0]) {
             case 0 : 
                 playSound$2("pickup", state, env);
                 var newrecord$13 = state.slice();
@@ -22644,14 +22686,14 @@ var index = (function (exports) {
                         /* None */0
                       ];
             case 2 : 
-                var match$13 = go$4[/* state */2];
-                if (typeof match$13 === "number") {
+                var match$14 = go$4[/* state */2];
+                if (typeof match$14 === "number") {
                   return /* tuple */[
                           state,
                           focusedObject
                         ];
-                } else if (match$13.tag === 1) {
-                  if (match$13[0][/* health */1] > 0) {
+                } else if (match$14.tag === 1) {
+                  if (match$14[0][/* health */1] > 0) {
                     playSound$2("pickup", state, env);
                     var newrecord$15 = state.slice();
                     return /* tuple */[
@@ -22784,16 +22826,16 @@ var index = (function (exports) {
                   ];
           } else {
             var go$5 = focusedObject[0];
-            var match$14 = go$5[/* state */2];
-            if (typeof match$14 === "number") {
+            var match$15 = go$5[/* state */2];
+            if (typeof match$15 === "number") {
               return /* tuple */[
                       state,
                       focusedObject
                     ];
             } else {
-              switch (match$14.tag | 0) {
+              switch (match$15.tag | 0) {
                 case 1 : 
-                    var s$1 = match$14[0];
+                    var s$1 = match$15[0];
                     if (s$1[/* health */1] > 0) {
                       playSound$2("hit", state, env);
                       var newrecord$22 = state.slice();
@@ -22822,7 +22864,7 @@ var index = (function (exports) {
                             ];
                     }
                 case 4 : 
-                    var s$2 = match$14[0];
+                    var s$2 = match$15[0];
                     if (s$2[/* health */1] > 0) {
                       playSound$2("hit", state, env);
                       var newrecord$23 = state.slice();
@@ -22852,7 +22894,7 @@ var index = (function (exports) {
                             ];
                     }
                 case 6 : 
-                    var s$3 = match$14[0];
+                    var s$3 = match$15[0];
                     if (s$3[/* health */1] > 0) {
                       playSound$2("hit", state, env);
                       var newrecord$24 = state.slice();
