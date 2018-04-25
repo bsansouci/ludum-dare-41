@@ -18360,7 +18360,9 @@ var index = (function (exports) {
     
   }
 
-  var basedirname = _1(dirname$1, caml_array_get(argv, 0)) + "/";
+  var basedirname = _1(dirname$1, caml_array_get(argv, 0));
+
+  var basedirname$1 = basedirname !== "" ? basedirname + "/" : basedirname;
 
   function loadSounds(env) {
     var loadSoundHelper = function (soundMap, param) {
@@ -18381,7 +18383,7 @@ var index = (function (exports) {
                                       ])
                                   ]),
                                 "%ssounds/%s.wav"
-                              ]), basedirname, soundName), env),
+                              ]), basedirname$1, soundName), env),
                   param[1]
                 ], soundMap);
     };
@@ -23720,7 +23722,7 @@ var index = (function (exports) {
               /* y */tileSizef * 10
             ],
             /* playerFacing : DownD */1,
-            /* spritesheet */loadImage$2(basedirname + "spritesheet/assets.png", /* Some */[/* boolean */1], env),
+            /* spritesheet */loadImage$2(basedirname$1 + "spritesheet/assets.png", /* Some */[/* boolean */1], env),
             /* assets */assets,
             /* sounds */loadSounds(env),
             /* currentItem : None */0,
@@ -23729,14 +23731,14 @@ var index = (function (exports) {
             /* dollarAnimation */-1,
             /* time */0,
             /* night : boolean */0,
-            /* mainFont */loadFont(basedirname + "whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
+            /* mainFont */loadFont(basedirname$1 + "whatever it takes bold_2x.fnt", /* Some */[/* boolean */0], env),
             /* monsterWasLockedIn : boolean */0,
             /* mousePressed : boolean */0,
             /* mousePressedHack : boolean */0,
             /* day6PlayerWentInBarn : boolean */0,
             /* day6CameraAnimation */0,
-            /* shortDestroyedBarnAsset */loadImage$2(basedirname + "short_destroyed_barn.png", /* Some */[/* boolean */1], env),
-            /* sleepingMonsterAsset */loadImage$2(basedirname + "sleeping_monster.png", /* Some */[/* boolean */1], env),
+            /* shortDestroyedBarnAsset */loadImage$2(basedirname$1 + "short_destroyed_barn.png", /* Some */[/* boolean */1], env),
+            /* sleepingMonsterAsset */loadImage$2(basedirname$1 + "sleeping_monster.png", /* Some */[/* boolean */1], env),
             /* hasPressedTheActionKeyOnce : boolean */0,
             /* playerDead : boolean */0
           ];
@@ -24305,7 +24307,7 @@ var index = (function (exports) {
                 }));
   }
 
-  loadAssetsAsync(basedirname + "spritesheet/sheet.json");
+  loadAssetsAsync(basedirname$1 + "spritesheet/sheet.json");
   /*  Not a pure module */
 
   exports.mapString = mapString;
