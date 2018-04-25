@@ -150,7 +150,7 @@ type stateT = {
   shortDestroyedBarnAsset: Reprocessing.imageT,
   sleepingMonsterAsset: Reprocessing.imageT,
   hasPressedTheActionKeyOnce: bool,
-  playerDead: bool
+  playerDead: bool,
 };
 
 let screenSize = 600.;
@@ -305,7 +305,20 @@ let handleCollision = (state, prevOffset, offset, pos, grid) => {
   ];
   let padding = 8.;
   let halfTileSizef = tileSizef /. 2.;
-  let offset = {x:Reprocessing.Utils.constrain(~amt=offset.x, ~low=-. halfTileSizef, ~high=halfTileSizef), y:Reprocessing.Utils.constrain(~amt=offset.y, ~low=-. halfTileSizef, ~high=halfTileSizef)};
+  let offset = {
+    x:
+      Reprocessing.Utils.constrain(
+        ~amt=offset.x,
+        ~low=-. halfTileSizef,
+        ~high=halfTileSizef,
+      ),
+    y:
+      Reprocessing.Utils.constrain(
+        ~amt=offset.y,
+        ~low=-. halfTileSizef,
+        ~high=halfTileSizef,
+      ),
+  };
   let collided =
     List.exists(
       ((dx, dy)) => {
@@ -376,20 +389,20 @@ let checkIfInBarn = pos =>
   );
 
 let addChick = gos => [
-    {
-      pos: {
-        x: Reprocessing.Utils.randomf(~min=11., ~max=22.) *. tileSizef,
-        y: Reprocessing.Utils.randomf(~min=18., ~max=20.) *. tileSizef,
-      },
-      action: NoAction,
-      state: Chick({
-               momentum: {
-                 x: 0.,
-                 y: 0.,
-               },
-               health: 1,
-               willDie: false,
-             }),
+  {
+    pos: {
+      x: Reprocessing.Utils.randomf(~min=11., ~max=22.) *. tileSizef,
+      y: Reprocessing.Utils.randomf(~min=18., ~max=20.) *. tileSizef,
     },
-    ...gos,
-  ];
+    action: NoAction,
+    state: Chick({
+             momentum: {
+               x: 0.,
+               y: 0.,
+             },
+             health: 1,
+             willDie: false,
+           }),
+  },
+  ...gos,
+];

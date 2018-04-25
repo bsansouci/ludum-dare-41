@@ -304,313 +304,318 @@ let moveAnimal = (state, mx, my, speed, pos, grid, env) => {
   ({x: pos.x +. offset.x, y: pos.y +. offset.y}, mx, my);
 };
 
-let update = (state, env) => {
-  let hackRefPlayerDead = ref(false);
-  let gameobjects =
-    List.map(
-      (g: gameobjectT) =>
-        switch (g) {
-        | {pos, state: Cow({momentum: {x, y}, health} as cow)}
-            when health > 0 =>
-          let (pos, x, y) =
-            moveAnimal(state, x, y, 1., pos, state.grid, env);
-          {...g, pos, state: Cow({
-                               ...cow,
-                               momentum: {
-                                 x,
-                                 y,
-                               },
-                             })};
-        | {pos, state: Chicken({momentum: {x, y}, health} as chicken)}
-            when health > 0 =>
-          let (pos, x, y) =
-            moveAnimal(state, x, y, 2., pos, state.grid, env);
-          {...g, pos, state: Chicken({
-                               ...chicken,
-                               momentum: {
-                                 x,
-                                 y,
-                               },
-                             })};
-        | {pos, state: Chick({momentum: {x, y}, health} as chick)}
-            when health > 0 =>
-          let (pos, x, y) =
-            moveAnimal(state, x, y, 4., pos, state.grid, env);
-          {...g, pos, state: Chick({
-                               ...chick,
-                               momentum: {
-                                 x,
-                                 y,
-                               },
-                             })};
-        | {
-            pos: {x: bx, y: by} as pos,
-            state:
-              Boss(
-                {
-                  movePair: (start, dest),
-                  hunger,
-                  movingTime,
-                  eatingTime,
-                  eating,
-                } as bossState,
-              ),
-          } =>
-          let timeToMove = 0.35;
-          if (movingTime > 0.) {
-            {
-              ...g,
-              state:
-                Boss({
-                  ...bossState,
-                  movingTime: movingTime -. Env.deltaTime(env),
-                }),
-              pos: {
-                x:
-                  Reprocessing.Utils.remapf(
-                    ~value=movingTime,
-                    ~low1=timeToMove,
-                    ~high1=0.,
-                    ~low2=start.x,
-                    ~high2=dest.x,
-                  ),
-                y:
-                  Reprocessing.Utils.remapf(
-                    ~value=movingTime,
-                    ~low1=timeToMove,
-                    ~high1=0.,
-                    ~low2=start.y,
-                    ~high2=dest.y,
-                  ),
-              },
-            };
-          } else if (state.day6CameraAnimation > 0.
-                     || state.journal.dayTransition === CheckJournal
-                     || state.journal.dayTransition === JournalIn
-                     || hunger === 0) {
-            g;
-          } else if (eatingTime <= 0.) {
-            let allNextTargets =
-              List.filter(
-                g =>
-                  switch (g) {
-                  | {state: Chicken({health: 0})}
-                  | {state: Cow({health: 0})}
-                  | {state: Chick({health: 0})} => true
-                  | _ => false
-                  },
-                state.gameobjects,
-              );
-            let allNextTargets =
-              List.sort(
-                (
-                  {pos: {x: x1, y: y1}}: gameobjectT,
-                  {pos: {x: x2, y: y2}}: gameobjectT,
-                ) => {
-                  let dx1 = abs(int_of_float(x1 -. bx));
-                  let dy1 = abs(int_of_float(y1 -. by));
-                  let dx2 = abs(int_of_float(x2 -. bx));
-                  let dy2 = abs(int_of_float(y2 -. by));
-                  dx1 + dy1 - dx2 - dy2;
-                },
-                allNextTargets,
-              );
-            let (nextTarget, isPlayer) =
-              switch (allNextTargets) {
-              | [] => ({x: state.playerPos.x, y: state.playerPos.y}, true)
-              | [first, ..._] => (first.pos, false)
-              };
-            let dx = nextTarget.x -. bx;
-            let dy = nextTarget.y -. by;
-            let mag = Utils.magf((dx, dy));
-            let isTargetCloseEnough = mag < 32.;
-            if (isTargetCloseEnough) {
-              print_endline("CLOSE");
-            };
-            let (_, {x: bx, y: by}) = bossState.movePair;
-            let bossTile = (
-              int_of_float(bx /. tileSizef),
-              int_of_float(by /. tileSizef),
-            );
-            let (currentTileX, currentTileY) = (
-              floor(nextTarget.x /. tileSizef) *. tileSizef,
-              floor(nextTarget.y /. tileSizef) *. tileSizef,
-            );
-            let (belowCurrentTileX, belowCurrentTileY) = (
-              currentTileX,
-              currentTileY +. tileSizef,
-            );
-            let (belowRightCurrentTileX, belowRightCurrentTileY) = (
-              currentTileX +. tileSizef,
-              currentTileY +. tileSizef,
-            );
-            let (rightCurrentTileX, rightCurrentTileY) = (
-              currentTileX +. tileSizef,
-              currentTileY,
-            );
-            /*print_endline("rightCurrentTileX: " ++ string_of_float(rightCurrentTileX) ++ " " ++ string_of_float(rightCurrentTileY));*/
-            /*print_endline("w " ++ string_of_float(belowCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowCurrentTileY +. tileSizef -. nextTarget.y));*/
-            /*print_endline("w " ++ string_of_float(belowRightCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowRightCurrentTileY +. tileSizef -. nextTarget.y));*/
-            let currentTileArea =
-              (currentTileX +. tileSizef -. nextTarget.x)
-              *. (currentTileY +. tileSizef -. nextTarget.y);
-            let belowCurrentTileArea =
-              (belowCurrentTileX +. tileSizef -. nextTarget.x)
-              *. (nextTarget.y +. tileSizef -. belowCurrentTileY);
-            let belowRightCurrentTileArea =
-              (nextTarget.x +. tileSizef -. belowRightCurrentTileX)
-              *. (nextTarget.y +. tileSizef -. belowRightCurrentTileY);
-            let rightCurrentTileArea =
-              (nextTarget.x +. tileSizef -. rightCurrentTileX)
-              *. (rightCurrentTileY +. tileSizef -. nextTarget.y);
-            /*print_endline("belowCurrentTileArea: " ++ string_of_float(belowCurrentTileArea));
-              print_endline("belowRightCurrentTileArea: " ++ string_of_float(belowRightCurrentTileArea));
-              print_endline("rightCurrentTileArea: " ++ string_of_float(rightCurrentTileArea));
-              print_endline("currentTileArea: " ++ string_of_float(currentTileArea));*/
-            let targetTile =
-              if (currentTileArea > belowCurrentTileArea
-                  && currentTileArea > belowRightCurrentTileArea
-                  && currentTileArea > rightCurrentTileArea) {
-                (
-                  int_of_float(currentTileX /. tileSizef),
-                  int_of_float(currentTileY /. tileSizef),
-                );
-              } else if (belowCurrentTileArea > currentTileArea
-                         && belowCurrentTileArea > belowRightCurrentTileArea
-                         && belowCurrentTileArea > rightCurrentTileArea) {
-                (
-                  int_of_float(belowCurrentTileX /. tileSizef),
-                  int_of_float(belowCurrentTileY /. tileSizef),
-                );
-              } else if (belowRightCurrentTileArea > currentTileArea
-                         && belowRightCurrentTileArea > belowCurrentTileArea
-                         && belowRightCurrentTileArea > rightCurrentTileArea) {
-                (
-                  int_of_float(belowRightCurrentTileX /. tileSizef),
-                  int_of_float(belowRightCurrentTileY /. tileSizef),
-                );
-              } else {
-                (
-                  int_of_float(rightCurrentTileX /. tileSizef),
-                  int_of_float(rightCurrentTileY /. tileSizef),
-                );
-              };
-            let (tx, ty) = targetTile;
-            let barnDoor =
-              List.find(
-                g =>
-                  switch (g) {
-                  | {state: BarnDoor(_)} => true
-                  | _ => false
-                  },
-                state.gameobjects,
-              );
-            let isBarnDoorClosed =
-              switch (barnDoor) {
-              | {state: BarnDoor(Closed)} => true
-              | _ => false
-              };
-            let movePair =
-              if (isBarnDoorClosed) {
-                (g.pos, g.pos);
-              } else {
-                switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
-                | None =>
-                  /*print_endline(
-                      "Cant find"
-                      ++ string_of_int(tx)
-                      ++ ","
-                      ++ string_of_int(ty),
-                    );*/
-                  ({x: bx, y: by}, {x: bx, y: by})
-                | Some([])
-                | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
-                | Some([(x1, y1), (x2, y2), ..._]) as p => (
-                    {
-                      x: float_of_int(x1) *. tileSizef,
-                      y: float_of_int(y1) *. tileSizef,
-                    },
-                    {
-                      x: float_of_int(x2) *. tileSizef,
-                      y: float_of_int(y2) *. tileSizef,
-                    },
-                  )
-                };
-              };
-            hackRefPlayerDead := isPlayer && isTargetCloseEnough;
-            {
-              ...g,
-              state:
-                Boss({
-                  ...bossState,
-                  movePair,
-                  movingTime: timeToMove,
-                  killed:
-                    isTargetCloseEnough && ! isPlayer && eating ?
-                      [List.hd(allNextTargets), ...bossState.killed] :
-                      bossState.killed,
-                  eating: isTargetCloseEnough && ! eating,
-                  eatingTime: isTargetCloseEnough && ! eating ? 3. : 0.,
-                }),
-            };
-          } else {
-            {
-              ...g,
-              state:
-                Boss({
-                  ...bossState,
-                  eatingTime: eatingTime -. Env.deltaTime(env),
-                }),
-            };
-          };
-        /*{
-            ...g,
-            pos:
-          }*/
-        | _ => g
-        },
-      state.gameobjects,
-    );
-  if (hackRefPlayerDead^) {
+let update = (state, env) =>
+  if (state.journal.dayTransition !== FadeOut
+      && state.journal.dayTransition !== JournalIn
+      && state.journal.dayTransition !== CheckJournal) {
+    let hackRefPlayerDead = ref(false);
     let gameobjects =
-      switch (
-        List.find(g =>
+      List.map(
+        (g: gameobjectT) =>
           switch (g) {
-          | {state: AxeStanding} => true
-          | _ => false
+          | {pos, state: Cow({momentum: {x, y}, health} as cow)}
+              when health > 0 =>
+            let (pos, x, y) =
+              moveAnimal(state, x, y, 1., pos, state.grid, env);
+            {...g, pos, state: Cow({
+                                 ...cow,
+                                 momentum: {
+                                   x,
+                                   y,
+                                 },
+                               })};
+          | {pos, state: Chicken({momentum: {x, y}, health} as chicken)}
+              when health > 0 =>
+            let (pos, x, y) =
+              moveAnimal(state, x, y, 2., pos, state.grid, env);
+            {...g, pos, state: Chicken({
+                                 ...chicken,
+                                 momentum: {
+                                   x,
+                                   y,
+                                 },
+                               })};
+          | {pos, state: Chick({momentum: {x, y}, health} as chick)}
+              when health > 0 =>
+            let (pos, x, y) =
+              moveAnimal(state, x, y, 4., pos, state.grid, env);
+            {...g, pos, state: Chick({
+                                 ...chick,
+                                 momentum: {
+                                   x,
+                                   y,
+                                 },
+                               })};
+          | {
+              pos: {x: bx, y: by} as pos,
+              state:
+                Boss(
+                  {
+                    movePair: (start, dest),
+                    hunger,
+                    movingTime,
+                    eatingTime,
+                    eating,
+                  } as bossState,
+                ),
+            } =>
+            let timeToMove = 0.35;
+            if (movingTime > 0.) {
+              {
+                ...g,
+                state:
+                  Boss({
+                    ...bossState,
+                    movingTime: movingTime -. Env.deltaTime(env),
+                  }),
+                pos: {
+                  x:
+                    Reprocessing.Utils.remapf(
+                      ~value=movingTime,
+                      ~low1=timeToMove,
+                      ~high1=0.,
+                      ~low2=start.x,
+                      ~high2=dest.x,
+                    ),
+                  y:
+                    Reprocessing.Utils.remapf(
+                      ~value=movingTime,
+                      ~low1=timeToMove,
+                      ~high1=0.,
+                      ~low2=start.y,
+                      ~high2=dest.y,
+                    ),
+                },
+              };
+            } else if (state.day6CameraAnimation > 0.
+                       || state.journal.dayTransition === CheckJournal
+                       || state.journal.dayTransition === JournalIn
+                       || hunger === 0) {
+              g;
+            } else if (eatingTime <= 0.) {
+              let allNextTargets =
+                List.filter(
+                  g =>
+                    switch (g) {
+                    | {state: Chicken({health: 0})}
+                    | {state: Cow({health: 0})}
+                    | {state: Chick({health: 0})} => true
+                    | _ => false
+                    },
+                  state.gameobjects,
+                );
+              let allNextTargets =
+                List.sort(
+                  (
+                    {pos: {x: x1, y: y1}}: gameobjectT,
+                    {pos: {x: x2, y: y2}}: gameobjectT,
+                  ) => {
+                    let dx1 = abs(int_of_float(x1 -. bx));
+                    let dy1 = abs(int_of_float(y1 -. by));
+                    let dx2 = abs(int_of_float(x2 -. bx));
+                    let dy2 = abs(int_of_float(y2 -. by));
+                    dx1 + dy1 - dx2 - dy2;
+                  },
+                  allNextTargets,
+                );
+              let (nextTarget, isPlayer) =
+                switch (allNextTargets) {
+                | [] => ({x: state.playerPos.x, y: state.playerPos.y}, true)
+                | [first, ..._] => (first.pos, false)
+                };
+              let dx = nextTarget.x -. bx;
+              let dy = nextTarget.y -. by;
+              let mag = Utils.magf((dx, dy));
+              let isTargetCloseEnough = mag < 32.;
+              if (isTargetCloseEnough) {
+                print_endline("CLOSE");
+              };
+              let (_, {x: bx, y: by}) = bossState.movePair;
+              let bossTile = (
+                int_of_float(bx /. tileSizef),
+                int_of_float(by /. tileSizef),
+              );
+              let (currentTileX, currentTileY) = (
+                floor(nextTarget.x /. tileSizef) *. tileSizef,
+                floor(nextTarget.y /. tileSizef) *. tileSizef,
+              );
+              let (belowCurrentTileX, belowCurrentTileY) = (
+                currentTileX,
+                currentTileY +. tileSizef,
+              );
+              let (belowRightCurrentTileX, belowRightCurrentTileY) = (
+                currentTileX +. tileSizef,
+                currentTileY +. tileSizef,
+              );
+              let (rightCurrentTileX, rightCurrentTileY) = (
+                currentTileX +. tileSizef,
+                currentTileY,
+              );
+              /*print_endline("rightCurrentTileX: " ++ string_of_float(rightCurrentTileX) ++ " " ++ string_of_float(rightCurrentTileY));*/
+              /*print_endline("w " ++ string_of_float(belowCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowCurrentTileY +. tileSizef -. nextTarget.y));*/
+              /*print_endline("w " ++ string_of_float(belowRightCurrentTileX +. tileSizef -. nextTarget.x) ++ " h " ++ string_of_float(belowRightCurrentTileY +. tileSizef -. nextTarget.y));*/
+              let currentTileArea =
+                (currentTileX +. tileSizef -. nextTarget.x)
+                *. (currentTileY +. tileSizef -. nextTarget.y);
+              let belowCurrentTileArea =
+                (belowCurrentTileX +. tileSizef -. nextTarget.x)
+                *. (nextTarget.y +. tileSizef -. belowCurrentTileY);
+              let belowRightCurrentTileArea =
+                (nextTarget.x +. tileSizef -. belowRightCurrentTileX)
+                *. (nextTarget.y +. tileSizef -. belowRightCurrentTileY);
+              let rightCurrentTileArea =
+                (nextTarget.x +. tileSizef -. rightCurrentTileX)
+                *. (rightCurrentTileY +. tileSizef -. nextTarget.y);
+              /*print_endline("belowCurrentTileArea: " ++ string_of_float(belowCurrentTileArea));
+                print_endline("belowRightCurrentTileArea: " ++ string_of_float(belowRightCurrentTileArea));
+                print_endline("rightCurrentTileArea: " ++ string_of_float(rightCurrentTileArea));
+                print_endline("currentTileArea: " ++ string_of_float(currentTileArea));*/
+              let targetTile =
+                if (currentTileArea > belowCurrentTileArea
+                    && currentTileArea > belowRightCurrentTileArea
+                    && currentTileArea > rightCurrentTileArea) {
+                  (
+                    int_of_float(currentTileX /. tileSizef),
+                    int_of_float(currentTileY /. tileSizef),
+                  );
+                } else if (belowCurrentTileArea > currentTileArea
+                           && belowCurrentTileArea > belowRightCurrentTileArea
+                           && belowCurrentTileArea > rightCurrentTileArea) {
+                  (
+                    int_of_float(belowCurrentTileX /. tileSizef),
+                    int_of_float(belowCurrentTileY /. tileSizef),
+                  );
+                } else if (belowRightCurrentTileArea > currentTileArea
+                           && belowRightCurrentTileArea > belowCurrentTileArea
+                           && belowRightCurrentTileArea > rightCurrentTileArea) {
+                  (
+                    int_of_float(belowRightCurrentTileX /. tileSizef),
+                    int_of_float(belowRightCurrentTileY /. tileSizef),
+                  );
+                } else {
+                  (
+                    int_of_float(rightCurrentTileX /. tileSizef),
+                    int_of_float(rightCurrentTileY /. tileSizef),
+                  );
+                };
+              let (tx, ty) = targetTile;
+              let barnDoor =
+                List.find(
+                  g =>
+                    switch (g) {
+                    | {state: BarnDoor(_)} => true
+                    | _ => false
+                    },
+                  state.gameobjects,
+                );
+              let isBarnDoorClosed =
+                switch (barnDoor) {
+                | {state: BarnDoor(Closed)} => true
+                | _ => false
+                };
+              let movePair =
+                if (isBarnDoorClosed) {
+                  (g.pos, g.pos);
+                } else {
+                  switch (Pathfind.getPath(bossTile, targetTile, state.grid)) {
+                  | None =>
+                    /*print_endline(
+                        "Cant find"
+                        ++ string_of_int(tx)
+                        ++ ","
+                        ++ string_of_int(ty),
+                      );*/
+                    ({x: bx, y: by}, {x: bx, y: by})
+                  | Some([])
+                  | Some([_]) => ({x: bx, y: by}, {x: bx, y: by})
+                  | Some([(x1, y1), (x2, y2), ..._]) as p => (
+                      {
+                        x: float_of_int(x1) *. tileSizef,
+                        y: float_of_int(y1) *. tileSizef,
+                      },
+                      {
+                        x: float_of_int(x2) *. tileSizef,
+                        y: float_of_int(y2) *. tileSizef,
+                      },
+                    )
+                  };
+                };
+              hackRefPlayerDead := isPlayer && isTargetCloseEnough;
+              {
+                ...g,
+                state:
+                  Boss({
+                    ...bossState,
+                    movePair,
+                    movingTime: timeToMove,
+                    killed:
+                      isTargetCloseEnough && ! isPlayer && eating ?
+                        [List.hd(allNextTargets), ...bossState.killed] :
+                        bossState.killed,
+                    eating: isTargetCloseEnough && ! eating,
+                    eatingTime: isTargetCloseEnough && ! eating ? 3. : 0.,
+                  }),
+              };
+            } else {
+              {
+                ...g,
+                state:
+                  Boss({
+                    ...bossState,
+                    eatingTime: eatingTime -. Env.deltaTime(env),
+                  }),
+              };
+            };
+          /*{
+              ...g,
+              pos:
+            }*/
+          | _ => g
           },
-          gameobjects
-        )
-      ) {
-      | exception Not_found =>
-      [
-          {
-            pos: {
-              x: 13. *. tileSizef,
-              y: 8. *. tileSizef,
+        state.gameobjects,
+      );
+    if (hackRefPlayerDead^) {
+      let gameobjects =
+        switch (
+          List.find(
+            g =>
+              switch (g) {
+              | {state: AxeStanding} => true
+              | _ => false
+              },
+            gameobjects,
+          )
+        ) {
+        | exception Not_found => [
+            {
+              pos: {
+                x: 13. *. tileSizef,
+                y: 8. *. tileSizef,
+              },
+              action: PickUp(Axe),
+              state: AxeStanding,
             },
-            action: PickUp(Axe),
-            state: AxeStanding,
-          },
-          ...gameobjects,
-        ]
-      | _ => gameobjects
+            ...gameobjects,
+          ]
+        | _ => gameobjects
+        };
+      {
+        ...state,
+        playerDead: true,
+        journal: {
+          ...state.journal,
+          dayIndex: state.journal.dayIndex - 1,
+          dayTransition: FadeOut,
+          animationTime: 0.,
+        },
+        gameobjects,
       };
-    {
-      ...state,
-      playerDead: true,
-      journal: {
-        ...state.journal,
-        dayIndex: state.journal.dayIndex - 1,
-        dayTransition: FadeOut,
-        animationTime: 0.,
-      },
-      gameobjects,
+    } else {
+      {...state, gameobjects};
     };
   } else {
-    {...state, gameobjects};
+    state;
   };
-};
 
 let renderBefore = (g, focusedObject, state, env) => {
   Draw.pushStyle(env);
@@ -705,7 +710,7 @@ let renderBefore = (g, focusedObject, state, env) => {
       );
     } else {
       /*Draw.fill(Utils.color(255, 255, 0, 255), env);
-      Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);*/
+        Draw.rectf(~pos=(x, y), ~width=tileSizef, ~height=tileSizef, env);*/
       drawAssetf(
         x -. tileSizef /. 4.,
         y -. tileSizef /. 4.,
@@ -1023,6 +1028,8 @@ let renderAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =
     | (Some(Water), Some({action: PickUp(Water)})) => "Put water back"
     /* Can't drop corn in water, it'd lock the game up */
     | (Some(Corn), Some({action: PickUp(Water)})) => ""
+    /* Can't drop flowers in water, it'd lock the game up */
+    | (Some(Flower), Some({action: PickUp(Water)})) => ""
     | (Some(_), Some({action: PickUp(Water)})) => "Drop into water"
     | (Some(Seed), Some({action: PickUp(Seed)})) => "Put seed back"
     | (Some(Seed), Some({action: PlantSeed})) => "Plant seed"
@@ -1148,26 +1155,21 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
         | Opened => (Closed, {x: pos.x -. tileSizef +. 3., y: pos.y})
         | Closed => (Opened, {x: pos.x +. tileSizef -. 3., y: pos.y})
         };
-
-      let playedInDoor = Utils.intersectRectRect(
-        ~rect1Pos=(
-          state.playerPos.x,
-          state.playerPos.y,
-        ),
-        ~rect1W=tileSizef,
-        ~rect1H=tileSizef,
-        ~rect2Pos=(tileSizef *. 9. -. 3., tileSizef *. 16. ),
-        ~rect2W=2. *. tileSizef +. 3.,
-        ~rect2H=tileSizef -. 8.,
-      );
-      let playerPos = if (playedInDoor) {
-        {
-          x: state.playerPos.x,
-          y: state.playerPos.y +. tileSizef /. 4.
-        }
-      } else {
-        state.playerPos
-      };
+      let playedInDoor =
+        Utils.intersectRectRect(
+          ~rect1Pos=(state.playerPos.x, state.playerPos.y),
+          ~rect1W=tileSizef,
+          ~rect1H=tileSizef,
+          ~rect2Pos=(tileSizef *. 9. -. 3., tileSizef *. 16.),
+          ~rect2W=2. *. tileSizef +. 3.,
+          ~rect2H=tileSizef -. 8.,
+        );
+      let playerPos =
+        if (playedInDoor) {
+          {x: state.playerPos.x, y: state.playerPos.y +. tileSizef /. 4.};
+        } else {
+          state.playerPos;
+        };
       (
         {
           ...state,
@@ -1203,6 +1205,10 @@ let applyAction = (state, playerInBarn, finishedAllTasks, focusedObject, env) =>
       ({...state, currentItem: Some(Seed)}, None);
     /* Can't drop corn in water */
     | (Some(Corn), Some({action: PickUp(Water)})) => (
+        state,
+        focusedObject,
+      )
+    | (Some(Flower), Some({action: PickUp(Water)})) => (
         state,
         focusedObject,
       )
