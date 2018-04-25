@@ -188,7 +188,11 @@ let setup = (assets, env) => {
     },
     playerFacing: DownD,
     spritesheet:
-      Draw.loadImage(~isPixel=true, ~filename=basedirname ++ "spritesheet/assets.png", env),
+      Draw.loadImage(
+        ~isPixel=true,
+        ~filename=basedirname ++ "spritesheet/assets.png",
+        env,
+      ),
     assets,
     sounds: loadSounds(env),
     gameobjects: GameObject.init(grid),
@@ -215,7 +219,11 @@ let setup = (assets, env) => {
         env,
       ),
     sleepingMonsterAsset:
-      Draw.loadImage(~isPixel=true, ~filename=basedirname ++ "sleeping_monster.png", env),
+      Draw.loadImage(
+        ~isPixel=true,
+        ~filename=basedirname ++ "sleeping_monster.png",
+        env,
+      ),
     hasPressedTheActionKeyOnce: false,
     playerDead: false,
   };
@@ -602,10 +610,7 @@ let draw = (state, env) => {
     playerInBarn ?
       false :
       Utils.intersectRectRect(
-        ~rect1Pos=(
-          state.playerPos.x,
-          state.playerPos.y,
-        ),
+        ~rect1Pos=(state.playerPos.x, state.playerPos.y),
         ~rect1W=tileSizef,
         ~rect1H=tileSizef,
         ~rect2Pos=(4. *. tileSizef, 4. *. tileSizef),
@@ -656,8 +661,7 @@ let draw = (state, env) => {
   /* Sort gameobjects by y, then place the player and barn while iterating over objects */
   let sortedGameObjects =
     List.sort(
-      (a: gameobjectT, b: gameobjectT) =>
-        int_of_float((a.pos.y -. b.pos.y)),
+      (a: gameobjectT, b: gameobjectT) => int_of_float(a.pos.y -. b.pos.y),
       state.gameobjects,
     );
   let firstGameObject = List.hd(sortedGameObjects);
@@ -680,9 +684,13 @@ let draw = (state, env) => {
         let barnBottom = 256. +. tileSizef *. 9.;
         if (! playerInBarn
             && prevGameOjbect.pos.y < barnBottom
-            -. collisionPadding -. tileSizef /. 2.
+            -. collisionPadding
+            -. tileSizef
+            /. 2.
             && curGameObject.pos.y >= barnBottom
-            -. collisionPadding -. tileSizef /. 2.) {
+            -. collisionPadding
+            -. tileSizef
+            /. 2.) {
           if (state.journal.dayIndex >= 6 && playerBehindBarn) {
             Draw.image(
               state.shortDestroyedBarnAsset,
