@@ -11,7 +11,7 @@ Play now!
 
 https://bsansouci.github.io/ludum-dare-41/
 
-You can also download the [native Mac app](https://github.com/bsansouci/ludum-dare-41/releases/download/1.0/MyDearFarm.zip) (slightly better performance).
+You can also download the [native Mac app](https://github.com/bsansouci/ludum-dare-41/releases/download/1.2/MyDearFarm.zip) (slightly better performance).
 
 More Info
 ---
@@ -22,18 +22,17 @@ See [here](https://github.com/schmavery/reprocessing#projects-using-reprocessing
 ### Install
 _warning_: this doesn't work with npm5. Use npm4 or use yarn. To downgrade to npm4 you can `npm install -g npm@latest-4`
 ```
-git clone https://github.com/bsansouci/reprocessing-example.git
 yarn
 ```
 
 ### Build
 ```
-npm run build
+yarn run build
 ```
 
 ### Start
 ```
-npm start
+yarn start
 ```
 
 To build to JS run `npm run build:web` and then run a static server, like `python -m SimpleHTTPServer` and go to `localhost:8000`. If you're using safari you can simply open the `index.html` and tick `Develop > Disable Cross-Origin Restrictions`.
