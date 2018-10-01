@@ -9,10 +9,10 @@
     "clean": "bsb -clean-world"
   },
   "dependencies": {
-    "Reprocessing": "schmavery/reprocessing#multifile-hotreloading",
+    "reprocessing": "0.2.0",
     "rex-json": "schmavery/rex-json"
   },
   "devDependencies": {
-    "bs-platform": "bsansouci/bsb-native"
+    "bsb-native": "4.0.6"
   }
 }
